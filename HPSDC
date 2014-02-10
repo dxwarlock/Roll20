@@ -1,0 +1,29 @@
+on("change:token", function (obj) {
+    if (obj.get("represents") == '')return;
+    var oCharacter = getObj('character', obj.get("_represents"));
+    var cBy = oCharacter.get('controlledby');
+    var oHP = findObjs({_type: "attribute",name: "Hitpoints",_characterid: oCharacter.id})[0];
+	var oSDC = findObjs({_type: "attribute",name: "SDC",_characterid: oCharacter.id})[0];
+	var oSDCHP = findObjs({_type: "attribute",name: "-HPSDC",_characterid: oCharacter.id})[0];
+    if(oHP == undefined || oSDC == undefined || oSDCHP == undefined)return;
+	//oSDCHP = oSDCHP[0];
+	//oSDC = oSDC[0];
+	//oHP = oHP[0];
+	//SDC-----------------    
+	var cSDC = parseInt(oSDC.get("current"));
+	var mSDC = parseInt(oSDC.get("max"));
+	//HP-----------------    
+	var cHP = parseInt(oHP.get("current"));
+	var mHP = parseInt(oHP.get("max"));
+	//SetMax-----------------------------
+	var mSDCHP = +mSDC + +mHP;
+	oSDCHP.set('max', mSDCHP);
+	//SetCurrent----------------------
+	var cSDCHP = +cSDC + +cHP;
+	oSDCHP.set('current', cSDCHP);
+	if(cSDC <= 0) {
+		obj.set('status_half-heart');
+	} else {
+		obj.set('status_half-heart', !true);
+	}
+});
