@@ -1,0 +1,18 @@
+on("chat:message", function(msg) {
+    if (msg.type != "api")return;
+    var cmdName1 = "!rb ";
+    var cmdName2 = "!pic ";
+    var msgTxt = msg.content;
+    if(msg.type == "api" && msgTxt.indexOf(cmdName1) !== -1) {        
+        var msgWho = msg.who;
+        var msgFormula = msgTxt.split(" ");
+    	sendChat(msgWho, "/w gm [[" + msgFormula[1] + "]] "+ 'Success for '+ msgFormula[2]);
+		sendChat('System', "/w " + msgWho + " roll sent to GM for " + msgFormula[2]);
+  	};    
+    var msgTxt = msg.content;
+    if (msg.type == "api" && msgTxt.indexOf(cmdName2) !== -1) {        
+        var msgWho = msg.who;
+        var piclink = msgTxt.slice(cmdName2.length);
+        sendChat(msgWho, '/direct <b><u>shared:<img src="' + piclink + '">');
+    };
+});
