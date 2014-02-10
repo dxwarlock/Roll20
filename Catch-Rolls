@@ -1,0 +1,52 @@
+on('chat:message', function (msg) {
+  if(msg.inlinerolls) {
+    //define var----------------------
+    var critRange = 18;
+    var failRange = 1;
+    var roll;
+    var pic = '';
+    var total = 0;
+    var who = msg.who;
+    var msgTxt = msg.content;
+    var msgFormula = msgTxt.split(" ");
+    //catch roll---------------------
+    var rr = msg.inlinerolls[0];
+    var firstPart = rr.results.rolls[0];
+    if(firstPart.sides == 20 && msgFormula[1] == 'attacks' || msgFormula[1] == 'attack') {
+      if(rr.results.rolls[1] == undefined) {
+        mod1 = '+0';
+      } else {
+        mod1 = (rr.results.rolls[1].expr);
+      }
+      total = (rr.results.total);
+      mod = mod1;
+      roll = (firstPart.results[0]['v']);
+      //CRIT---------------------
+      if(roll >= critRange) {
+        sendChat('', '/roll 1t[HitTable]', function (results) {
+          text = JSON.parse(results[0].content).rolls[0].results[0].tableItem.name;
+          //-----------------------   
+          var output = "<table border='3' bordercolor='#FFCC00' style='background-color:#00FF00' width='100%'><tr><td><big><b>Lucky Shot: " + text + "</td></tr></table><p><big><b>(" + roll + ')(' + mod + ')= ' + total;
+          sendChat(who, '/direct ' + output);
+          //sendChat(who, '/direct <big><b>(' + roll + ')(' + mod + ')= ' + total);
+        });
+        //FAIL---------------------
+      } else if(roll <= failRange) {
+        sendChat('', '/roll 1t[Fumble]', function (results) {
+          text = JSON.parse(results[0].content).rolls[0].results[0].tableItem.name;
+          //-----------------------            
+          var output = "<table border='3' bordercolor='#FFCC00' style='background-color:#FF3333' width='100%'><tr><td><big><b>Fumble:</td></tr>" + text + "</table><p><big><b>(" + roll + ')(' + mod + ')= ' + total;
+          sendChat(who, '/direct ' + output);
+        });
+        //normal roll---------------------
+      } else {
+        if(roll <= 3) {
+          sendChat(who, '/direct <b><big><a style="color:BLUE">To Hit:</a><a style="color:RED">(MISS)(' + roll + ')</a>(' + mod + ')=' + total);
+        } else {
+          sendChat(who, '/direct <b><big><a style = "color:BLUE">To Hit:</a>(' + roll + ')(' + mod + ')=<big><b><a style="color:BLUE">' + total);
+        }
+      }
+    if(roll == 20) sendChat(who, '/direct <b><big><a style="color:RED">DOUBLE DAMAGE</a>');    
+    }
+  }
+});
