@@ -1,0 +1,77 @@
+var WillTurnOrder = {};
+(function(self) {
+    var TurnData = {};
+    var BestRoll = 0;
+    self.addPlayer = function(id, Roll, Attack) {
+        var inc = Roll/Attack;
+        var init = Roll;
+        if(Roll > BestRoll) {
+            BestRoll = Roll;
+        }        
+        var table = [];
+        for (var i=0;i<Attack;i++) {
+            if(init > 0) {
+                table.push(parseInt(init));
+                init = Math.round(init - inc);
+            }
+        }        
+        TurnData[id] = {"Roll":Roll,"Attack":Attack,"Table":table};
+    }
+    self.createOrder = function() {
+        var order = [];
+        order.push({"id":'-1',"pr":100,"custom":"StartRound"}); 
+        for (var i=(+BestRoll +1);i>0;i--) {
+            _.each(TurnData, function(value, key) {
+                if(value.Table.indexOf(i) != -1) {
+                    order.push({"id":key,"pr":i,"custom":""});                    
+                }
+            });
+        }
+        return order;
+    }
+    self.reset = function() {
+        TurnData = {};
+        BestRoll = 0;
+    }
+})(WillTurnOrder);
+//------------------------------------------------
+on('chat:message', function (msg) {
+    if(msg.type == 'api' && msg.content.indexOf('!Reset') !== -1) {
+    	if(!Campaign().get("turnorder")) return;
+		var turn_order = JSON.parse(Campaign().get("turnorder"));
+		if(!turn_order.length) return;
+		var unset_token = getObj("graphic", turn_order[0].id);
+        if (unset_token != undefined){
+		    unset_token.set({'aura2_radius': '',});
+        }
+		Campaign().set("turnorder", '');
+	}
+    //-------------------------
+	if(msg.type == 'api' && msg.content.indexOf('!Turns') !== -1) {
+		var turnorder;
+		if(!Campaign().get("turnorder")) {
+			sendChat('', '/desc No turns set!');
+			return;
+		} else turnorder = JSON.parse(Campaign().get("turnorder"));
+		for(var i in turnorder) {
+			var cAttacks = 4;
+			var name = turnorder[i].id;
+			var id1 = getObj("graphic", turnorder[i].id);
+            if(id1 != undefined) {
+			var oCharacter = getObj("character", id1.get("represents"));
+			if(oCharacter != undefined) {
+				var oAttacks = findObjs({_type: "attribute",name: "-Attacks",_characterid: oCharacter.id})[0];
+				if(oAttacks != undefined) {
+					var cAttacks = parseInt(oAttacks.get("current"));
+				}
+			}
+			var init = turnorder[i].pr;
+			if(init < cAttacks) init = cAttacks;
+			WillTurnOrder.addPlayer(name, init, cAttacks);
+            }
+		}
+		var sTurns = WillTurnOrder.createOrder();
+		Campaign().set("turnorder", JSON.stringify(sTurns));
+		WillTurnOrder.reset();
+	}
+});
