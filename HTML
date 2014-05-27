@@ -1,0 +1,405 @@
+<!--1st row info-->
+<h6 style="background:#0F2DC4;">Rifts Character Sheet</h6>
+<h5> Name:
+  <input style="width:130px;" type="text" name="attr_Name"/>
+  OCC:
+  <input style="width:130px;" type="text" name="attr_OCC"/>
+  Level:
+  <input style="width:60px;" type="number" name="attr_Level" value=1>
+  XP:
+  <input style="width:60px;" type="number" name="attr_XP" value=0>
+  Next Level:
+  <input style="width:60px;" type="number" name="attr_XP_max" value=0>
+  Alignment:
+  <select style="width:100px;" name="attr_Alignment">
+    <option value="Principled">Principled</option>
+    <option value="Scrupulous">Scrupulous</option>
+    <option value="Unprincipled">Unprincipled</option>
+    <option value="Anarchist">Anarchist</option>
+    <option value="Miscreant">Miscreant</option>
+    <option value="Aberrant">Aberrant</option>
+    <option value="Diabolic">Diabolic</option>
+  </select>
+</h5>
+<h5> Age:
+  <input style="width:40px;" type="text" name="attr_Age" value=0>
+  Weight:
+  <input style="width:50px;" type="text" name="attr_Weight" value=0>
+  Height:
+  <input style="width:40px;" type="text" name="attr_Height" value=0>
+  Sentiment toward Coalition:
+  <input style="width:125px;" type="text" name="attr_Coalition"/>
+  Sentiment toward DBees:
+  <input style="width:125px;" type="text" name="attr_DBees"/>
+</h5>
+<hr>
+<!--2nd row stats-->
+<div class='sheet-5colrow1'>
+  <div class="sheet-col">
+    <h3>Ability Scores</h3>
+    <table frame="box" width="100%">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td width=50>Stat</td>
+          <td width=50>Bonus</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label>IQ:</label></td>
+          <td><input type="number" name="attr_IQ" value=0></td>
+          <td><input type="number" name="attr_IQ_max" value=0></td>
+        <tr>
+          <td><label>ME:</label></td>
+          <td><input type="number" name="attr_ME" value=0></td>
+          <td><input type="number" name="attr_ME_max" value=0></td>
+        <tr>
+          <td><label>MA:</label></td>
+          <td><input type="number" name="attr_MA" value=0></td>
+          <td><input type="number" name="attr_MA_max" value=0></td>
+        <tr>
+          <td><label>PS:</label></td>
+          <td><input type="number" name="attr_PS" value=0></td>
+          <td><input type="number" name="attr_PS_max" value=0></td>
+        <tr>
+          <td><label>PP:</label></td>
+          <td><input type="number" name="attr_PP" value=0></td>
+          <td><input type="number" name="attr_PP_max" value=0></td>
+        <tr>
+          <td><label>PE:</label></td>
+          <td><input type="number" name="attr_PE" value=0></td>
+          <td><input type="number" name="attr_PE_max" value=0></td>
+        <tr>
+          <td><label>PB:</label></td>
+          <td><input type="number" name="attr_PB" value=0></td>
+          <td><input type="number" name="attr_PB_max" value=0></td>
+        <tr>
+          <td><label>SPD:</label></td>
+          <td><input type="number" name="attr_SPD" value=0></td>
+          <td><input style="background:#dddddd;" type="number" name="attr_SPD_max" value="round(@{SPD}*0.6825938)" disabled="true"></td>
+      </tbody>
+    </table>
+  </div>
+  <div class="sheet-col">
+    <h3>H2H:
+      <input style="width:110px;" type="text" name="attr_H2H"/>
+    </h3>
+    <table frame="box" width="100%">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td width=50>Stat</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label>Attacks:</label></td>
+          <td><input type="number" name="attr_ATT" value=0></td>
+        <tr>
+          <td><label>Initiative+:</label></td>
+          <td><input type="number" name="attr_INIT" value=0></td>
+        <tr>
+          <td><label>Damage+:</label></td>
+          <td><input type="number" name="attr_DAM" value=0></td>
+        <tr>
+          <td><label>Strike+:</label></td>
+          <td><input type="number" name="attr_STRK" value=0></td>
+        <tr>
+          <td><label>Parry+:</label></td>
+          <td><input type="number" name="attr_PARRY" value=0></td>
+        <tr>
+          <td><label>Dodge+:</label></td>
+          <td><input type="number" name="attr_DODGE" value=0></td>
+        <tr>
+          <td><label>Roll+:</label></td>
+          <td><input type="number" name="attr_ROLL" value=0></td>
+        <tr>
+          <td><label>PERC:</label></td>
+          <td><input type="number" name="attr_PERC" value=0></td>
+      </tbody>
+    </table>
+  </div>
+  <div class="sheet-col">
+    <h3>Saving Throws</h3>
+    <table frame="box" width="100%">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td width=50>Base</td>
+          <td width=50>Stat</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label>Spell:</label></td>
+          <td ><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STSPELL" value=12></td>
+          <td><input type="number" name="attr_STSPELL_max" value=0></td>
+        <tr>
+          <td><label>Ritual:</label></td>
+          <td><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STRITUAL" value=16></td>
+          <td><input type="number" name="attr_STRITUAL_max" value=0></td>
+        <tr>
+          <td><label>Psionics:</label></td>
+          <td><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STPSI" value=15></td>
+          <td><input type="number" name="attr_STPSI_max" value=0></td>
+        <tr>
+          <td><label>Toxic:</label></td>
+          <td><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STTOXIC" value=15></td>
+          <td><input type="number" name="attr_STTOXIC_max" value=0></td>
+        <tr>
+          <td><label>Insanity:</label></td>
+          <td><input  style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STINSAN" value=12></td>
+          <td><input type="number" name="attr_STINSAN_max" value=0></td>
+        <tr>
+          <td><label>Possession:</label></td>
+          <td><input  style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STPOSS" value=12></td>
+          <td><input type="number" name="attr_STPOSS_max" value=0></td>
+        <tr>
+          <td><label>HF:</label></td>
+          <td><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STHF" value=0></td>
+          <td><input type="number" name="attr_STHF_max" value=0></td>
+        <tr>
+          <td><label>Death:</label></td>
+          <td><input style="background:#dddddd; width:25px;" disabled="true" type="text" name="attr_STDEATH" value=0></td>
+          <td><input type="number" name="attr_STDEATH_max" value=0></td>
+      </tbody>
+    </table>
+  </div>
+  <div class="sheet-col">
+    <h3 style="background:#AD3232;">Armor Stats</h3>
+    <table frame="box" width="100%">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td width=50>Current</td>
+          <td width=50>Max</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label>MainBody:</label></td>
+          <td><input type="number" name="attr_A-BODY" value=0></td>
+          <td><input type="number" name="attr_A-BODY_max" value=0></td>
+        <tr>
+          <td><label>Head:</label></td>
+          <td><input type="number" name="attr_A-HEAD" value=0></td>
+          <td><input type="number" name="attr_A-HEAD_max" value=0></td>
+        <tr>
+          <td><label>LeftArm:</label></td>
+          <td><input type="number" name="attr_A-LARM" value=0></td>
+          <td><input type="number" name="attr_A-LARM_max" value=0></td>
+        <tr>
+          <td><label>RightArm:</label></td>
+          <td><input type="number" name="attr_A-RARM" value=0></td>
+          <td><input type="number" name="attr_A-RARM_max" value=0></td>
+        <tr>
+          <td><label>LeftLeg:</label></td>
+          <td><input type="number" name="attr_A-LLEG" value=0></td>
+          <td><input type="number" name="attr_A-LLEG_max" value=0></td>
+        <tr>
+          <td><label>RightLeg:</label></td>
+          <td><input type="number" name="attr_A-RLEG" value=0></td>
+          <td><input type="number" name="attr_A-RLEG_max" value=0></td>
+        <tr>
+          <td><label>MISC1:</label></td>
+          <td><input type="number" name="attr_A-MISC1" value=0></td>
+          <td><input type="number" name="attr_A-MISC1_max" value=0></td>
+        <tr>
+          <td><label>MISC2:</label></td>
+          <td><input type="number" name="attr_A-MISC2" value=0></td>
+          <td><input type="number" name="attr_A-MISC2_max" value=0></td>
+      </tbody>
+    </table>
+  </div>
+  <div class="sheet-col">
+    <h3 style="background:#AD3232;">Player Stats</h3>
+    <table class="table1" frame="box" width="100%">
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td width=50>Current</td>
+          <td width=50>Max</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><label>HP:</label></td>
+          <td><input type="number" name="attr_HP" value=0></td>
+          <td><input type="number" name="attr_HP_max" value=0></td>
+        <tr>
+          <td><label>ISP:</label></td>
+          <td><input type="number" name="attr_ISP" value=0></td>
+          <td><input type="number" name="attr_ISP_max" value=0></td>
+        <tr>
+          <td><label>PPE:</label></td>
+          <td><input type="number" name="attr_PPE" value=0></td>
+          <td><input type="number" name="attr_PPE_max"  value=0></td>
+        <tr>
+          <td><label>Hunger:</label></td>
+          <td><input type="number" name="attr_HUNGER" value=0></td>
+          <td><input type="number" name="attr_HUNGER_max" value=100></td>
+      </tbody>
+    </table>
+    <table frame="box" width="100%">
+      <tbody>
+        <tr>
+          <td><label>Credits:</label></td>
+          <td align="right"><input type="number" style="width:100px;" name="attr_Credits"></td>
+      </tbody>
+    </table>
+    <table frame="box" width="100%">
+      <tbody>
+        <tr>
+          <td><label>Quirk:</label></td>
+          <td align="right"><input type="text" style="width:100px;" name="attr_Insanity" value=(insanity)></td>
+      </tbody>
+    </table>
+  </div>
+</div>
+<h1>
+    Initiative:
+    <button type='roll' value='Rolls Initiative:[[1d20+@{INIT}&{tracker}]]' name='roll_Initi' />
+</h1>
+<h1>
+    MPH:
+    <input type="number" name="attr_SPD0" value="round(@{SPD}*0.6825938)" disabled="true">
+    FPS:
+    <input type="number" name="attr_SPD0" value="round(@{SPD})" disabled="true">
+    No Neg:
+    <input type="number" name="attr_SPD0" value="round(@{SPD}*{15/@{ATT}/4)" disabled="true">
+    Max(-3):
+    <input type="number" name="attr_SPD0" value="round(@{SPD}*{15/@{ATT}/2)" disabled="true">
+    FullSpeed(-6):
+    <input type="number" name="attr_SPD0" value="round(@{SPD}*{15/@{ATT})" disabled="true">
+</h1>
+<hr>
+<!--3rd row skills-->
+<div class='sheet-3colrow1'>
+  <h6>Skills</h6>
+  <div class='sheet-col'>
+    <h4>OCC Skills</h4>
+    <table frame="box" width="100%">
+      <tr>
+        <td style="width:190px;">Name</td>
+        <td style="width:40px;" >%</td>
+        <td>Per</td>
+      </tr>
+    </table>
+    <table frame="box" width="100%">
+      <tr>
+        <fieldset class="repeating_OCCSK">
+          <input type="text" style="width:185px;" name="attr_OCCSK" >
+          <input type="number" style="width:40px;" name="attr_OCCSKP" value=0>
+          <input type="number" style="width:40px;" name="attr_OCCSKPL" value=0>
+        </fieldset>
+      </tr>
+    </table>
+  </div>
+  <div class='sheet-col'>
+    <h4>OCC Related Skills</h4>
+    <table frame="box" width="100%">
+      <tr>
+        <td style="width:190px;">Name</td>
+        <td style="width:40px;">%</td>
+        <td>Per</td>
+      </tr>
+    </table>
+    <table frame="box" width="100%">
+      <tr>
+        <fieldset class="repeating_OCRCSK">
+          <input type="text" style="width:185px;" name="attr_OCCRSK" >
+          <input type="number" style="width:40px;" name="attr_OCRCSKp" value=0>
+          <input type="number" style="width:40px;" name="attr_OCRCSKPL" value=0>
+        </fieldset>
+      </tr>
+    </table>
+  </div>
+  <div class='sheet-col'>
+    <h4>Secondary Skills</h4>
+    <table frame="box" width="100%">
+      <tr>
+        <td style="width:190px;">Name</td>
+        <td style="width:40px;">%</td>
+        <td>Per</td>
+      </tr>
+    </table>
+    <table frame="box" width="100%">
+      <tr>
+        <fieldset class="repeating_SECSK">
+          <input type="text" style="width:185px;" name="attr_SECSK" >
+          <input type="number" style="width:40px;" name="attr_SECSKp" value=0>
+          <input type="number" style="width:40px;" name="attr_SECSKpl" value=0>
+        </fieldset>
+      </tr>
+    </table>
+  </div>
+</div>
+<hr>
+<!--4th row-->
+<h6>Weapons/Equipment</h6>
+<div class="sheet-col">
+  <h4>Weapons</h4>
+  <table frame="box" width="100%">
+    <tr>
+      <td style="width:160px;">Name</td>
+      <td style="width:20px;" title="Bonus to Attack for selected weapon">Bonus</td>
+      <td style="width:50px;" title="Bonus to Attack for selected weapon">Damage</td>
+      <td style="width:50px;" title="Bonus to Attack for selected weapon">Range</td>
+      <td style="width:20px;" title="Bonus to Attack for selected weapon">Clips</td>
+    </tr>
+  </table>
+  <table frame="box" width="100%">
+    <tr>
+      <fieldset class="repeating_WEAP">
+        <input style="width:20px;" type='checkbox' value='10' name='attr_WEAP-c'>
+        <input type="text" style="width:200px;" name="attr_WEAP" >
+        <input type="text" style="width:25px;" name="attr_WEAPb" value=0>
+        <input type="text" style="width:65px;" name="attr_WEAPd" value=0>
+        <input type="text" style="width:65px;" name="attr_WEAPr" value=0>
+        <input type="text" style="width:35px;" name="attr_WEAPc" value=0>
+      </fieldset>
+    </tr>
+  </table>
+</div>
+<div class="sheet-col">
+  <h4>Equipment</h4>
+  <textarea style="height:200px; width:350px" name="attr_Tequip"></textarea>
+</div>
+<hr>
+<!--5th row-->
+<h6>Powers</h6>
+<div>
+  <h4>Spells/Psionics/Abilities</h4>
+  <table frame="box" width="820px">
+    <tr>
+      <td style="width:215px;">Name</td>
+      <td style="width:65px;" title="Bonus to Attack for selected weapon">Range</td>
+      <td style="width:65px;" title="Bonus to Attack for selected weapon">Damage</td>
+      <td style="width:47px;"title="Bonus to Attack for selected weapon">Cost</td>
+      <td style="width:47px;" title="Bonus to Attack for selected weapon">Duration</td>
+      <td title="Bonus to Attack for selected weapon">Description</td>
+    </tr>
+  </table>
+  <table frame="box" width="820px">
+    <tr>
+      <fieldset class="repeating_CAST">
+        <input type="text" style="width:210px;" name="attr_CAST" >
+        <input type="text" style="width:60px;" name="attr_CASTr" value=0>
+        <input type="text" style="width:60px;" name="attr_CASTd" value=0>
+        <input type="text" style="width:45px;" name="attr_CASTc" value=0>
+        <input type="text" style="width:45px;" name="attr_CASTdur" value=0>
+        <input type="text" style="width:380px;" name="attr_CASTdesc">
+      </fieldset>
+    </tr>
+  </table>
+</div>
+<hr>
+<!--6th row-->
+<div>
+  <h6>Misc</h6>
+  <div class="sheet-col">
+    <h4>Notes</h4>
+    <textarea style="width:810px;"name="attr_Notes"></textarea>
+  </div>
+</div>
