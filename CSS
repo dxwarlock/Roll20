@@ -1,0 +1,114 @@
+/*Input Types*/
+.charsheet input[type=number] {
+    display: inline-block;
+    margin: 0;
+    padding: 0.2em;
+    font-weight:bold;
+    position: center;
+    box-shadow: 0px 0px 0px 1px #000000 inset;
+}
+.charsheet input[type=text] {
+    display: inline-block;
+    width: 165px;
+    margin: 0;
+    font-weight:bold;
+    padding: 0.2em;
+    position: center;
+    box-shadow: 0px 0px 0px 1px #000000 inset;
+}
+.charsheet select {
+    width: 165px;
+    margin: 0;
+    padding: 0.1em;
+    position: center;
+    box-shadow: 0px 0px 0px 1px #000000 inset;
+}
+.charsheet label {
+    display: table-cell;
+    font-size: 11px;
+}
+.charsheet input {
+    display: inline-block;
+	width: 150px;
+}
+.charsheet button {
+    background:#D2E627; 
+    border: 2px solid #000;
+    border-radius: 10px;
+}
+textarea { 
+    resize: none;
+    border: 2px solid #765942;
+	border-radius: 10px;
+    padding-left:20px;
+}
+/*Tables*/
+.charsheet table td, .charsheet table th {
+    font-size: 0.8em;
+    padding-top:1px;
+    padding-bottom:1px;
+    padding-left:0px;
+    padding-right:0;
+    background-color: #C7C7C7;
+}
+/*Tables*/
+.charsheet {
+    background-image:url('http://www.webtexture.net/wp-content/gallery/20-seamless-paper-texture/papar_texture_thumb03.jpg');
+}
+/*Horz Line*/
+.charsheet hr {
+    background-image: -webkit-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,75.75), rgba(0,0,0,0));
+    width: 100%; 
+    height: 2px;
+    margin: 5px;
+}
+/*Headings*/
+.charsheet h1 {
+    font-size: 1.1em;
+    margin-bottom: 0px;
+    text-align:justify;
+    border: 1px solid #000;
+    border-radius: 10px;
+}
+.charsheet h3 {
+    font-size: 1.0em;
+    width:100%;
+    background-color:#333333; 
+    color:#fff;
+    text-align:justify;
+    padding: 0px 0px 0px 0px;
+}
+.charsheet h5 {
+    background-color: #cecece;
+    margin:3;
+    padding: 2px 0px 2px 0px;
+    font-size: 12px;
+    text-align:center;
+    border: 1px solid #666;
+    border-radius: 10px;
+}
+.charsheet h6 {
+    background-color: #10144A; 
+    margin:0;
+    height: 20px;
+    width:100%;
+    color:#fff;
+    padding: 2px 0px 0px 0px;
+    font-size: 15px;
+    text-align:center;
+    border-style:solid;
+    border-width:1px;
+    border-color:black;
+    border: 2px solid #000;
+    border-radius: 10px;
+}
+/*Columns*/
+.charsheet .sheet-2colrow1 .sheet-col {
+    width: calc(49%);
+}
+.charsheet .sheet-3colrow1 .sheet-col {
+    width: calc(33% - 1px);
+}
+.charsheet .sheet-5colrow1 .sheet-col {
+    width: calc(20% - 4px);
+}
