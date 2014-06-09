@@ -1,0 +1,87 @@
+on("chat:message", function (msg) {
+    if(msg.type != "api") return;
+	var msgTxt = msg.content;
+	var msgWho = msg.who;
+	var msgFormula = msgTxt.split(" ");
+//----NONBLIND ROLL
+	if(msg.type == "api" && msgTxt.indexOf("!roll") !== -1) {
+		sendChat('', "/roll [[" + msgFormula[1] + "]]", function (ops) {
+			rollresult = JSON.parse(ops[0].content);
+			total = rollresult.total;
+			rText = total + " out of " + msgFormula[2] + " for: " + msgFormula[3];
+			if(total <= msgFormula[2]) {
+				var RE = fPart + "background-color:" + greenC + ";'>" + msg.who + " SUCCESS!<BR>" + rText + "</div>";
+			} else {
+				var RE = fPart + "background-color:" + redC + ";'>" + msg.who + " FAIL!<BR>" + rText + "</div>";
+			}
+			sendChat('', "/direct " + RE);
+		});
+	};
+//----BLIND ROLL
+	if(msg.type == "api" && msgTxt.indexOf("!rb") !== -1) {
+		sendChat('', "/roll [[" + msgFormula[1] + "]]", function (ops) {
+			rollresult = JSON.parse(ops[0].content);
+			total = rollresult.total;
+			rText = total + " out of " + msgFormula[2];
+			if(total > 90) {
+				var RE = fPart + "background-color:" + redC + ";'>" + msg.who + " had an <b>obvious failure!</b><BR>rolled a " + total + " trying to " + msgFormula[3] + "</div>";
+				sendChat('', "/direct " + RE);
+				return;
+			} else if(total <= msgFormula[2]) {
+				var RE = fPart + "background-color:" + greenC + ";'><B>" + msgFormula[3] + "</B><BR> " + msg.who + " SUCCESS!<BR>" + rText + "</div>";
+			} else {
+				var RE = fPart + "background-color:" + redC + ";'><B>" + msgFormula[3] + "</B><BR> " + msg.who + " FAIL!<BR>" + rText + "</div>";
+			}
+			var Blind = fPart + "background-color:" + grayC + ";'>" + msg.who + " sent a blind roll</div>";
+			sendChat('', "/direct " + Blind);
+			sendChat('BlindRoll', "/w GM " + RE);
+		});
+	};
+//----PIC SHARE
+	if(msg.type == "api" && msgTxt.indexOf("!pic") !== -1) {
+		var cmdName2 = "!pic";
+		var piclink = msgTxt.slice(cmdName2.length);
+		var tPic = fPart + "background-color:" + grayC + ";'>" + msg.who + " Shared a pic:</div>";
+		var Pic = fPart + "background-color:#AAAAAA;'><img src=" + piclink + "></div>";
+		sendChat('', "/direct " + tPic + Pic);
+	};
+//----GMROLL
+	if(msg.type == "api" && msgTxt.indexOf("!GM") !== -1) {
+		var ax = randomFromTo(30, 70);
+		var ay = randomFromTo(30, 70);
+		var bgp = "background-position:" + ax + "% " + ay + "%;";
+		var GMR = gPart + "background-image: url(" + gm_img + ");" + bgp + "'><B>GM rolls some dice..</div>";
+		sendChat('', "/direct " + GMR);
+		sendChat('', "/roll [[" + msgFormula[1] + "]]", function (ops) {
+			rollresult = JSON.parse(ops[0].content);
+			total = rollresult.total;
+			var GMRW = fPart + "background-color:" + gmC + ";'>ROLLED " + msgFormula[1] + ":<b> " + total + "</div>";
+			sendChat('ROLL', "/w GM " + GMRW);
+		});
+	};
+//----XP
+	if(msg.type == "api" && msgTxt.indexOf("!xp") !== -1) {
+		var cmdName2 = "!pic";
+		var nXp = msgTxt.slice(cmdName2.length);
+		var cWho = findObjs({_type: 'character',name: msg.who})[0];
+		var oC = findObjs({name: "XP",_type: "attribute",characterid: cWho.id}, {caseInsensitive: true})[0];
+		if(oC === undefined || oC.length === 0) {
+			sendChat(msgWho, '/direct No XP Found, please set!');
+			return;
+		}
+		var XP = oC.get("current");
+		var mXP = oC.get("max");
+		var total = parseInt(nXp) + parseInt(XP);
+		oC.set('current', total);
+		var PlayerBGColor = getObj("player", msg.playerid).get("color");
+		var help = lPart + "background-color:#831F29;'><u>" + msg.who + "</u><br>XP Earned: " + formatNumber(nXp) + "<br>XP Total: " + formatNumber(total) + "<br>Next Level @: " + formatNumber(mXP) + "</div>";
+		sendChat('', "/direct " + help);
+	};
+//----HELP
+	if(msg.type == "api" && msgTxt.indexOf("!help") !== -1) {
+		var ex = "EXAMPLE:<BR>!attack --[[1d20]] --[[1d6]] --BAM --Rifle 3";
+		var ex1 = "<br>PARTS:<br>!attack --[[tohit]] --[[dmg]] --saying --Ammo #";
+		var help = hPart + "background-color:#CCCCCC;'>" + ex + " " + ex1 + "</div>";
+		sendChat('', "/direct " + help);
+	};
+});
