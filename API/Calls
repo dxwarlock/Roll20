@@ -1,0 +1,88 @@
+//--colors
+var greenC = "#438032";
+var gmC = "#22571F";
+var redC = "#A34645";
+var grayC = "#666666";
+var bShadow ="#707070";
+//---ImgLinks
+var gm_img = "http:\\//1.bp.blogspot.com/-_7PUzQpiroI/UOPmxmhXJCI/AAAAAAAAC6A/weRyMBUZYRU/s1600/spirograph2.gif";
+var crit_img = "http:\\//media.giphy.com/media/3KqZp8MBaf1Ty/giphy.gif";
+var fail_img = "http:\\//fc06.deviantart.net/fs70/f/2013/076/5/2/_tutorial__creating_an_animated_light_pulse_in_ps_by_d_k0d3-d5ybir4.gif"
+
+//---START BOXES CODE
+var fPart = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; font-family: Verdana; text-shadow: 2px 2px #000; text-align: center; vertical-align: middle; padding: 2px 2px; margin-top: 0.2em; border: 1px solid #000; border-radius: 8px 8px 8px 8px; color: #FFFFFF;"
+var lPart = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; font-family: Verdana; text-shadow: 2px 2px #000; font-size: 9pt; text-shadow: 2px 2px #000; text-align: left; vertical-align: middle; background-position:center; padding: 1px 1px; margin-top: 0.2em; border: 2px solid #000; border-radius: 8px 8px 8px 8px; color: #FFFFFF;"
+var hPart = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; font-family: Verdana; font-size: 7pt; text-align: left; vertical-align: middle; background-position:center; padding: 1px 1px; margin-top: 0.2em; border: 2px solid #000; border-radius: 8px 8px 8px 8px; color: #000;"
+var gPart = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; font-family: Verdana; text-shadow: 2px 2px #000; text-align: center; vertical-align: middle; padding: 2px 2px; margin-top: 0.2em; border: 1px solid #919191; border-radius: 8px 8px 8px 8px; color: #FFFFFF;"
+/*------------------
+COMBAT STUFF
+------------------*/
+//---AUTO LOCATION ROLLS
+var aLoc = ["Chest","Head","Left Arm","Right Arm","Left Leg","Right Leg","..Dangly Bits! (Main Body)","FREE ATTACK!"];
+//---FUMBLE ROLLS
+var aFum = [
+    "Hit a totally different target in direction of aimed target (if possible)",
+    "Ungracefully fumbled the attack!, lose next attack",
+    "Got something in eye, lose this attack",
+    "Missed so badly, it makes the enemy question if you know what you are doing!",
+    "Total gun jam/broke weapon(or limb!).. useless this fight. Must get fixed.",
+    "Tripped!, next attack to get up",
+    "Somehow hit a Flying Squirrel!"
+];
+var CONFIG = [
+    {barId: 1,barRatioMax: 1.0,barRatioMin: 0.5,status: "green",whenLow: true}, 
+    {barId: 1,barRatioMax: 0.5,barRatioMin: 0.25,status: "yellow",whenLow: true}, 
+    {barId: 1,barRatioMax: 0.25,barRatioMin: 0,status: "brown",whenLow: true}, 
+    {barId: 1,barRatioMax: 0,barRatioMin: -0.1,status: "red",whenLow: true}, 
+    {barId: 2,barRatioMax: 0.25,barRatioMin: 0,status: "half-heart",whenLow: true}, 
+    {barId: 2,barRatioMax: 0,barRatioMin: -0.1,status: "dead",whenLow: true}
+    ];
+ var FOOD = [
+    {FoodRatioMax: 100,FoodRatioMin: 100,status: "",whenLow: true, stype: 'full'},
+    {FoodRatioMax: 50,FoodRatioMin: 21,status: "drink-me",whenLow: true, stype: 'hungry'},     
+    {FoodRatioMax: 20,FoodRatioMin: 0,status: "skull",whenLow: true, stype: 'starving and weak!'}
+    ];
+/*------------------
+Functions
+------------------*/
+
+//find level
+function fLevel() {
+    var characters = findObjs({_type: "character"});
+    var chat = '';
+	var lTotal = 0;
+    var count = 0;
+	_.each(characters, function (id) {
+		var aa = id.get("inplayerjournals");
+		var aSet = findObjs({_type: "attribute",name: "Level",_characterid: id.id})[0];
+		if(aa == "all" && aSet !== undefined) {
+			var a2 = parseInt(aSet.get("current"));
+            count = count + 1;
+			lTotal = lTotal + a2;
+		}
+	});
+    lTotal = Math.round(lTotal / count);
+	return lTotal;
+}
+//parse loot
+function myrolls(loota) {
+    for(var i = 0; i < loota.length; i++) {
+    	var ii = (loota[i].indexOf("[[") != -1);
+		if(ii == true) {
+			var num = loota[i].replace(/[^0-9]/g, '');
+			var res1 = num.substr(0, 1);
+			var res2 = num.substr(1, 4);
+			var i = 1;
+			var tot = 0;
+			while(i <= res1) {
+				var tot = tot + randomInteger(res2);
+				i++
+			}
+			return tot;
+		}
+	}
+}
+//make number
+function formatNumber (num) {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+}
