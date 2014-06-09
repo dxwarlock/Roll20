@@ -1,0 +1,33 @@
+/*------------------
+ENCOUNTERS
+------------------*/
+on("chat:message", function (msg) {
+  var msgTxt = msg.content;
+  if(msg.type == "api" && msgTxt.indexOf('!enc') !== -1) {
+    var loots = randomInteger(100);
+    if(loots >= 90) {
+      sendChat('', "/roll 1t[CEncounters]", function (ops) {
+        var loot = JSON.parse(ops[0].content).rolls[0].results[0].tableItem.name;
+        var loot1 = loot.split(" ");
+        var a = myrolls(loot1);
+        var lootE = loot.replace(/\[.*?\]\]/g, a);
+       var GMC = fPart + "background-color:#A34645;'>COMBAT:<BR>"+lootE+"</div>";
+        sendChat('ENCOUNTER', '/w gm ' + GMC);
+      });
+    }
+    else if(loots >= 70) {
+      sendChat('', "/roll 1t[NEncounters]", function (ops) {
+        var loot = JSON.parse(ops[0].content).rolls[0].results[0].tableItem.name;
+        var loot1 = loot.split(" ");
+        var a = myrolls(loot1);
+        var lootE = loot.replace(/\[.*?\]\]/g, a);
+        var GMC = fPart + "background-color:#36769E;'>NONCOMBAT:<BR>"+lootE+"</div>";
+        sendChat('ENCOUNTER', '/w gm ' + GMC);
+      });
+    }
+    else {
+      var GM = fPart + "background-color:"+grayC+";'>NO ENCOUNTER..</div>";
+      sendChat('ENCOUNTER', '/w gm ' + GM);
+    }
+  };
+});
