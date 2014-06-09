@@ -1,0 +1,162 @@
+on('chat:message', function (msg) {
+    if (msg.type != "api") return;
+    var msgTxt = msg.content; 
+    var command = msg.content.split(" ", 1);
+    if (command == "!attack") {
+        var cWho = findObjs({_type: 'character',name: msg.who})[0];
+        if (cWho == undefined && msg.who != "GM (GM)") {
+            var noWho = fPart + "background-color:" + redC + ";'>" + msg.who + ": roll as your character name</div>";
+            sendChat('', "/direct " + noWho);
+            return;
+        }
+        //check roll---------------------
+        var ar = msg.inlinerolls[0];
+        var dr = msg.inlinerolls[1];
+        //define var----------------------        
+        if (ar === undefined || dr === undefined) {
+            sendChat('', "/direct <B><I>bad macro!"); 
+            return;
+        }
+        var who = msg.who;
+        var PlayerBGColor = getObj("player", msg.playerid).get("color");
+        var boxcolor = '#066303';
+        if (msg.who == "GM (GM)") {boxcolor = '#831F29';who = "NPC";}
+        var font = 'Century Gothic';
+        var critRange = 18;
+        var failRange = 1;
+        var dParts = "";
+        var dRoll = "";
+        var DD = "";
+        var bText = "";
+        var DDtext = "";
+        var bg_crit = "";       
+        var MainSay = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; text-shadow: 1px 1px #878787; font-family:Arial; font-size: x-small; text-align: center; vertical-align: middle; padding: 1px; border-left: 1px solid #000; border-right: 1px solid #000; border-radius: 0px; background-color:#CEC7B6; color: #000;'>";
+        var MainEven = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; text-shadow: 1px 1px #878787; font-family: " + font + "; text-align: center; vertical-align: middle; padding: 1px; border-left: 1px solid #000; border-right: 1px solid #000; border-radius: 0px; background-color: #CEC7B6; color: #000;'>";
+        var MainOdd = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; text-shadow: 1px 1px #878787; font-family: " + font + "; text-align: center; vertical-align: middle; padding: 1px; border-left: 1px solid #000; border-right: 1px solid #000; border-radius: 0px; background-color: #C0B9A8; color: #000;'>";
+        var msgFormula = msgTxt.split(" --");
+        //set motto
+        if (msgFormula[3] !== undefined) Custom = msgFormula[3].toUpperCase();
+        else(Custom = "");
+        //--------------------------------
+        //ATTACK PARTS-----------------
+        //-----------------------------
+        //Attack Modifier
+        if (ar.results.rolls[1] === undefined) mod = "";
+        else mod = (ar.results.rolls[1].expr);
+        aRollraw = ar.results.rolls[0].results[0]['v'];
+        aNum = ar.results.rolls[0].results[0]['v'];
+        if (aNum <= 3) {
+            num = "<b><span style='background-color:#D4A4A1'>[" + aNum + "]</span></b></a>";
+            bText = bText + " " + 'MISS';
+        } else if (aNum >= 19) {
+            num = "<b><span style='background-color:#AAD2B3'>[" + aNum + "]</span></b></a>";
+        } else num = "[" + aNum + "]";
+        aRoll = num;
+        //Attack total and type
+        Atotal = (ar.results.total);
+        Atype = "<a style='color:RED'>" + ar.expression + "</a>";
+        //-----------------------------
+        //DAMAGE PARTS-----------------
+        //-----------------------------
+        //Damage modifier
+        if (dr.results.rolls[1] === undefined) dMod = "";
+        else dMod = (dr.results.rolls[1].expr);
+        //Set damage total
+        Dtotal = dr.results.total;
+        //Make damage text for all rolls
+        dam = dr.results.rolls[0];
+        var i = 0;
+        while (dam.results[i] !== undefined) {
+            dNum = dam.results[i]['v'];
+            if (dNum == 1) num = "<b><span style='background-color:#D4A4A1'>[" + dNum + "]</span></b></a>";
+            else if (dNum == dr.results.rolls[0].sides) num = "<b><span style='background-color:#AAD2B3'>[" + dNum + "]</span></b></a>";
+            else num = "[" + dNum + "]";
+            dRoll = dRoll + " " + (num);
+            i++;
+        }
+        Dtype = "<a style='color:RED'>" + dr.expression + "</a>";
+        dRoll = dRoll + dMod;
+        //Set Double Damage
+        if (aRollraw == 20) {
+            Dtotal = "<a style='color:RED'>" + Dtotal * 2 + "!</a>";
+            bText = bText + " " + '<b>DOUBLE DAMAGE!</b><BR><b>(NATURAL 20!)</b>';
+        }
+        //-----------------------------
+        //CHATBOX PARTS----------------
+        //-----------------------------
+        Main = MainSay + "<i>" + Custom + "</div>";
+        Main = Main + MainOdd + Atype + " <b>To Hit:</b>" + aRoll + mod + "<b> = <a style='color:BLUE'>" + Atotal + "</b></a></div>";
+        Main = Main + MainEven + Dtype + " <b>Damage:</b>" + dRoll + "<b> = <a style='color:BLUE'>" + Dtotal + "</b></a></div>";
+        //-----------------------------
+        //CRIT_FUMBLE PARTS----------------
+        //-----------------------------
+        //CRIT roll     
+        if (aRollraw >= critRange) {
+            Main = Main + MainOdd + "<b><u>Lucky Shot!: " + aLoc[Math.floor(Math.random() * aLoc.length)] + "</b></div>";
+            bg_crit = "background-position:center; background-image: url("+crit_img+");";
+             bText = bText + " " +'LUCKY SHOT';
+        //FAIL roll
+        } 
+        if (aRollraw <= failRange) {
+            Main = Main + MainOdd + "<a style = 'color:PURPLE'>Fumble!: " + aFum[Math.floor(Math.random() * aFum.length)] + "</div>";
+            bg_crit = "background-position:50% 54%; background-image: url("+fail_img+");";
+            bText = bText + " " +'FUMBLE';
+        }
+        //-----------------------------
+        //AMMO PARTS----------------
+        //-----------------------------
+        if (msgFormula[4] === undefined) msgFormula[4] = msgFormula[3];
+        if (msgFormula[4] !== undefined) {
+            var ammoF = msgFormula[4].split(" ");
+            var ammoType = ammoF[0];
+            if (cWho !== undefined) {
+                var ammo0 = findObjs({_type: "attribute",name: ammoType,_characterid: cWho.id}, {caseInsensitive: true})[0];
+            }
+            if (ammo0 !== undefined){
+                var ammoC = parseInt(ammoF[1]);
+                if(ammoC === undefined || isNaN(ammoC)) ammoC = 1;
+                var cAmmo = parseInt(ammo0.get("current"));
+                var mAmmo = parseInt(ammo0.get("max"));
+                var curPageID = findObjs({_type: "campaign"})[0].get("playerpageid");
+                var curPage = findObjs({_type: "page", _id: curPageID})[0];  
+                var tokens = findObjs({_type: "graphic", layer:"objects", _pageid: curPageID, name: msg.who});
+                _.each(tokens, function(id) {
+                    var who = getObj('character', id.get("_represents"));
+                    var aSet = findObjs({_type: "attribute",name: ammoType,_characterid: who.id});
+                    aSet = aSet[0].id;
+                    id.set("bar3_link", aSet);
+                    id.set('bar3_value', cAmmo);
+                    id.set('bar3_max', mAmmo);
+                });
+                var aPart = "<div style='box-shadow: 3px 3px 2px "+bShadow+"; font-family: Calibri; font-size: 8pt; text-align: center; margin:0px; padding:0px 0px 0px 0px; border-left: 1px solid #000; border-right: 1px solid #000; border-top: 1px solid #000; border-radius: 0px; color: #000;";
+                if (cAmmo <= 0 || cAmmo < ammoC) {
+                    cAmmo = "0";
+                    ammo0.set('current', cAmmo);
+                    ammo0.set('max', mAmmo);
+                    Main = aPart + "background-color:RED;'><b><i>Not Enough " + ammoType + " ammo left in clip.</div>";
+                }
+                else if (cAmmo <= 2 || cAmmo < ammoC) {
+                    cAmmo = cAmmo - ammoC;
+                    ammo0.set('current', cAmmo);
+                    ammo0.set('max', mAmmo);
+                    Main = Main + aPart + "background-color:RED;'><b><i>" + cAmmo + " " + ammoType + " ammo left in clip.</div>";
+                } 
+                else {
+                    cAmmo = cAmmo - ammoC;
+                    ammo0.set('current', cAmmo);
+                    ammo0.set('max', mAmmo);
+                    Main = Main + aPart + "background-color:#A8A191;'><b><i>" + cAmmo + " of " + mAmmo + " " + ammoType + " ammo left</div>";
+                }
+            }
+        } 
+        //-----------------------------
+        //SEND CHAT----------------
+        //-----------------------------
+        var pad = "6px;";
+        if (bText != "") pad = "2px;";
+        var top = "<div style=' "+bg_crit+" box-shadow: 3px 3px 2px "+bShadow+"; text-shadow: 2px 2px #000; font-family: Arial Black; text-align: center; vertical-align: middle; padding: 0px 0px; margin-top: 0.2em; border: 1px solid #000; border-radius: 10px 10px 0px 0px; color: #FFFFFF; background-color:" + boxcolor + ";'>" + who + "  Attacks</div>";
+        End = "<div style=' "+bg_crit+" box-shadow: 3px 3px 2px "+bShadow+"; text-shadow: 2px 2px #000; font-family: Arial Black; font-size: 16px ;text-align: center; padding: "+pad+" vertical-align: middle; border: 1px solid #000; border-radius: 0px 0px 8px 8px; color: #FFFFFF; background-color:" + boxcolor+ ";'>"  + bText + "</div>";
+        sendChat(who, '/direct ' + top + Main + End);
+        return;
+    }
+});
