@@ -1,0 +1,37 @@
+/*global iPart createObj log on obj _ state getObj sendChat CONFIG fPart findObjs OuterDiv Campaign randomFromTo  fixNO toFront randomInteger FOOD*/
+var NAME = NAME || (function() {
+    'use strict';
+    var version = 0.1,
+        schemaVersion = 0.1,
+        checkInstall = function() {
+            if(!_.has(state, 'NAME') || state.NAME.version !== schemaVersion) {
+                log('NAME: Resetting state');
+                state.NAME = {
+                    version: schemaVersion
+                };
+            }
+        },
+        handleInput = function(msg) {
+            var args;
+            if(msg.type !== "api") {
+                return;
+            }
+            args = msg.content.split(/\s+/);
+            switch(args[0]) {
+                case '!NAME':
+                    break;
+            }
+        },
+        registerEventHandlers = function() {
+            on('chat:message', handleInput);
+        };
+    return {
+        CheckInstall: checkInstall,
+        RegisterEventHandlers: registerEventHandlers
+    };
+}());
+on('ready', function() {
+    'use strict';
+    NAME.CheckInstall();
+    NAME.RegisterEventHandlers();
+});

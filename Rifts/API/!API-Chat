@@ -1,0 +1,244 @@
+/*global gmC test state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+on("chat:message", function(msg) {
+	if(msg.type != "api") return;
+	var msgTxt = msg.content;
+	var msgFormula = msg.content.split(/\s+/);
+	//----CHECK CHARACTER
+	var cWho = findObjs({
+		_type: 'character',
+		name: msg.who
+	})[0];
+	if(cWho === undefined && !playerIsGM(msg.playerid)) {
+		cWho = RollRight(msg.playerid);
+		msg.who = cWho.get("name");
+	}
+	if(msg.who == "GM (GM)") msg.who = "NPC";
+	var PlayerBGColor = getObj("player", msg.playerid).get("color");
+	switch(msgFormula[0].toUpperCase()) {
+		/*
+PIC*/
+		case "!PIC":
+			var piclink = msgFormula[1];
+			var tPic = fPart + "background-color:" + grayC + ";'>● " + msg.who + " Shared a pic: ●</div>";
+			var Pic = fPart + "background-color:#AAAAAA;'><img src=" + piclink + "></div>";
+			sendChat('', "/direct " + tPic + Pic);
+			break;
+			/*
+ROTATE*/
+		case "!ROTATE":
+			var selected = msg.selected;
+			var i = 0;
+			_.each(selected, function(obj) {
+				var token = getObj('graphic', msg.selected[i]._id);
+				token.set({
+					rotation: (randomInteger(360) - 1)
+				});
+				i++;
+			});
+			break;
+			/*
+BLOOD*/
+		case "!BLOOD":
+			if(state.bloodlist.length === 0) return;
+			for(i = 0; i < state.bloodlist.length; i++) {
+				var obj = state.bloodlist[i];
+				var token = findObjs({
+					_id: state.bloodlist[0].id,
+					_type: "graphic"
+				})[0];
+				if(token !== undefined) token.remove();
+				state.bloodlist.splice(i, 1);
+				i--;
+			}
+			break;
+			/*
+GM*/
+		case "!GM":
+			var ax = randomFromTo(25, 75);
+			var ay = randomFromTo(25, 75);
+			var bgp = "background-position:" + ax + "% " + ay + "%;";
+			var GMR = OuterDiv + iPart + "background-image: url(" + gm_img + ");" + bgp + "'><b>● GM rolls some dice.. ●</div>";
+			sendChat('', "/direct " + GMR);
+			sendChat('', "/roll [[" + msgFormula[1] + "]]", function(ops) {
+				var rollresult = JSON.parse(ops[0].content);
+				var GMRW = OuterDiv + fPart + "background-color:" + gmC + ";'>ROLLED " + msgFormula[1] + ":<b> " + rollresult.total + "</div>";
+				sendChat('ROLL', "/w GM " + GMRW);
+			});
+			break;
+			/*
+WHISPER*/
+		case "!WIS":
+			var nXp = msg.content.substr(msg.content.indexOf(" ") + 1);
+			var wischat = OuterDiv + iPart + "background-color:#831F29;'><b>● " + nXp + " ●</div></div>";
+			sendChat('System', "/w " + msg.who + ' ' + wischat);
+			sendChat(msg.who, "/w GM " + wischat);
+			break;
+			/*
+ADJUST*/
+		case "!ADJUST":
+			var nGen = msgFormula[1];
+			var nGEnAd = msgFormula[2];
+			var oC = findObjs({
+				name: nGen,
+				_type: "attribute",
+				characterid: cWho.id
+			}, {
+				caseInsensitive: true
+			})[0];
+			var Cred = oC.get("current");
+			var total = parseInt(Cred) + parseInt(nGEnAd);
+			oC.set('current', total);
+			var help = lPart + "background-color:#" + greenC + ";'><u>● " + msg.who + "  ●</u><b><br>Adjust: " + nGen.toUpperCase() + " (" + nGEnAd + ")<br>Total: " + formatNumber(total) + "</div>";
+			sendChat('', "/direct " + help);
+			break;
+			/*
+CREDITS*/
+		case "!CRED":
+			var nCred = msgFormula[1];
+			var oC = findObjs({
+				name: "Credits",
+				_type: "attribute",
+				characterid: cWho.id
+			}, {
+				caseInsensitive: true
+			})[0];
+			var Cred = oC.get("current");
+			var mCred = oC.get("max");
+			var total = parseInt(nCred) + parseInt(Cred);
+			oC.set('current', total);
+			var PlayerBGColor = getObj("player", msg.playerid).get("color");
+			var help = lPart + "background-color:#" + greenC + ";'><u>● " + msg.who + "  ●</u><b><br>Credits Adjust: " + formatNumber(nCred) + "<br>Credits Total: " + formatNumber(total) + "</div>";
+			sendChat('', "/direct " + help);
+			break;
+			/*
+SAVINGTHROW*/
+		case "!SAVE":
+			sendChat('', "/roll [[" + msgFormula[1] + "]]", function(ops) {
+				var rollresult = JSON.parse(ops[0].content);
+				total = rollresult.total;
+				if(msg.who == "NPC") total = total + 4;
+				else total = total - 2;
+				if(total < 1) total = 1;
+				if(total > 20) total = 18;
+				var rText = total + "</b> against <b>" + msgFormula[2];
+				if(total >= msgFormula[2]) {
+					var RE = fPart + "background-color:" + greenC + ";'><B>" + brPart + "background-color:" + PlayerBGColor + ";'>" + msg.who + " save: " + msgFormula[3] + "</div></B>SUCCEEDED!<BR><b>" + rText + "</b> on <b>" + msgFormula[1] + "</div>";
+				} else {
+					var RE = fPart + "background-color:" + redC + ";'><B>" + brPart + "background-color:" + PlayerBGColor + ";'>" + msg.who + " save: " + msgFormula[3] + "</div></B>FAILED!<BR><b>" + rText + "</b> on <b>" + msgFormula[1] + "</div>";
+				}
+				sendChat(msg.who, "/direct " + RE);
+			});
+			break;
+			/*
+PERC*/
+		case "!PERC":
+			var nMod = msgFormula[1];
+			sendChat('', "/roll [[" + msgFormula[1] + "]]", function(ops) {
+				var rollresult = JSON.parse(ops[0].content);
+				total = rollresult.total;
+				var try1 = randomInteger(100);
+				sendChat(msg.who, "/direct <b>Perc Check");
+				sendChat("PERC", "/w GM <b>" + msg.who + " " + [[try1 < total]] + "<br>(" + try1 + " out of " + total + ")");
+			});
+			break;
+			/*
+FOOD*/
+		case "!FOOD":
+			var nXp = msgFormula[1];
+			var oC = findObjs({
+				name: "HUNGER",
+				_type: "attribute",
+				characterid: cWho.id
+			}, {
+				caseInsensitive: true
+			})[0];
+			if(oC === undefined || oC.length === 0) {
+				sendChat(msg.who, '/direct No FOOD Found, please set!');
+				return;
+			}
+			var XP = oC.get("current");
+			var total = parseInt(nXp) + parseInt(XP);
+			if(total > 100) total = 100;
+			oC.set('current', total);
+			var help = lPart + "background-color:#" + greenC + ";'><u>● " + msg.who + " ate  ●</u><b><br>HUNGER: " + formatNumber(total) + "</div>";
+			sendChat('', "/direct " + help);
+			break;
+			/*
+XP*/
+		case "!XP":
+			var nXp = msgFormula[1];
+			var oC = findObjs({
+				name: "XP",
+				_type: "attribute",
+				characterid: cWho.id
+			}, {
+				caseInsensitive: true
+			})[0];
+			var oL = findObjs({
+				name: "Level",
+				_type: "attribute",
+				characterid: cWho.id
+			}, {
+				caseInsensitive: true
+			})[0];
+			if(oC === undefined || oC.length === 0) {
+				sendChat(msg.who, '/direct No XP Found, please set!');
+				return;
+			}
+			var XP = oC.get("current");
+			var Level = oL.get("current");
+			var mXP = oC.get("max");
+			var total = parseInt(nXp) + parseInt(XP);
+			oC.set('current', total);
+			var help = OuterDiv + lPart + "background-color:#831F29;'><u>● " + msg.who + " ●</u> [Level:" + Level + "] <br>XP Earned: " + formatNumber(nXp) + "<br>XP Total: " + formatNumber(total) + "<br>Next Level: " + formatNumber(mXP) + "</div>";
+			sendChat('', "/direct " + help);
+			break;
+			/*
+BLINDROLL*/
+		case "!RB":
+			sendChat('', "/roll [[" + msgFormula[1] + "]]", function(ops) {
+				var rollresult = JSON.parse(ops[0].content);
+				total = rollresult.total;
+				var skillN = "";
+				var i = 0;
+				while(msgFormula[5 + i] !== undefined) {
+					skillN = skillN + " " + msgFormula[5 + i];
+					i++;
+				}
+				var totalAd = parseInt(msgFormula[2]) + parseInt(msgFormula[3]);
+				var rText = "<b>" + total + "</b> out of <b>" + totalAd + " </b>(" + msgFormula[2] + " + " + msgFormula[3] + ")";
+				if(msgFormula[4].toUpperCase() == "Y") {
+					if(total > 92) {
+						var RE = fPart + "background-color:" + redC + ";'>" + msg.who + " had an <b>obvious failure!</b><BR>rolled a " + total + " trying:<br><b>" + skillN + "<br></b>(player gets to pick the type of spectacular failure)</div>";
+						sendChat('', "/direct " + RE);
+						return;
+					} else if(total <= 5) {
+						var RE = fPart + "background-color:" + greenC + ";'>" + msg.who + " had a <b>spectacular success!</b><BR>rolled a " + total + " trying:<br><b>" + skillN + "</div>";
+						sendChat('', "/direct " + RE);
+						return;
+					} else if(total <= totalAd) {
+						var RE = fPart + "background-color:" + greenC + ";'><B>" + skillN.toUpperCase() + "</B><BR> " + msg.who + " SUCCEEDED!<BR>" + rText + "</div>";
+					} else {
+						var RE = fPart + "background-color:" + redC + ";'><B>" + skillN.toUpperCase() + "</B><BR> " + msg.who + " FAILED!<BR>" + rText + "</div>";
+					}
+					var Blind = fPart + "background-color:" + grayC + ";'>● " + msg.who + " sent a blind roll ●</div>";
+					sendChat(msg.who, "/direct " + Blind);
+					sendChat('BlindRoll', "/w GM " + RE);
+				} else {
+					if(total > 92) {
+						var RE = fPart + "background-color:" + redC + ";'>" + msg.who + " had an <b>obvious failure!</b><BR>rolled a " + total + " trying:<br><b>" + skillN + "<br></b>(player gets to pick the type of spectacular failure)</div>";
+						sendChat('', "/direct " + RE);
+						return;
+					} else if(total <= totalAd) {
+						var RE = fPart + "background-color:" + greenC + ";'>" + brPart + "background-color:" + PlayerBGColor + ";'><b>" + msg.who + " tried:</div><b>" + skillN.toUpperCase() + "</B><BR> " + " and SUCCEEDED!<BR>" + rText + "</div>";
+					} else {
+						var RE = fPart + "background-color:" + redC + ";'>" + brPart + "background-color:" + PlayerBGColor + ";'><b>" + msg.who + " tried:</div><b>" + skillN.toUpperCase() + "</B><BR> " + " and FAILED!<BR>" + rText + "</div>";
+					}
+					sendChat('VisibleRoll', "/direct " + RE);
+				}
+			});
+			break;
+		default:
+			return;
+	}
+});
