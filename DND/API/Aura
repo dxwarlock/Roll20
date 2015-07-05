@@ -1,5 +1,5 @@
 /*------------------
-Aura
+Aura 0.35
 ------------------*/
 on("ready", function() {
     state.auraColorOn = true; //global on or off
