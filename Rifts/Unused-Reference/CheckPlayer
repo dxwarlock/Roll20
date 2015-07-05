@@ -1,0 +1,39 @@
+/*global log on obj _ state getObj playerIsGM crit_img fail_img aLoc OuterDiv iPart sendChat aFum CONFIG fPart bShadow RollRight font MakeRollNum findObjs OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+on('chat:message', function(msg) {
+    var command = msg.content.split(" ", 1);
+    if(msg.type != "api" && command != "!something") return;
+    var cWho = findObjs({_type: 'character',name: msg.who})[0];
+    if(cWho === undefined && !playerIsGM(msg.playerid)) {
+        cWho = TalkRight(msg.playerid);
+        msg.who = cWho.get("name");
+    }
+    //----do code here----
+});
+//Character Find Function
+function TalkRight(whoPC) {
+    var character = findObjs({type: 'character',controlledby: whoPC})[0];
+    return character;
+}
+
+
+		case "!BAR":
+			var curPageID = findObjs({
+				_type: "campaign"
+			})[0].get("playerpageid");
+			var tokens = getObj('graphic', msg.selected[0]._id);
+			var who = getObj('character', tokens.get("_represents"));
+			if(tokens.get("bar3_link") === "") {
+				sendChat('', "/direct <b> NOT ASSIGNED");
+				return;
+			}
+			var bar3 = tokens.get("bar3_link");
+			var aBar3 = findObjs({
+				_type: "attribute",
+				id: bar3,
+				_characterid: who.id
+			})[0];
+			var BarName = aBar3.get("name");
+			var BarCur = aBar3.get("current");
+			var BarMax = aBar3.get("max");
+			sendChat('', "/direct " + iPart + "background-color:#831F29;'><b>White Bar: " + BarName + "<br>Value: " + BarCur + "/" + BarMax + "</div>");
+			break;

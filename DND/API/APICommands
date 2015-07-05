@@ -1,0 +1,115 @@
+/*global gmC state on myrolls obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+//-----COMMANDS--------
+on("chat:message", function(msg) {
+    if(msg.type != "api") return;
+    var msgFormula = msg.content.split(/\s+/);
+    //----CHECK CHARACTER
+    var cWho = findObjs({
+        _type: 'character',
+        name: msg.who
+    })[0];
+    if(cWho === undefined && !playerIsGM(msg.playerid)) {
+        cWho = RollRight(msg.playerid);
+        msg.who = cWho.get("name");
+    }
+    if(msg.who == "GM (GM)") msg.who = "NPC";
+    switch(msgFormula[0].toUpperCase()) {
+        /*PIC--------*/
+        case "!PIC":
+            var piclink = msgFormula[1];
+            var Pic = "<img src=" + piclink + ">";
+            sendChat('', "&{template:5eDefault} {{show_character_name=1}} {{character_name=" + msg.who + "}} {{emote=" + Pic + "}} {{title=Shared a pic}}");
+            break;
+            /*ROTATE--------*/
+        case "!ROTATE":
+            var selected = msg.selected;
+            var i = 0;
+            _.each(selected, function(obj) {
+                var token = getObj('graphic', msg.selected[i]._id);
+                token.set({
+                    rotation: (randomInteger(360) - 1)
+                });
+                i++;
+            });
+            break;
+            /*GM--------*/
+        case "!GM":
+            sendChat('', "&{template:5eDefault} {{deathsave=1}} {{emote=GM rolls some dice..}} {{title=GM}}");
+            sendChat('', "/roll [[" + msgFormula[1] + "]]", function(ops) {
+                sendChat('GM ROLL', "/w GM &{template:5eDefault} {{action=1}} {{rollname=Outcome:}} {{roll=[[" + msgFormula[1] + "]]}} {{title=Roll Result}}");
+            });
+            break;
+        case "!COMMANDS":
+            sendChat('', "&{template:5eDefault} {{showclassactions=1}} {{XP=!XP (number)}}{{Pic=!PIC (url)}} {{Money Conv=!CONV (amount)}} {{Conditions=!NOW}} {{title=Commands}}");
+            break;
+        case "!GMCOMS":
+            sendChat('', "/w GM &{template:5eDefault} {{showclassactions=1}} {{XP=!XP (number)}}{{Pic=!PIC (url)}} {{Money Conv=!CONV (amount)}} {{Conditions=!NOW}} {{Weather=!WEATHER}} {{Set Time=!Hour (number)}} {{title=Commands}}");
+            break;
+        case "!SORT":
+            var turnorder = JSON.parse(Campaign().get("turnorder"));
+            sort(turnorder);
+            break;
+        case "!RESET":
+            if(!Campaign().get("turnorder")) return;
+            var turn_order = JSON.parse(Campaign().get("turnorder"));
+            Campaign().set("turnorder", '');
+            sendChat('', '/desc Turns Reset!');
+            break;
+            /*TABLE--------*/
+        case "!TABLE":
+            var tablelink = msgFormula[1];
+            sendChat("NoOne", "/roll 1t[" + tablelink + "]", function(ops) {
+                var tablelink = msgFormula[1];
+                var rollresult = JSON.parse(ops[0].content);
+                var loc = rollresult.rolls[0].results[0].tableItem.name;
+                var loot1 = loc.split(" ");
+                var a = myrolls(loot1);
+                var lootE = loc.replace(/\[.*?\]\]/g, a);
+                sendChat('', "&{template:5eDefault} {{showclassactions=1}} {{show_character_name=1}} {{character_name=" + msg.who + "}} {{save=1}} {{Effect=<b>" + lootE + "}}{{title=" + msgFormula[1] + "}}");
+            });
+            break;
+            /*MONEY--------*/
+        case "!CONV":
+            var Money = msgFormula[1];
+            var NewMoney = Number(parseFloat(Money * 0.15).toFixed(4));
+            var Text = '';
+            var PP = Math.floor(NewMoney / 10);
+            if(PP > 0) Text = PP + " Platinum<br>";
+            NewMoney = NewMoney - (PP * 10);
+            var GP = Math.floor(NewMoney);
+            if(GP > 0) Text += +GP + " Gold<br>";
+            NewMoney = NewMoney - GP;
+            var EP = Math.floor(NewMoney * 10);
+            if(EP > 0) Text += +EP + " Electrum<br>";
+            NewMoney = NewMoney - (EP / 10);
+            var SP = Math.floor(NewMoney * 100);
+            if(SP > 0) Text += +SP + " Silver<br>";
+            NewMoney = NewMoney - (SP / 100);
+            var CP = Math.floor(NewMoney * 1000);
+            if(CP > 0) Text += +CP + " Copper";
+            if(Text == '') Text = "~1 Copper~";
+            sendChat('', "&{template:5eDefault} {{showclassactions=1}} {{show_character_name=1}} {{character_name=Amount: " + msgFormula[1] + "G}} {{Total=<b>" + Text + "}} {{title=Money Convert}}");
+            break;
+            /*XP--------*/
+        case "!XP":
+            var nXp = msgFormula[1];
+            var oC = findObjs({
+                name: "xp",
+                _type: "attribute",
+                characterid: cWho.id
+            }, {
+                caseInsensitive: true
+            })[0];
+            if(oC === undefined || oC.length === 0) {
+                sendChat(msg.who, '/direct No XP Found, please set!');
+                return;
+            }
+            var XP = oC.get("current");
+            var total = parseInt(nXp) + parseInt(XP);
+            oC.set('current', total);
+            sendChat('', "&{template:5eDefault} {{title=XP}} {{showclassactions=1}} {{show_character_name=1}} {{character_name=" + msg.who + "}}  {{Gained=<b>" + nXp + "}} {{Total=<b>" + total + "}}");
+            break;
+        default:
+            return;
+    }
+});

@@ -1,0 +1,262 @@
+/*global log on obj _ state getObj sendChat CONFIG fPart findObjs OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+on("ready", function() {
+    if(state.bloodlist == undefined) state.bloodlist = [];
+    var currentTime = new Date();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    if(minutes < 10) minutes = "0" + minutes;
+    var time = hours + ":" + minutes;
+    sendChat('API', "/w GM API STARTED " + time);
+    log("----------------------");
+    log("----------------------");
+});
+//CODE-----------------
+on("change:token", function(o) {
+    var obj = getObj(o.get('type'), o.id);
+    //var imgurname = obj.get('name');
+    //var tokens = findObjs({_type:"graphic",_pageid:	Campaign().get('playerpageid'),name: imgurname});
+    //log(state);
+    //SET ENEMY AURA----------
+    var eBar1 = parseInt(obj.get("bar1_value"), 10);
+    var eBar2 = parseInt(obj.get("bar2_value"), 10);
+    if(obj.get('represents') === "" && !isNaN(eBar1) && !isNaN(eBar2)) {
+        obj.set({
+            'aura1_radius': -2.0,
+            'aura2_radius': -2.0,
+            'aura1_color': '#980000',
+            'aura2_color': '#980000',
+            'showplayers_aura1': true,
+            'showplayers_aura2': true,
+            'showplayers_name': false,
+            'showname': false
+        });
+    }
+    //SET PLAYER AURA------------
+    if(obj.get("represents") !== "") {
+        var oCharacter = getObj('character', obj.get("_represents"));
+        var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+        if(type == 'Player') {
+            var cBy = oCharacter.get('controlledby');
+            var cName = oCharacter.get('name').split(" ");
+            cName = cName[0];
+            if(cBy.split(',').length == 1 && cBy != 'all') {
+                var player = getObj('player', cBy);
+                var pColor = player.get('color');
+                obj.set({
+                    'aura1_radius': 0.1,
+                    'aura2_radius': 0.1,
+                    'aura1_color': pColor,
+                    'aura2_color': pColor,
+                    'showplayers_aura1': true,
+                    'showplayers_aura2': true,
+                    'showplayers_name': false,
+                    'showname': false
+                });
+            }
+        }
+    }
+    //SET HURT ICONS-----------
+    CONFIG.forEach(function(opts) {
+        if(obj.get("bar" + opts.barId + "_max") !== "" && obj.get("bar" + opts.barId + "_value") !== "") {
+            var maxValue = parseInt(obj.get("bar" + opts.barId + "_max"));
+            var curValue = parseInt(obj.get("bar" + opts.barId + "_value"));
+            if(!isNaN(maxValue) && !isNaN(curValue) && obj.get("controlledby") != '-J54-6mE5Q1BnpKxGOrZ') {
+                var markerName = "status_" + opts.status;
+                if(curValue <= (maxValue * opts.barRatioMax) && curValue > (maxValue * opts.barRatioMin)) {
+                    obj.set(markerName, opts.whenLow);
+                } else {
+                    obj.set(markerName, !opts.whenLow);
+                }
+            }
+        }
+    });
+});
+/*-----------
+ARMOR WARNINGS
+-----------*/
+on('change:attribute', function(obj) {
+    var name = obj.get("name").toUpperCase();
+    if(name !== "A-BODY" && name !== "PA-BODY" && name !== "HP") return;
+    var ID = obj.get("_characterid");
+    var ch = getObj('character', ID);
+    var char = ch.get("name");
+    var cur = obj.get("current");
+    var max = obj.get("max");
+    var per = (cur / max) * 100;
+    var numb1 = Math.round(per);
+    var numb = "";
+    var t = "";
+    var perLeft = numb1 + "% left [" + cur + " of " + max + "]";
+    if(name == "A-BODY" || name == "PA-BODY") {
+        if(cur <= 0) {
+            numb = "<b>" + char + " HAS NO ARMOR! <br>" + perLeft;
+            var gif = "https://pbs.twimg.com/profile_images/1400028753/Red-alert.gif";
+            t = fPart + "background-position:center; background-image: url(" + gif + ");'>" + numb + "</div>";
+            sendChat('Armor Warning', "/direct " + t);
+            return;
+        }
+        if(cur < max / 4) {
+            numb = "<b>" + char + " is below 1/4 armor! <br>" + perLeft;
+            t = fPart + "background-color:#A14242;'>" + numb + "</div>";
+            sendChat('Armor Warning', "/direct " + t);
+            return;
+        }
+        if(cur < max / 2) {
+            numb = "<b>" + char + " is below 1/2 armor! <br>" + perLeft;
+            t = fPart + "background-color:#262A33;'>" + numb + "</div>";
+            sendChat('Armor Warning', "/direct " + t);
+            return;
+        }
+    }
+    /*-----------
+    Health WARNINGS
+    -----------*/
+    if(name == "HP") {
+        if(cur < max / 4) {
+            numb = "<b>" + char + " is close to dying!<br>" + perLeft;
+            t = OuterDiv + fPart + "background-color:#A14242;'>" + numb + "</div>";
+            sendChat('Health Warning', "/direct " + t);
+            return;
+        }
+        if(cur < max / 2) {
+            numb = "<b>" + char + " is hurt!<br>" + perLeft;
+            t = OuterDiv + fPart + "background-color:#262A33;'>" + numb + "</div>";
+            sendChat('Health Warning', "/direct " + t);
+            return;
+        }
+    }
+});
+//DEAD CHAT
+on('change:graphic:bar1_value', function(obj, prev) {
+    if(Campaign().get("playerpageid") != obj.get("_pageid")) return;
+    var name = obj.get("name");
+    if(name === "") name = "NPC";
+    var bar1 = parseInt(obj.get("bar1_value"));
+    var bar1m = parseInt(obj.get("bar1_max"));
+    var bar1p = prev.bar1_value;
+    var amount = 1;
+    var numb = "";
+    var t = "";
+    if(obj.get("_represents") === "") {
+        if(bar1 === 0) {
+            var ax = randomFromTo(50, 80);
+            var ay = randomFromTo(50, 80);
+            var bgp = "background-position:" + ax + "% " + ay + "%;";
+            var img = "https:\\//i.imgur.com/vFsJzWQ.gif";
+            var saying = "<b>" + name + " is DEAD!<br>";
+            t = OuterDiv + fPart + "background-image: url(" + img + ");" + bgp + "'>" + saying + "</div>";
+            sendChat('SYSTEM', "/direct " + t);
+        } else if(bar1 <= bar1m / 4) {
+            numb = name + " is badly beaten and below 1/4 health!<br>";
+            t = OuterDiv + fPart + "background-color:#262A33;'>" + numb + "</div>";
+            sendChat('Health Warning', "/direct " + t);
+        } else if(bar1 <= bar1m / 2) {
+            numb = name + " is below 1/2 health!<br>";
+            t = OuterDiv + fPart + "background-color:#262A33;'>" + numb + "</div>";
+            sendChat('Health Warning', "/direct " + t);
+        }
+    }
+    if(bar1 < bar1p && bar1p !== "") {
+        var amountHitfor = bar1p - bar1
+        var amounthitPerc = 1 + amountHitfor / bar1m;
+        var amountLost = 1 + (1 - Math.round((bar1 / bar1m) * 100) / 100);
+        var scale = Math.round(amountLost * amounthitPerc * 100) / 100;
+        if(scale > 210) scale = 2.5;
+        if(bar1 <= 0) scale = 3;
+        var size = obj.get("height") * scale;
+        var color = "#ff0000";
+        blood(obj, size, color);
+    }
+    if(bar1 > bar1p && bar1p !== "") {
+        size = obj.get("height") / 2;
+        color = "#00ff00";
+        HealIcon(obj, size, color);
+    }
+});
+
+function HealIcon(current_token, size, color) {
+    if(current_token.get("layer") != "gmlayer") {
+        var tokenURL = "https://s3.amazonaws.com/files.staging.d20.io/images/180724/qeNVGU6kgFv4K5hK2NeWWw/thumb.png?1418008052";
+        var healMark = createObj('graphic', {
+            name: "Heal",
+            pageid: Campaign().get("playerpageid"),
+            layer: 'objects',
+            imgsrc: tokenURL,
+            left: current_token.get("left"),
+            top: current_token.get("top"),
+            height: size,
+            width: size
+        });
+        current_token.set({
+            'tint_color': color
+        });
+        setTimeout(function() {
+            current_token.set({
+                'tint_color': "transparent"
+            });
+        }, 2000);
+        setTimeout(function() {
+            toFront(healMark);
+        }, 5);
+        removetoken(healMark, 1000);
+    }
+};
+
+function blood(current_token, size, color) {
+    if(current_token.get("layer") != "gmlayer") {
+        var urls = [];
+        var rot = randomInteger(359);
+        current_token.set({
+            'tint_color': color
+        });
+        var BloodTokenTable = findObjs({
+            _type: "rollabletable",
+            name: "bloodtable"
+        });
+        BloodTokenTable = BloodTokenTable[0];
+        var currentPageGraphics = findObjs({
+            _type: "tableitem",
+            _rollabletableid: BloodTokenTable.get("_id")
+        });
+        _.each(currentPageGraphics, function(obj) {
+            urls.push(obj.get("avatar"));
+        });
+        var ret = urls[randomInteger(urls.length) - 1];
+        var tokenURL = ret.replace("max.png", "thumb.png").replace("med.png", "thumb.png");
+        var bloodmarker = createObj('graphic', {
+            name: "Damage",
+            pageid: current_token.get("_pageid"),
+            layer: 'map',
+            imgsrc: tokenURL,
+            left: current_token.get("left"),
+            top: current_token.get("top"),
+            height: size,
+            width: size,
+            rotation: rot
+        });
+        var BloodArrayPart = {
+            id: bloodmarker.get("_id")
+        };
+        state.bloodlist.push(BloodArrayPart);
+        if(state.bloodlist.length >= 20) {
+            var token = findObjs({
+                _id: state.bloodlist[0].id,
+                _type: "graphic"
+            })[0];
+            if(token !== undefined) token.remove();
+            state.bloodlist.shift();
+        }
+        setTimeout(function() {
+            current_token.set({
+                'tint_color': "transparent"
+            });
+        }, 2000);
+        toFront(bloodmarker);
+    }
+};
+
+function removetoken(token, time) {
+    setTimeout(function() {
+        token.remove();
+    }, time);
+};
