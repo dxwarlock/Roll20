@@ -1,4 +1,7 @@
 /*global MonthId gmC state on log myrolls obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+/*------------------
+DXWarlock - Roll20
+------------------*/
 //CODE-----------------
 on("chat:message", function(msg) {
 	var msgTxt = msg.content;

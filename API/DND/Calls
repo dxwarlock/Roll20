@@ -1,4 +1,7 @@
 /*------------------
+DXWarlock - Roll20
+------------------*/
+/*------------------
 PAGE CHANGE
 ------------------*/
 on("change:campaign:playerpageid", function(obj, prev) {
