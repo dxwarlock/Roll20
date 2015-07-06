@@ -52,7 +52,9 @@ on("chat:message", function(msg) {
 function aurahelp() {
     var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
     var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
-    sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + 'Is On: <a href="!aura on">' + state.auraColorOn + '</a><br>' + 'Bar: <a href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' + 'Use Tint: <a href="!aura tint">' + state.auraTint + '</a><br>' + 'Percentage: <a href="!aura perc ?{Percent?|90}">' + state.auraPerc + '</a><br>' + 'Show Dead: <a href="!aura dead">' + state.auraDead + '</a></div>');
+    sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' +
+    '<u>Version:' + state.auraversion +
+    '</u><br>Is On: <a href="!aura on">' + state.auraColorOn + '</a><br>' + 'Bar: <a href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' + 'Use Tint: <a href="!aura tint">' + state.auraTint + '</a><br>' + 'Percentage: <a href="!aura perc ?{Percent?|90}">' + state.auraPerc + '</a><br>' + 'Show Dead: <a href="!aura dead">' + state.auraDead + '</a></div>');
 }
 on("change:token", function(obj) {
     var bar = state.auraBar;
