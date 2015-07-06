@@ -82,7 +82,6 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM getAttrByName brPa
     if(msg.type !== 'api') {
       return;
     }
-    log('msg.content: ' + msg.content);
     var args = msg.content.split(/\s+/);
     switch(args[0]) {
       case '!build-monster':
