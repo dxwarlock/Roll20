@@ -21,7 +21,11 @@ on("ready", function() {
 on("chat:message", function(msg) {
     var msgFormula = msg.content.split(/\s+/);
     var command = msgFormula[0].toUpperCase();
-    if(msg.type == "api" && command.indexOf("!AURA") !== -1) {
+    if (playerIsGM(msg.playerid) !== true) {
+        sendChat('HealthColors', "/w " +msg.who+ " you must be a GM to use this command!");
+        return;
+    }
+    if(msg.type == "api" && command.indexOf("!AURA") !== -1 && playerIsGM(msg.playerid) == true) {
         var option = msgFormula[1];
         if(option == undefined) {
             aurahelp();
