@@ -1,3 +1,7 @@
+/*
+global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+---CLOUD9 ERROR CLEARING---
+*/
 /*------------------
 DXWarlock - Roll20
 ------------------*/
@@ -19,8 +23,8 @@ function formatNumber(num) {
 //-------PLAYER COLOR
 function GetPColor(Player) {
 	var cBy = Player.get('controlledby');
-	player = getObj('player', cBy);
-	pColor = player.get('color');
+	var player = getObj('player', cBy);
+	var pColor = player.get('color');
 	return pColor;
 }
 //set character name
@@ -81,7 +85,7 @@ function MakeRollNum(cont, inline) {
 		m['$[[' + k + ']]'] = v.results.total || 0;
 		return m;
 	}, {}).reduce(function(m, v, k) {
-		d20 = m.replace(k, v);
+		var d20 = m.replace(k, v);
 		return m.replace(k, v);
 	}, cont).value();
 };
@@ -181,52 +185,4 @@ var MonthId = [
 		Name: 'December',
 		Base: 20
 	}
-	 ];
-//---DUST TYPES
-var Dust = [
-	 "Light Dusty Winds: Visibility reduced to 1/2 mile",
-	 "Heavy Dusty Winds: Visibility reduced to 1/4 mile",
-	 "Strong Dusty Wind Storm!: Visibility reduced to 100 feet and anything over 10mph is wreckless travel and sand gets in EVERYTHING, +15 to prowl",
-     "Twisters!: 100+ MPH winds. Anything not tied down is swept up and flung around. Visibility reduced to 50 feet and travel impossible and sand gets in EVERYTHING, 1d3 hours to remove sand"
-	 ];
-//---RAIN TYPES
-var Rain = [
-	 "Light Rain",
-	 "Heavy Rain: Travel is treacherous in the mud and slick conditions Hard to see road or paths. Land navigation at -15%",
-	 "Downpour: Sheets of rain cover any and everything, seeing out of windows or visors a problem. Land navigation at -20%",
-	 "ThunderStorm: Best to lay low, strong rain, lightning, and high gusts of winds common. Land navigation at -30%"
-	 ];
-//---SNOW TYPES
-var Snow = [
-	 "Light Falling Snow: Tracking is at -25%",
-	 "Heavy Falling Snow: Progress cut in 1/2 and following tracks impossible. Land navigation at -30%",
-	 "Blizzard: The combination of high winds, heavy snow (typically 3d4 feet), and bitter cold make blizzards deadly for all who are unprepared for them. Progress is slow at best visibility is a 100 feet. Land navigation at -50%",
-	 "Whiteout: Progress is slow and cautious visibility is a few feet. making Spot, Search, and Listen checks and all ranged weapon attacks impossible. Land navigation at -90%",
-	 "Small hail: pea sized balls of hail, Combat is -4 to hit due to you and your gun being pelted with the hail",
-	 "Large hail: Baseball sized hail falls, anyone not in armor or shelter takes 1d8 damage per 5 minutes exposed. Hearing or hitting anything outside arm reach is impossible due to the noise"
-	 ];
-//---MAG TYPES
-var Magnetic = [
-	 "Light Magnetic Storm: Radio range is 1/2, and electronic and mechanical compasses off by 1d20 degrees. -10 Land Nav",
-     "Medium Magnetic Storm: Radio range is 1/4, and electronic and mechanical compasses off by 1d20 degrees. -20 Land Nav",
-	 "Heavy Magnetic Storm: Radio is useless, and electronic and mechanical compasses spin wildly"
-	 ];
-//---CALM TYPES
-var Calm = [
-	 "Very Light Winds, clear sky, its a beautiful day! Seems a great day for travel. Progress is at 110% and +10 to land navigation and tracking",
-	 "A nice clear day +10 to land navigation",
-	 "Very overcast, sun and sky hiding behind clouds. -10 to land navigation",
-	 "Overcast sky, light breezes, and overall pleasent conditions considering",
-	 "A typical day like any other. Partially cloudy, calm winds.",
-	 "Clear skys, but higher than usual winds. prowling in bushes and wooded areas is easier +10 to prowl",
-	 "Clear skys, and dead calm winds. Prowling in quiet areas and wilderness is noticable, -10 to prowl"
-	 ];
-//---RARE TYPES
-var Rare = [
-	 "Incorporeal Wind: Incorporeal wind passes through physical objects and barriers, such as clothing, armor, walls, and solid earth and stone. It negates any benefit of winter clothing against cold and exposure effects, but also negates any penalty for heavy clothing or armor against heat. Incorporeal wind is blocked only by mage armor, wall of force, and similar force effects.",
-	 "Ghoststorm: A chill windstorm brings a cacophany of noises, including the lost voices of the dead. -8 penalty on Listen checks due to the howling of the wind. Ranged weapon attacks are -8 due to winds and the ghosts of the undead bumping weapons",
-	 "Celestial Clarity: The sky is a perfect azure blue, colors seem more vibrant, and details appear sharper. Celestial clarity grants a +4 bonus to Spot, Search, Listen checks.",
-	 "Rogue Zephyr: Rogue zephyrs are gentle but magical breezes which undo simple knots, locks, bolts, manacles, shackles, and similar impediments",
-	 "Undead Fog: A fog comes, bringing with it the rising of any dead engulfed in the ground in its grasp. Some seek comfort, some want justice, others want revenge.",
-	 "Gale Force Winds: Winds over 70MPH tear around the landscape. Standing outside is near impossible. Small debris and rocks cause 1d10 damage for every minute outside."
 	 ];

@@ -1,4 +1,7 @@
-/*global gmC state on myrolls obj sort getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+/*
+global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+---CLOUD9 ERROR CLEARING---
+*/
 /*------------------
 DXWarlock - Roll20
 ------------------*/

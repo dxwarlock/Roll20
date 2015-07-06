@@ -1,4 +1,7 @@
-/*global MonthId gmC state on log myrolls obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+/*
+global myrolls log gmC state on obj getObj iPart _ MonthId playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+---CLOUD9 ERROR CLEARING---
+*/
 /*------------------
 DXWarlock - Roll20
 ------------------*/
@@ -15,13 +18,13 @@ on("chat:message", function(msg) {
 	if(msg.type == "api" && msgTxt.indexOf('!weather') !== -1) {
 		weath();
 		setTimeout(function() {
-			var wText = state.weather
+			var wText = state.weather;
 			sendChat('', "&{template:5eDefault} {{title=Nature}} {{showclassactions=1}} " + wText);
-		}, 100)
+		}, 100);
 	}
 	if(msg.type == "api" && msgTxt.indexOf('!now') !== -1) {
-		cText = state.world;
-		wText = state.weather;
+		var cText = state.world;
+		var wText = state.weather;
 		sendChat('', cText + wText);
 	}
 });
@@ -81,19 +84,17 @@ function weath() {
 			var cRare = 5;
 			var cRain = 10;
 			var cDust = 20;
-			var Calm = 100;
 			//---find temp
 			var rN = Math.floor(Math.random() * 30) - 15;
-			var tChange = rN;
 			var TempBase = (opts.Base + rN + oTerrainNum);
 			if(oHourNum >= 19 || oHourNum <= 7) TempBase = TempBase - 15;
 			var TempBaseReal = TempBase;
 			if(TempBase <= 10) {
-				var TempBase = TempBase + "F (Exposer Warning!)";
+				TempBase = TempBase + "F (Exposer Warning!)";
 			} else if(TempBase >= 90) {
-				var TempBase = TempBase + "F (Heat Warning!)";
+				TempBase = TempBase + "F (Heat Warning!)";
 			} else {
-				var TempBase = TempBase + "F ";
+				TempBase = TempBase + "F ";
 			}
 			//----------
 			var ranType = randomInteger(100);
@@ -121,7 +122,7 @@ function weath() {
 			});
 		}
 	});
-};
+}
 //-------TIME FUNCTION
 function time(HourT) {
 	var nHour = parseInt(HourT);
@@ -185,7 +186,7 @@ function time(HourT) {
 		MonthChat.set('current', 1);
 		YearChat.set('current', YearNum + 1);
 	}
-	wText = "";
+	var wText = "";
 	var cWeather = randomInteger(8);
 	if(cWeather == 1) {
 		weath();
