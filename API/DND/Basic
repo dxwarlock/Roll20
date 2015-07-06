@@ -4,7 +4,7 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 on("ready", function() {
     if(state.bloodlist == undefined) state.bloodlist = [];
     var currentTime = new Date();
-    var hours = currentTime.getHours()+1;
+    var hours = currentTime.getHours() + 1;
     var minutes = currentTime.getMinutes();
     if(minutes < 10) minutes = "0" + minutes;
     var time = hours + ":" + minutes;
@@ -18,14 +18,16 @@ on("change:player:_online", function(obj) {
     var name = obj.get("_displayname");
     if(obj.get("_online") == true) {
         setTimeout(funcOn, 8000);
+
         function funcOn() {
-        sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello "+name+"}} {{emote=" + name + " joined}}");
+            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello " + name + "}} {{emote=" + name + " joined}}");
         }
     }
-        if(obj.get("_online") == false) {
+    if(obj.get("_online") == false) {
         setTimeout(funcOff, 500);
+
         function funcOff() {
-        sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye "+name+"}} {{emote=" + name + " left}}");
+            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye " + name + "}} {{emote=" + name + " left}}");
         }
     }
 });
@@ -37,9 +39,17 @@ on("change:token", function(o) {
         var oCharacter = getObj('character', o.get("_represents"));
         var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
         if(type == 'Player') {
-            var PC = findObjs({_type: 'character'})[0];
-            var EX = findObjs({name: "exhaustion_level",_type: "attribute",_characterid: PC.id}, {caseInsensitive: true})[0];
-            if (EX == undefined) return;
+            var PC = findObjs({
+                _type: 'character'
+            })[0];
+            var EX = findObjs({
+                name: "exhaustion_level",
+                _type: "attribute",
+                _characterid: PC.id
+            }, {
+                caseInsensitive: true
+            })[0];
+            if(EX == undefined) return;
             var cur = EX.get("current");
             o.set("status_brown", cur);
         }
@@ -64,6 +74,29 @@ on("change:graphic", function(obj, prev) {
             degs = degs - degs % 1;
             if(degs > 360) degs = degs - 360;
             obj.set("rotation", degs);
+        }
+    }
+});
+/*------------------
+ANNOUNCE TURNS
+------------------*/
+on("change:campaign:turnorder", function(obj, prev) {
+    if(!Campaign().get("turnorder")) return;
+    var turn_order = JSON.parse(Campaign().get("turnorder"));
+    if(!turn_order.length) return;
+    var current_token = getObj("graphic", turn_order[0].id);
+    if(turn_order[0].pr == 100) {
+        sendChat('', "&{template:5eDefault} {{deathsave=1}} {{title=NEW ROUND}} {{emote=Roll Initiative}}");
+        return;
+    }
+    if(current_token != undefined) {
+        var oCharacter = getObj("character", current_token.get("represents"));
+        if(oCharacter != undefined) {
+            var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+            if(type == 'Player') {
+                var iName = getObj("graphic", current_token.id).get("name");
+                sendChat('', "&{template:5eDefault} {{title=Turn}} {{emote=" + iName + "}}");
+            }
         }
     }
 });
