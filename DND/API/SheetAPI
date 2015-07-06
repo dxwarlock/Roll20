@@ -193,10 +193,14 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM getAttrByName brPa
       var isNPC = getAttrByName(represent, 'is_npc', 'current');
       if(isNPC === 1) {
         rollCharacterHp(represent, function(total, average, formula) {
-          if (average > total) total = average;
+          var adjust = "";
+          if (average > total) {
+            total = average;
+            adjust = "<br>(adjusted)";
+          }
           token.set(barTokenName + '_value', total);
           token.set(barTokenName + '_max', total);
-          var message = 'HP (' + formula + ') | average: ' + average + ' | rolled: ' + total;
+          var message = 'HP (' + formula + ') | average: ' + average + ' | rolled: ' + total + "" + adjust;
           sendChat('GM', '/w gm ' + message);
         });
       }
