@@ -3,26 +3,56 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 ---CLOUD9 ERROR CLEARING---
 */
 /*------------------
-Aura 0.35 - DXWarlock - Roll20
+Aura 0.4 - DXWarlock - Roll20
 ------------------*/
 on("ready", function() {
-    state.auraColorOn = true; //global on or off
-    state.auraBar = "bar1"; //bar to use
-    state.auraTint = false; //use tint instead?
-    state.auraPerc = 50; //precent to start showing
-    state.auraDead = true; //show dead X status
-    log("Token Health Aura/Tint v 0.3 Ready");
+    if (state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
+    if (state.auraBar == undefined) state.auraBar = "bar1"; //bar to use
+    if (state.auraTint == undefined) state.auraTint = false; //use tint instead?
+    if (state.auraPerc == undefined) state.auraPerc = 100; //precent to start showing
+    if (state.auraDead == undefined) state.auraDead = true; //show dead X status
+    if (state.auraversion == undefined) state.auraversion = "v0.4";
+    log("Token Health Aura/Tint " +state.auraversion+ " Ready");
 });
 on("chat:message", function(msg) {
     var msgFormula = msg.content.split(/\s+/);
     var command = msgFormula[0].toUpperCase();
     if(msg.type == "api" && command.indexOf("!AURA") !== -1) {
         var option = msgFormula[1];
-        if(option == "--help") {
-            sendChat('API', "/w GM " + "<br>Bar:<br>[" + state.auraBar + "](!attackroll)" + "<br>Use Tint:<br>[" + state.auraTint + "](!attackroll)" + "<br>Percentage:<br>[" + state.auraPerc + "](!attackroll)" + "<br>Is on:<br>[" + state.auraColorOn + "](!attackroll)" + "<br>Show Death:<br>[" + state.auraDead + "](!attackroll)");
+        if(option == undefined) {
+            aurahelp();
+        }
+        if(option == "--On") {
+            state.auraColorOn = !state.auraColorOn;
+            aurahelp();
+        }
+        if(option == "--bar") {
+            state.auraBar = "bar" + msgFormula[2];
+            aurahelp();
+        }
+        if(option == "--tint") {
+            state.auraTint = !state.auraTint;
+            aurahelp();
+        }
+        if(option == "--perc") {
+            state.auraPerc = parseInt(msgFormula[2], 10);
+            aurahelp();
+        }
+        if(option == "--dead") {
+            state.auraDead = !state.auraDead;
+            aurahelp();
         }
     }
 });
+function aurahelp() {
+    sendChat('HealthColors', "/w GM " +
+    "<br>Click buttons to toggle:" +
+    "<br>Is on:[" + state.auraColorOn + "](!aura --On)" +
+    "<br>Bar:[" + state.auraBar + "](!aura --bar ?{BarNumber?|1})" +
+    "<br>Use Tint:[" + state.auraTint + "](!aura --tint)" +
+    "<br>Percentage:[" + state.auraPerc + "](!aura --perc ?{Percent?|90})" +
+    "<br>Show Death:[" + state.auraDead + "](!aura --dead)");
+}
 on("change:token", function(obj) {
     var bar = state.auraBar;
     var tint = state.auraTint;
