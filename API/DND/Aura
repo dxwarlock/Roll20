@@ -3,7 +3,7 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 ---CLOUD9 ERROR CLEARING---
 */
 /*------------------
-Aura 0.4 - DXWarlock - Roll20
+Aura 0.5 - DXWarlock - Roll20
 ------------------*/
 on("ready", function() {
     if(state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
@@ -11,7 +11,11 @@ on("ready", function() {
     if(state.auraTint == undefined) state.auraTint = false; //use tint instead?
     if(state.auraPerc == undefined) state.auraPerc = 100; //precent to start showing
     if(state.auraDead == undefined) state.auraDead = true; //show dead X status
-    if(state.auraversion == undefined) state.auraversion = "v0.4";
+    var auraversion = "v0.5";
+    if(state.auraversion != auraversion) {
+        state.auraversion = auraversion;
+        log("Updating HealthColors to " + state.auraversion);
+    }
     log("Token Health Aura/Tint " + state.auraversion + " Ready");
 });
 on("chat:message", function(msg) {
@@ -24,7 +28,6 @@ on("chat:message", function(msg) {
         }
         if(option == "on") {
             state.auraColorOn = !state.auraColorOn;
-            log(state.auraColorOn);
             aurahelp();
         }
         if(option == "bar") {
