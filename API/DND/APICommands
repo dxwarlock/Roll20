@@ -63,7 +63,7 @@ on("chat:message", function(msg) {
             break;
         case "!RESET":
             if(!Campaign().get("turnorder")) return;
-            Campaign().set("turnorder", '');
+            Campaign().set("turnorder", '[]');
             sendChat('', '/desc Turns Reset!');
             break;
             /*TABLE--------*/

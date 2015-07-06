@@ -1,14 +1,10 @@
 /*
 global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
----CLOUD9 ERROR CLEARING---
 */
-/*------------------
-DXWarlock - Roll20
-------------------*/
 on("ready", function() {
     if(state.bloodlist == undefined) state.bloodlist = [];
     var currentTime = new Date();
-    var hours = currentTime.getHours();
+    var hours = currentTime.getHours()+1;
     var minutes = currentTime.getMinutes();
     if(minutes < 10) minutes = "0" + minutes;
     var time = hours + ":" + minutes;
@@ -16,13 +12,26 @@ on("ready", function() {
     sendChat('API', "/w GM &{template:5eDefault} {{showclassactions=1}} {{save=1}} {{title=API STARTED}} {{Time=" + time + "}}");
 });
 on("change:player:_online", function(obj) {
-    log(obj);
+    var name = obj.get("_displayname");
+    if(obj.get("_online") == true) {
+        setTimeout(funcOn, 8000);
+        function funcOn() {
+        sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello "+name+"}} {{emote=" + name + " joined}}");
+        }   
+    }
+        if(obj.get("_online") == false) {
+        setTimeout(funcOff, 500);
+        function funcOff() {
+        sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye "+name+"}} {{emote=" + name + " left}}");
+        }     
+    }
 });
 /*------------------
 Rotate
 ------------------*/
 on("change:graphic", function(obj, prev) {
-    if(Campaign().get("turnorder") == "[]") return;
+    log(Campaign().get("turnorder"));
+    if(Campaign().get("turnorder") == "[]" || Campaign().get("turnorder") == "") return;
     var degs;
     if(obj.get("left") != prev.left || obj.get("top") != prev.top) {
         if(obj.get("layer") == "objects") {
