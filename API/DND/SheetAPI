@@ -193,9 +193,9 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM getAttrByName brPa
       if(isNPC === 1) {
         rollCharacterHp(represent, function(total, average, formula) {
           var adjust = "";
-          if (average > total) {
+          if(average > total) {
+            adjust = "<br>(adjusted from " + total + ")";
             total = average;
-            adjust = "<br>(adjusted)";
           }
           token.set(barTokenName + '_value', total);
           token.set(barTokenName + '_max', total);
@@ -204,7 +204,6 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM getAttrByName brPa
         });
       }
     }
-    log('Still working after trying to roll hp');
   };
 
   function rollCharacterHp(id, callback) {
