@@ -1,4 +1,10 @@
-/*global gmC state on myrolls obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger*/
+/*
+global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+---CLOUD9 ERROR CLEARING---
+*/
+/*------------------
+DXWarlock - Roll20
+------------------*/
 //-----COMMANDS--------
 on("chat:message", function(msg) {
     if(msg.type != "api") return;
@@ -51,7 +57,6 @@ on("chat:message", function(msg) {
             break;
         case "!RESET":
             if(!Campaign().get("turnorder")) return;
-            var turn_order = JSON.parse(Campaign().get("turnorder"));
             Campaign().set("turnorder", '');
             sendChat('', '/desc Turns Reset!');
             break;
