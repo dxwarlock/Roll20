@@ -1,5 +1,5 @@
 /*------------------
-Aura 0.35 - DXWarlock - Roll20
+Aura 0.35 - DXWarlock - Roll20 -
 ------------------*/
 on("ready", function() {
     state.auraColorOn = true; //global on or off
