@@ -1,0 +1,38 @@
+/*
+global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+*/
+on("ready", function() {
+    if(state.bloodlist == undefined) state.bloodlist = [];
+    var currentTime = new Date();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    if(minutes < 10) minutes = "0" + minutes;
+    var time = hours + ":" + minutes;
+    log("----------------------");
+    sendChat('API', "/w GM &{template:5eDefault} {{showclassactions=1}} {{save=1}} {{title=API STARTED}} {{Time=" + time + "}}");
+});
+on("change:player:_online", function(obj) {
+    log(obj);
+});
+/*------------------
+Rotate
+------------------*/
+on("change:graphic", function(obj, prev) {
+    if(Campaign().get("turnorder") == "[]") return;
+    var degs;
+    if(obj.get("left") != prev.left || obj.get("top") != prev.top) {
+        if(obj.get("layer") == "objects") {
+            var movex = obj.get("left") - prev.left;
+            var movey = obj.get("top") - prev.top;
+            if(movey != 0) {
+                degs = Math.atan(movex / movey) * 57.29577;
+                if(movey < 0) degs = 360 - degs % 360;
+                else degs = 180 - degs % 360;
+            } else if(movex < 0) degs = 270;
+            else degs = 90;
+            degs = degs - degs % 1;
+            if(degs > 360) degs = degs - 360;
+            obj.set("rotation", degs);
+        }
+    }
+});
