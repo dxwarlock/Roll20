@@ -11,26 +11,44 @@ on("ready", function() {
     log("----------------------");
     sendChat('API', "/w GM &{template:5eDefault} {{showclassactions=1}} {{save=1}} {{title=API STARTED}} {{Time=" + time + "}}");
 });
+/*------------------
+ANNOUNCE ONLINE
+------------------*/
 on("change:player:_online", function(obj) {
     var name = obj.get("_displayname");
     if(obj.get("_online") == true) {
         setTimeout(funcOn, 8000);
         function funcOn() {
         sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello "+name+"}} {{emote=" + name + " joined}}");
-        }   
+        }
     }
         if(obj.get("_online") == false) {
         setTimeout(funcOff, 500);
         function funcOff() {
         sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye "+name+"}} {{emote=" + name + " left}}");
-        }     
+        }
     }
 });
 /*------------------
-Rotate
+EXHAUSTION LEVEL
+------------------*/
+on("change:token", function(o) {
+    if(o.get("represents") !== "") {
+        var oCharacter = getObj('character', o.get("_represents"));
+        var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+        if(type == 'Player') {
+            var PC = findObjs({_type: 'character'})[0];
+            var EX = findObjs({name: "exhaustion_level",_type: "attribute",_characterid: PC.id}, {caseInsensitive: true})[0];
+            if (EX == undefined) return;
+            var cur = EX.get("current");
+            o.set("status_brown", cur);
+        }
+    }
+});
+/*------------------
+ROTATE
 ------------------*/
 on("change:graphic", function(obj, prev) {
-    log(Campaign().get("turnorder"));
     if(Campaign().get("turnorder") == "[]" || Campaign().get("turnorder") == "") return;
     var degs;
     if(obj.get("left") != prev.left || obj.get("top") != prev.top) {
