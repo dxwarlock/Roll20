@@ -17,18 +17,14 @@ ANNOUNCE ONLINE
 on("change:player:_online", function(obj) {
     var name = obj.get("_displayname");
     if(obj.get("_online") == true) {
-        setTimeout(funcOn, 8000);
-
-        function funcOn() {
-            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello " + name + "}} {{emote=" + name + " joined}}");
-        }
+        setTimeout(function() {
+            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello " + name + "}} {{emote=" + name + " joined}}")
+        }, 5000);
     }
     if(obj.get("_online") == false) {
-        setTimeout(funcOff, 500);
-
-        function funcOff() {
-            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye " + name + "}} {{emote=" + name + " left}}");
-        }
+        setTimeout(function() {
+            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye " + name + "}} {{emote=" + name + " left}}")
+        }, 500);
     }
 });
 /*------------------
@@ -84,12 +80,20 @@ on("change:campaign:turnorder", function(obj, prev) {
     if(!Campaign().get("turnorder")) return;
     var turn_order = JSON.parse(Campaign().get("turnorder"));
     if(!turn_order.length) return;
+    var check = _.find(turn_order, function(obj) {
+        return obj.id == '-1'
+    })
     var current_token = getObj("graphic", turn_order[0].id);
-    if(turn_order[0].pr == 100) {
+    if(turn_order[0].pr == 0.001) {
         sendChat('', "&{template:5eDefault} {{deathsave=1}} {{title=NEW ROUND}} {{emote=Roll Initiative}}");
+        Campaign().set("turnorder", '[]');
         return;
     }
-    if(current_token != undefined) {
+    if(JSON.parse(prev.turnorder)[0] != undefined) {
+        var first = JSON.parse(prev.turnorder)[0].id;
+        var second = turn_order[0].id;
+    }
+    if(current_token != undefined && check != undefined && first != second) {
         var oCharacter = getObj("character", current_token.get("represents"));
         if(oCharacter != undefined) {
             var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';

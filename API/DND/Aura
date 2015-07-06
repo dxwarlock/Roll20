@@ -6,13 +6,13 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 Aura 0.4 - DXWarlock - Roll20
 ------------------*/
 on("ready", function() {
-    if (state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
-    if (state.auraBar == undefined) state.auraBar = "bar1"; //bar to use
-    if (state.auraTint == undefined) state.auraTint = false; //use tint instead?
-    if (state.auraPerc == undefined) state.auraPerc = 100; //precent to start showing
-    if (state.auraDead == undefined) state.auraDead = true; //show dead X status
-    if (state.auraversion == undefined) state.auraversion = "v0.4";
-    log("Token Health Aura/Tint " +state.auraversion+ " Ready");
+    if(state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
+    if(state.auraBar == undefined) state.auraBar = "bar1"; //bar to use
+    if(state.auraTint == undefined) state.auraTint = false; //use tint instead?
+    if(state.auraPerc == undefined) state.auraPerc = 100; //precent to start showing
+    if(state.auraDead == undefined) state.auraDead = true; //show dead X status
+    if(state.auraversion == undefined) state.auraversion = "v0.4";
+    log("Token Health Aura/Tint " + state.auraversion + " Ready");
 });
 on("chat:message", function(msg) {
     var msgFormula = msg.content.split(/\s+/);
@@ -22,36 +22,34 @@ on("chat:message", function(msg) {
         if(option == undefined) {
             aurahelp();
         }
-        if(option == "--On") {
+        if(option == "on") {
             state.auraColorOn = !state.auraColorOn;
+            log(state.auraColorOn);
             aurahelp();
         }
-        if(option == "--bar") {
+        if(option == "bar") {
             state.auraBar = "bar" + msgFormula[2];
             aurahelp();
         }
-        if(option == "--tint") {
+        if(option == "tint") {
             state.auraTint = !state.auraTint;
             aurahelp();
         }
-        if(option == "--perc") {
+        if(option == "perc") {
             state.auraPerc = parseInt(msgFormula[2], 10);
             aurahelp();
         }
-        if(option == "--dead") {
+        if(option == "dead") {
             state.auraDead = !state.auraDead;
             aurahelp();
         }
     }
 });
+
 function aurahelp() {
-    sendChat('HealthColors', "/w GM " +
-    "<br>Click buttons to toggle:" +
-    "<br>Is on:[" + state.auraColorOn + "](!aura --On)" +
-    "<br>Bar:[" + state.auraBar + "](!aura --bar ?{BarNumber?|1})" +
-    "<br>Use Tint:[" + state.auraTint + "](!aura --tint)" +
-    "<br>Percentage:[" + state.auraPerc + "](!aura --perc ?{Percent?|90})" +
-    "<br>Show Death:[" + state.auraDead + "](!aura --dead)");
+    var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
+    var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
+    sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + 'Is On: <a href="!aura on">' + state.auraColorOn + '</a><br>' + 'Bar: <a href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' + 'Use Tint: <a href="!aura tint">' + state.auraTint + '</a><br>' + 'Percentage: <a href="!aura perc ?{Percent?|90}">' + state.auraPerc + '</a><br>' + 'Show Dead: <a href="!aura dead">' + state.auraDead + '</a></div>');
 }
 on("change:token", function(obj) {
     var bar = state.auraBar;
