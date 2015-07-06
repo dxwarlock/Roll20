@@ -1,5 +1,5 @@
 /*
-global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
+global myrolls log sort gmC state on obj getObj iPart _ playerIsGM brPart RollRight formatNumber findObjs sendChat CONFIG lPart fPart gm_img gPart greenC redC grayC OuterDiv Campaign randomFromTo createObj fixNO toFront randomInteger
 ---CLOUD9 ERROR CLEARING---
 */
 /*------------------
@@ -53,7 +53,13 @@ on("chat:message", function(msg) {
             break;
         case "!SORT":
             var turnorder = JSON.parse(Campaign().get("turnorder"));
+            turnorder.unshift({
+                "id": '-1',
+                "pr": 100,
+                "custom": "StartRound"
+            });
             sort(turnorder);
+            sendChat('', '/desc Turns Set!');
             break;
         case "!RESET":
             if(!Campaign().get("turnorder")) return;
@@ -64,7 +70,6 @@ on("chat:message", function(msg) {
         case "!TABLE":
             var tablelink = msgFormula[1];
             sendChat("NoOne", "/roll 1t[" + tablelink + "]", function(ops) {
-                var tablelink = msgFormula[1];
                 var rollresult = JSON.parse(ops[0].content);
                 var loc = rollresult.rolls[0].results[0].tableItem.name;
                 var loot1 = loc.split(" ");
@@ -110,7 +115,7 @@ on("chat:message", function(msg) {
                 return;
             }
             var XP = oC.get("current");
-            var total = parseInt(nXp) + parseInt(XP);
+            var total = parseInt(nXp, 10) + parseInt(XP, 10);
             oC.set('current', total);
             sendChat('', "&{template:5eDefault} {{title=XP}} {{showclassactions=1}} {{show_character_name=1}} {{character_name=" + msg.who + "}}  {{Gained=<b>" + nXp + "}} {{Total=<b>" + total + "}}");
             break;
