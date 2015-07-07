@@ -160,7 +160,7 @@ var AuraFunctions = AuraFunctions || {
             //--
             'GM Sees NPC Names: <a '+style+'background-color:'+( state.GM_NPCNames != true ? off : "")+';" href="!aura gmnpc">' +(state.GM_NPCNames != true ? "No" : "Yes")+'</a><br>' +
             //--
-            'GM Sees PC Names: <a '+style+'background-color:'+(state.GM_PCNames != true ? off : "")+';" href="!aura gmpc">'+(state.GM_PCName != true ? "No" : "Yes")+ '</a><br>' +
+            'GM Sees PC Names: <a '+style+'background-color:'+(state.GM_PCNames != true ? off : "")+';" href="!aura gmpc">'+(state.GM_PCNames != true ? "No" : "Yes")+ '</a><br>' +
             //--
             '<hr>'+
             //--
