@@ -183,7 +183,7 @@ var AuraFunctions = AuraFunctions || {
         }
     },
     setState: function() {
-        var auraversion = "v0.6";
+        var auraversion = "v0.7";
         if(state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
         if(state.auraBar == undefined) state.auraBar = "bar1"; //bar to use
         if(state.auraTint == undefined) state.auraTint = false; //use tint instead?
@@ -193,8 +193,7 @@ var AuraFunctions = AuraFunctions || {
         if(state.NPCNames == undefined) state.NPCNames = true; //show players NPC Names?
         if(state.GM_PCNames == undefined) state.GM_PCNames = true; //show GM PC names?
         if(state.PCNames == undefined) state.PCNames = true; //show players PC Names?
-        if(state.PCNames == undefined)
-            if(state.auraversion != auraversion || state.auraversion == undefined) {
+            if(state.auraversion != auraversion) {
                 state.auraversion = auraversion;
                 log("Updating HealthColors to " + state.auraversion);
             }
