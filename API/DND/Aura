@@ -146,30 +146,29 @@ var AuraFunctions = AuraFunctions || {
         var off = "#A84D4D";
         sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.auraversion +
             //--
-            '</u><br>Is On: <a '+style+'background-color:'+(state.auraColorOn != true ? off : "")+';" href="!aura on">'+(state.auraColorOn != true ?"No" : "Yes")+'</a><br>' +
+            '</u><br>Is On: <a ' + style + 'background-color:' + (state.auraColorOn != true ? off : "") + ';" href="!aura on">' + (state.auraColorOn != true ? "No" : "Yes") + '</a><br>' +
             //--
-            'Bar: <a '+style+'" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' +
+            'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' +
             //--
-            'Use Tint: <a '+style+'background-color:'+(state.auraTint != true ? off : "")+';" href="!aura tint">'+(state.auraTint != true ? "No" : "Yes")+'</a><br>' +
+            'Use Tint: <a ' + style + 'background-color:' + (state.auraTint != true ? off : "") + ';" href="!aura tint">' + (state.auraTint != true ? "No" : "Yes") + '</a><br>' +
             //--
-            'Percentage: <a '+style+'" href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' +
+            'Percentage: <a ' + style + '" href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' +
             //--
-            'Show Dead: <a '+style+'background-color:'+(state.auraDead != true ? off : "")+';" href="!aura dead">'+(state.auraDead != true ? "No" : "Yes")+'</a>'+
+            'Show Dead: <a ' + style + 'background-color:' + (state.auraDead != true ? off : "") + ';" href="!aura dead">' + (state.auraDead != true ? "No" : "Yes") + '</a>' +
             //--
-            '<hr>'+
+            '<hr>' +
             //--
-            'GM Sees NPC Names: <a '+style+'background-color:'+( state.GM_NPCNames != true ? off : "")+';" href="!aura gmnpc">' +(state.GM_NPCNames != true ? "No" : "Yes")+'</a><br>' +
+            'GM Sees NPC Names: <a ' + style + 'background-color:' + (state.GM_NPCNames != true ? off : "") + ';" href="!aura gmnpc">' + (state.GM_NPCNames != true ? "No" : "Yes") + '</a><br>' +
             //--
-            'GM Sees PC Names: <a '+style+'background-color:'+(state.GM_PCNames != true ? off : "")+';" href="!aura gmpc">'+(state.GM_PCNames != true ? "No" : "Yes")+ '</a><br>' +
+            'GM Sees PC Names: <a ' + style + 'background-color:' + (state.GM_PCNames != true ? off : "") + ';" href="!aura gmpc">' + (state.GM_PCNames != true ? "No" : "Yes") + '</a><br>' +
             //--
-            '<hr>'+
+            '<hr>' +
             //--
-            'PC Sees NPC Names: <a '+style+'background-color:'+(state.NPCNames != true ? off : "")+';" href="!aura pcnpc">' +(state.NPCNames != true ? "No" : "Yes")+ '</a><br>' +
+            'PC Sees NPC Names: <a ' + style + 'background-color:' + (state.NPCNames != true ? off : "") + ';" href="!aura pcnpc">' + (state.NPCNames != true ? "No" : "Yes") + '</a><br>' +
             //--
-            'PC Sees PC Names: <a '+style+'background-color:'+(state.PCNames != true ? off : "")+';" href="!aura pcpc">' +(state.PCNames != true ? "No" : "Yes")+ '</a><br>'+
+            'PC Sees PC Names: <a ' + style + 'background-color:' + (state.PCNames != true ? off : "") + ';" href="!aura pcpc">' + (state.PCNames != true ? "No" : "Yes") + '</a><br>' +
             //--
             '</div>');
-
     },
     SetAuraNone: function(obj) {
         var tint = state.auraTint;
@@ -195,10 +194,10 @@ var AuraFunctions = AuraFunctions || {
         if(state.NPCNames == undefined) state.NPCNames = true; //show players NPC Names?
         if(state.GM_PCNames == undefined) state.GM_PCNames = true; //show GM PC names?
         if(state.PCNames == undefined) state.PCNames = true; //show players PC Names?
-            if(state.auraversion != auraversion) {
-                state.auraversion = auraversion;
-                log("Updating HealthColors to " + state.auraversion);
-            }
+        if(state.auraversion != auraversion) {
+            state.auraversion = auraversion;
+            log("Updating HealthColors to " + state.auraversion);
+        }
         log("Token Health Aura/Tint " + state.auraversion + " Ready");
     },
     newColor: function(ratio) {
