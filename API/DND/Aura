@@ -156,15 +156,15 @@ var AuraFunctions = AuraFunctions || {
             //--
             '<hr>'+
             //--
-            'GM See NPC Names: <a href="!aura gmnpc">' + state.GM_NPCNames + '</a><br>' +
+            'GM Sees NPC Names: <a href="!aura gmnpc">' + state.GM_NPCNames + '</a><br>' +
             //--
-            'GM See PC Names: <a href="!aura gmpc">' + state.GM_PCNames + '</a><br>' +
+            'GM Sees PC Names: <a href="!aura gmpc">' + state.GM_PCNames + '</a><br>' +
             //--
             '<hr>'+
             //--
-            'PC See NPC Names: <a href="!aura pcnpc">' + state.NPCNames + '</a><br>' +
+            'PC Sees NPC Names: <a href="!aura pcnpc">' + state.NPCNames + '</a><br>' +
             //--
-            'PC See PC Names: <a href="!aura pcpc">' + state.PCNames + '</a><br>'+
+            'PC Sees PC Names: <a href="!aura pcpc">' + state.PCNames + '</a><br>'+
             //--
             '</div>');
 
