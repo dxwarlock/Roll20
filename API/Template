@@ -10,24 +10,9 @@ var NAME = NAME || (function() {
                     version: schemaVersion
                 };
             }
-        },
-        handleInput = function(msg) {
-            var args;
-            if(msg.type !== "api") {
-                return;
-            }
-            args = msg.content.split(/\s+/);
-            switch(args[0]) {
-                case '!NAME':
-                    break;
-            }
-        },
-        registerEventHandlers = function() {
-            on('chat:message', handleInput);
         };
     return {
         CheckInstall: checkInstall,
-        RegisterEventHandlers: registerEventHandlers
     };
 }());
 on('ready', function() {
