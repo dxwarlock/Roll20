@@ -100,8 +100,6 @@ on("change:token", function(obj) {
                         'aura2_color': pColor,
                         'showplayers_aura1': true,
                         'showplayers_aura2': true,
-                        'showplayers_name': false,
-                        'showname': false
                     });
                 }
             }
@@ -124,8 +122,6 @@ on("change:token", function(obj) {
                     'aura2_color': '#ffffff',
                     'showplayers_aura1': true,
                     'showplayers_aura2': true,
-                    'showplayers_name': false,
-                    'showname': true
                 });
             }
         }
