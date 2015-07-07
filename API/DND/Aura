@@ -145,7 +145,7 @@ var AuraFunctions = AuraFunctions || {
         var style = 'style="border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 2px 2px 1px #707070;';
         var off = "#A84D4D";
         sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.auraversion +
-            //--            
+            //--
             '</u><br>Is On: <a '+style+'background-color:'+(state.auraColorOn != true ? off : "")+';" href="!aura on">' + state.auraColorOn + '</a><br>' +
             //--
             'Bar: <a '+style+'" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' +
@@ -185,7 +185,7 @@ var AuraFunctions = AuraFunctions || {
         }
     },
     setState: function() {
-        var auraversion = "v0.7";
+        var auraversion = "v0.8";
         if(state.auraColorOn == undefined) state.auraColorOn = true; //global on or off
         if(state.auraBar == undefined) state.auraBar = "bar1"; //bar to use
         if(state.auraTint == undefined) state.auraTint = false; //use tint instead?
