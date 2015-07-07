@@ -35,9 +35,7 @@ on("change:token", function(o) {
         var oCharacter = getObj('character', o.get("_represents"));
         var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
         if(type == 'Player') {
-            var PC = findObjs({
-                _type: 'character'
-            })[0];
+            var PC = getObj("character", o.get("represents"));
             var EX = findObjs({
                 name: "exhaustion_level",
                 _type: "attribute",
@@ -45,9 +43,20 @@ on("change:token", function(o) {
             }, {
                 caseInsensitive: true
             })[0];
-            if(EX == undefined) return;
-            var cur = EX.get("current");
-            o.set("status_brown", cur);
+            var cur = "";
+            if(EX == undefined) {
+                cur = 0
+            } else {
+                var cur = EX.get("current");
+            }
+            //o.set("status_brown", cur);
+            if(cur == 0) {
+                o.set("bar2_max", "");
+                o.set("bar2_value", "");
+            } else {
+                o.set("bar2_max", 6);
+                o.set("bar2_value", cur);
+            }
         }
     }
 });
