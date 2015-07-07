@@ -142,29 +142,30 @@ var AuraFunctions = AuraFunctions || {
     aurahelp: function() {
         var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
         var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
+        var style = 'style="border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 2px 2px 1px #707070;';
         sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.auraversion +
+            //--            
+            '</u><br>Is On: <a '+style+'" href="!aura on">' + state.auraColorOn + '</a><br>' +
             //--
-            '</u><br>Is On: <a href="!aura on">' + state.auraColorOn + '</a><br>' +
+            'Bar: <a '+style+'" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' +
             //--
-            'Bar: <a href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' +
+            'Use Tint: <a '+style+'" href="!aura tint">' + state.auraTint + '</a><br>' +
             //--
-            'Use Tint: <a href="!aura tint">' + state.auraTint + '</a><br>' +
+            'Percentage: <a '+style+'" href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' +
             //--
-            'Percentage: <a href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' +
-            //--
-            'Show Dead: <a href="!aura dead">' + state.auraDead + '</a>'+
-            //--
-            '<hr>'+
-            //--
-            'GM Sees NPC Names: <a href="!aura gmnpc">' + state.GM_NPCNames + '</a><br>' +
-            //--
-            'GM Sees PC Names: <a href="!aura gmpc">' + state.GM_PCNames + '</a><br>' +
+            'Show Dead: <a '+style+'" href="!aura dead">' + state.auraDead + '</a>'+
             //--
             '<hr>'+
             //--
-            'PC Sees NPC Names: <a href="!aura pcnpc">' + state.NPCNames + '</a><br>' +
+            'GM Sees NPC Names: <a '+style+'" href="!aura gmnpc">' + state.GM_NPCNames + '</a><br>' +
             //--
-            'PC Sees PC Names: <a href="!aura pcpc">' + state.PCNames + '</a><br>'+
+            'GM Sees PC Names: <a '+style+'" href="!aura gmpc">' + state.GM_PCNames + '</a><br>' +
+            //--
+            '<hr>'+
+            //--
+            'PC Sees NPC Names: <a '+style+'" href="!aura pcnpc">' + state.NPCNames + '</a><br>' +
+            //--
+            'PC Sees PC Names: <a '+style+'" href="!aura pcpc">' + state.PCNames + '</a><br>'+
             //--
             '</div>');
 
