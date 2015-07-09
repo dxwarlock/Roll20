@@ -251,7 +251,7 @@ var HealthColors = HealthColors || (function() {
             };
         },
         checkInstall = function() {
-            log('-=> HealthColors v' + version + ' <=-  [' + (new Date(lastUpdate * 1000)) + ']');
+            log('<HealthColors v' + version + ' Ready> [' + (new Date(lastUpdate * 1000)) + ']');
             if(!_.has(state, 'HealthColors') || state.HealthColors.version !== schemaVersion) {
                 log('  > Updating Schema to v' + schemaVersion + ' <');
                 state.HealthColors = {
