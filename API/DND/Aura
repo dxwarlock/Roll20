@@ -4,6 +4,8 @@ global log state on getObj _ playerIsGM sendChat
 */
 // By: DXWarlock
 //Script: Aura/Tint HealthColor
+//Roll20 Thread: https://app.roll20.net/forum/post/2139713/script-aura-slash-tint-healthcolor#post-2139713
+//Roll20 Contact: https://app.roll20.net/users/262130
 var HealthColors = HealthColors || (function() {
     'use strict';
     var version = '0.9.0',
