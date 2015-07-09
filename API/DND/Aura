@@ -9,7 +9,7 @@ global log state on getObj _ playerIsGM sendChat
 var HealthColors = HealthColors || (function() {
     'use strict';
     var version = '0.9.0',
-        lastUpdate = 1436408838,
+        lastUpdate = 1436473210,
         schemaVersion = 0.9,
         /*
         CHAT MESSAGE
