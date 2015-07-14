@@ -1,0 +1,38 @@
+/*
+global on _ playerIsGM sendChat
+---CLOUD9 ERROR CLEARING---
+*/
+// By: DXWarlock
+//Script: Greeting Message
+//Roll20 Thread: 
+//Roll20 Contact: https://app.roll20.net/users/262130
+var DXGREET = DXGREET || (function() {
+    'use strict';
+    var Greet = function(obj) {
+            var name = obj.get("_displayname");
+            var isGM = "";
+            if(playerIsGM(obj.id) === true) {
+                isGM = " [GM]";
+            }
+            if(obj.get("_online") == true) {
+                setTimeout(function() {
+                    sendChat('', "&{template:default} {{name=Hello " + name + "}} {{<small>Joined:=<small>" + name + isGM + "}}");
+                }, 3000);
+            }
+            if(obj.get("_online") == false) {
+                setTimeout(function() {
+                    sendChat('', "&{template:default} {{name=Goodbye " + name + "}} {{<small>Left:=<small>" + name + isGM + "}}");
+                }, 500);
+            }
+        },
+        registerEventHandlers = function() {
+            on('change:player:_online', Greet);
+        };
+    return {
+        RegisterEventHandlers: registerEventHandlers
+    };
+}());
+on('ready', function() {
+    'use strict';
+    DXGREET.RegisterEventHandlers();
+});
