@@ -3,9 +3,6 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 ---CLOUD9 ERROR CLEARING---
 */
 /*------------------
-DXWarlock - Roll20
-------------------*/
-/*------------------
 PAGE CHANGE
 ------------------*/
 on("change:campaign:playerpageid", function(obj, prev) {
@@ -16,6 +13,24 @@ on("change:campaign:playerpageid", function(obj, prev) {
 /*------------------
 Generic Functions
 ------------------*/
+function createOrder() {
+	var order = JSON.parse(Campaign().get("turnorder"));
+	order.unshift({
+		"id": '-1',
+		"pr": 0.001,
+		"custom": "ENDROUND"
+	});
+	var nOrd = order.sortByProp('pr');
+	Campaign().set("turnorder", JSON.stringify(nOrd));
+	var turnorder = JSON.parse(Campaign().get("turnorder"));
+	var iName2 = getObj("graphic", turnorder[0].id).get("name");
+	sendChat('', "&{template:5eDefault} {{title=Goes First!}} {{emote=" + iName2 + "}}");
+};
+Array.prototype.sortByProp = function(p) {
+	return this.sort(function(a, b) {
+		return(parseInt(a[p], 10) < parseInt(b[p], 10)) ? 1 : (parseInt(a[p], 10) > parseInt(b[p], 10)) ? -1 : 0;
+	});
+};
 //make number
 function formatNumber(num) {
 	return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
@@ -34,32 +49,6 @@ function RollRight(whoPC) {
 		controlledby: whoPC
 	})[0];
 	return character;
-}
-//find level
-function fLevel() {
-	var characters = findObjs({
-		_type: "character"
-	});
-	var chat = '';
-	var lTotal = 0;
-	var count = 0;
-	_.each(characters, function(id) {
-		var aa = id.get("inplayerjournals");
-		var aSet = findObjs({
-			_type: "attribute",
-			name: "Level",
-			_characterid: id.id
-		}, {
-			caseInsensitive: true
-		})[0];
-		if(aa == "all" && aSet !== undefined) {
-			var a2 = parseInt(aSet.get("current"));
-			count = count + 1;
-			lTotal = lTotal + a2;
-		}
-	});
-	lTotal = Math.round(lTotal / count);
-	return lTotal;
 }
 //parse loot
 function myrolls(loota) {
@@ -89,37 +78,6 @@ function MakeRollNum(cont, inline) {
 		return m.replace(k, v);
 	}, cont).value();
 };
-//-------------
-var CONFIG = [
-	{
-		barId: 1,
-		barRatioMax: 1.0,
-		barRatioMin: 0.5,
-		status: "green",
-		whenLow: true
-	},
-	{
-		barId: 1,
-		barRatioMax: 0.5,
-		barRatioMin: 0.25,
-		status: "yellow",
-		whenLow: true
-	},
-	{
-		barId: 1,
-		barRatioMax: 0.25,
-		barRatioMin: 0,
-		status: "brown",
-		whenLow: true
-	},
-	{
-		barId: 1,
-		barRatioMax: 0,
-		barRatioMin: -0.1,
-		status: "red",
-		whenLow: true
-	},
-	 ];
 /*------------------
 WEATHER STUFF
 ------------------*/

@@ -4,13 +4,8 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 on("ready", function() {
     if(state.bloodlist == undefined) state.bloodlist = [];
     var currentTime = new Date();
-    var new1 = (new Date(currentTime));
-    log(Math.floor(currentTime.getTime()/1000));
-    var hours = currentTime.getHours() + 1;
-    var minutes = currentTime.getMinutes();
-    if(minutes < 10) minutes = "0" + minutes;
-    var time = hours + ":" + minutes;
-    sendChat('API', "/w GM &{template:default} {{name=API STARTED}} {{<small>Time:=<small>" + new1 + "}}");
+    var timestamp = (new Date(currentTime));
+    sendChat('API', "/w GM &{template:default} {{name=API STARTED}} {{<small>Time:=<small>" + timestamp + "}}");
 });
 /*------------------
 EXHAUSTION LEVEL

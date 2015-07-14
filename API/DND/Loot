@@ -15,7 +15,7 @@ on("chat:message", function(msg) {
             while(x < times || x < 1) {
                 var rollresult = JSON.parse(ops[0].content);
                 var item = rollresult.rolls[0].results[x].tableItem.name;
-                tLOOT = tLOOT + "{{Item " + (x + 1) + "=" + item + "}}"
+                tLOOT = tLOOT + "{{Item " + (x + 1) + "=" + item + "}}";
                 x++;
             }
         });
