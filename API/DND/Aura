@@ -10,7 +10,7 @@ var HealthColors = HealthColors || (function() {
     'use strict';
     var version = '0.9.1',
         lastUpdate = 1436865948,
-        schemaVersion = 0.9,
+        schemaVersion = '0.9.1',
         /*
         CHAT MESSAGE
         */
