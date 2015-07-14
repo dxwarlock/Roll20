@@ -3,8 +3,8 @@ global on _ playerIsGM sendChat
 ---CLOUD9 ERROR CLEARING---
 */
 // By: DXWarlock
-//Script: Greeting Message
-//Roll20 Thread: 
+//Script: Simple Join/Part Greeter
+//Roll20 Thread:
 //Roll20 Contact: https://app.roll20.net/users/262130
 var DXGREET = DXGREET || (function() {
     'use strict';
