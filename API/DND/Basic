@@ -4,28 +4,13 @@ global myrolls log gmC state on obj getObj iPart _ playerIsGM brPart RollRight f
 on("ready", function() {
     if(state.bloodlist == undefined) state.bloodlist = [];
     var currentTime = new Date();
+    var new1 = (new Date(currentTime));
+    log(Math.floor(currentTime.getTime()/1000));
     var hours = currentTime.getHours() + 1;
     var minutes = currentTime.getMinutes();
     if(minutes < 10) minutes = "0" + minutes;
     var time = hours + ":" + minutes;
-    log("----------------------");
-    sendChat('API', "/w GM &{template:5eDefault} {{showclassactions=1}} {{save=1}} {{title=API STARTED}} {{Time=" + time + "}}");
-});
-/*------------------
-ANNOUNCE ONLINE
-------------------*/
-on("change:player:_online", function(obj) {
-    var name = obj.get("_displayname");
-    if(obj.get("_online") == true) {
-        setTimeout(function() {
-            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Hello " + name + "}} {{emote=" + name + " joined}}")
-        }, 5000);
-    }
-    if(obj.get("_online") == false) {
-        setTimeout(function() {
-            sendChat('API', "&{template:5eDefault} {{save=1}} {{title=Goodbye " + name + "}} {{emote=" + name + " left}}")
-        }, 500);
-    }
+    sendChat('API', "/w GM &{template:default} {{name=API STARTED}} {{<small>Time:=<small>" + new1 + "}}");
 });
 /*------------------
 EXHAUSTION LEVEL
@@ -45,9 +30,9 @@ on("change:token", function(o) {
             })[0];
             var cur = "";
             if(EX == undefined) {
-                cur = 0
+                cur = 0;
             } else {
-                var cur = EX.get("current");
+                cur = EX.get("current");
             }
             //o.set("status_brown", cur);
             if(cur == 0) {
@@ -90,8 +75,8 @@ on("change:campaign:turnorder", function(obj, prev) {
     var turn_order = JSON.parse(Campaign().get("turnorder"));
     if(!turn_order.length) return;
     var check = _.find(turn_order, function(obj) {
-        return obj.id == '-1'
-    })
+        return obj.id == '-1';
+    });
     var current_token = getObj("graphic", turn_order[0].id);
     if(turn_order[0].pr == 0.001) {
         sendChat('', "&{template:5eDefault} {{deathsave=1}} {{title=NEW ROUND}} {{emote=Roll Initiative}}");
