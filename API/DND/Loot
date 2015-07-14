@@ -18,13 +18,8 @@ on("chat:message", function(msg) {
                 tLOOT = tLOOT + "{{Item " + (x + 1) + "=" + item + "}}"
                 x++;
             }
-            chat(tLOOT);
         });
     }
-
-    function chat(msg) {
-        log(msg);
-    };
     if(msg.type == "api" && msgTxt.indexOf("!loot") !== -1) {
         var msgFormula = msgTxt.split(" ");
         //---------catch non players

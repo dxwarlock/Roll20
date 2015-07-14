@@ -8,8 +8,8 @@ global log state on getObj _ playerIsGM sendChat
 //Roll20 Contact: https://app.roll20.net/users/262130
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '0.9.0',
-        lastUpdate = 1436473210,
+    var version = '0.9.1',
+        lastUpdate = 1436865948,
         schemaVersion = 0.9,
         /*
         CHAT MESSAGE
@@ -42,6 +42,14 @@ var HealthColors = HealthColors || (function() {
                             break;
                         case "PERC":
                             state.auraPerc = parseInt(msgFormula[2], 10);
+                            aurahelp();
+                            break;
+                        case "PC":
+                            state.PCAura = !state.PCAura;
+                            aurahelp();
+                            break;
+                        case "NPC":
+                            state.NPCAura = !state.NPCAura;
                             aurahelp();
                             break;
                         case "GMNPC":
@@ -98,6 +106,7 @@ var HealthColors = HealthColors || (function() {
                 var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
                 //SET PLAYER AURA------------
                 if(type == 'Player') {
+                    if(state.PCAura === false) return;
                     if(percReal > onPerc) {
                         SetAuraNone(obj);
                         return;
@@ -126,6 +135,7 @@ var HealthColors = HealthColors || (function() {
                 }
                 //SET NPC AURA------------
                 if(type == 'Monster') {
+                    if(state.NPCAura === false) return;
                     if(percReal > onPerc) {
                         SetAuraNone(obj);
                         return;
@@ -157,12 +167,14 @@ var HealthColors = HealthColors || (function() {
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="text-align:center; width: 35px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
-            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.HealthColors.version +//--
+            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.HealthColors.version + //--
                 '</u><br>Is On: <a ' + style + 'background-color:' + (state.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' + //--
                 'Use Tint: <a ' + style + 'background-color:' + (state.auraTint !== true ? off : "") + ';" href="!aura tint">' + (state.auraTint !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Percentage: <a ' + style + '" href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' + //--
-                'Show Dead: <a ' + style + 'background-color:' + (state.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.auraDead !== true ? "No" : "Yes") + '</a>' + //--
+                'Show Dead: <a ' + style + 'background-color:' + (state.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Show PC: <a ' + style + 'background-color:' + (state.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Show NPC: <a ' + style + 'background-color:' + (state.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.NPCAura !== true ? "No" : "Yes") + '</a>' + //--
                 '<hr>' + //--
                 'GM Sees NPC Names: <a ' + style + 'background-color:' + (state.GM_NPCNames !== true ? off : "") + ';" href="!aura gmnpc">' + (state.GM_NPCNames !== true ? "No" : "Yes") + '</a><br>' + //--
                 'GM Sees PC Names: <a ' + style + 'background-color:' + (state.GM_PCNames !== true ? off : "") + ';" href="!aura gmpc">' + (state.GM_PCNames !== true ? "No" : "Yes") + '</a><br>' + //--
@@ -183,17 +195,6 @@ var HealthColors = HealthColors || (function() {
                     'aura2_color': "",
                 });
             }
-        },
-        setState = function() {
-            if(!state.auraColorOn) state.auraColorOn = true; //global on or off
-            if(!state.auraBar) state.auraBar = "bar1"; //bar to use
-            if(!state.auraTint) state.auraTint = false; //use tint instead?
-            if(!state.auraPerc) state.auraPerc = 100; //precent to start showing
-            if(!state.auraDead) state.auraDead = true; //show dead X status
-            if(!state.GM_NPCNames) state.GM_NPCNames = true; //show GM NPC names?
-            if(!state.NPCNames) state.NPCNames = true; //show players NPC Names?
-            if(!state.GM_PCNames) state.GM_PCNames = true; //show GM PC names?
-            if(!state.PCNames) state.PCNames = true; //show players PC Names?
         },
         newColor = function(ratio) {
             var color = hsl2rgb(ratio, 100, 50);
@@ -258,6 +259,17 @@ var HealthColors = HealthColors || (function() {
                     version: schemaVersion
                 };
             }
+            if(!state.auraColorOn) state.auraColorOn = true; //global on or off
+            if(!state.auraBar) state.auraBar = "bar1"; //bar to use
+            if(!state.PCAura) state.PCAura = true; //show players Health?
+            if(!state.NPCAura) state.NPCAura = true; //show NPC Health?
+            if(!state.auraTint) state.auraTint = false; //use tint instead?
+            if(!state.auraPerc) state.auraPerc = 100; //precent to start showing
+            if(!state.auraDead) state.auraDead = true; //show dead X status
+            if(!state.GM_NPCNames) state.GM_NPCNames = true; //show GM NPC names?
+            if(!state.NPCNames) state.NPCNames = true; //show players NPC Names?
+            if(!state.GM_PCNames) state.GM_PCNames = true; //show GM PC names?
+            if(!state.PCNames) state.PCNames = true; //show players PC Names?
         },
         registerEventHandlers = function() {
             on('chat:message', handleInput);
@@ -267,7 +279,6 @@ var HealthColors = HealthColors || (function() {
         RETURN OUTSIDE FUNCTIONS
         -----------*/
     return {
-        setState: setState,
         CheckInstall: checkInstall,
         RegisterEventHandlers: registerEventHandlers
     };
@@ -277,5 +288,4 @@ on('ready', function() {
     'use strict';
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
-    HealthColors.setState();
 });
