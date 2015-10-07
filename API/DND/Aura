@@ -32,10 +32,15 @@ var HealthColors = HealthColors || (function() {
                 var percReal = Math.round((curValue / maxValue) * 100);
                 var perc = Math.round((curValue / maxValue) * 120);
                 //Set dead
+<<<<<<< HEAD
                 if(curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     if(state.auraDeadFX !== "None") PlayDeath(state.auraDeadFX);
                 } else if(dead === true) obj.set("status_dead", false);
+=======
+                if(curValue <= 0 && dead === true) obj.set("status_dead", true);
+                else if(dead === true) obj.set("status_dead", false);
+>>>>>>> 9a8e9c77ee0e9eb7618b7896817311d57f23e53f
                 //Monster or Player
                 var oCharacter = getObj('character', obj.get("_represents"));
                 var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
@@ -137,10 +142,13 @@ var HealthColors = HealthColors || (function() {
                             state.auraDead = !state.auraDead;
                             aurahelp();
                             break;
+<<<<<<< HEAD
                         case "DEADFX":
                             state.auraDeadFX = msgFormula[2];
                             aurahelp();
                             break;
+=======
+>>>>>>> 9a8e9c77ee0e9eb7618b7896817311d57f23e53f
                         case "SIZE":
                             state.AuraSize = parseFloat(msgFormula[2]);
                             aurahelp();
@@ -154,6 +162,7 @@ var HealthColors = HealthColors || (function() {
         /*
         MY FUNCTIONS
         */
+<<<<<<< HEAD
         PlayDeath = function(trackname) {
             log(trackname)
             var track = findObjs({
@@ -169,6 +178,8 @@ var HealthColors = HealthColors || (function() {
                 log("No track found");
             }
         },
+=======
+>>>>>>> 9a8e9c77ee0e9eb7618b7896817311d57f23e53f
         pcSet = function(obj, sizeSet, markerColor, pColor) {
             obj.set({
                 'aura1_radius': sizeSet,
@@ -205,8 +216,12 @@ var HealthColors = HealthColors || (function() {
                 'Percentage: <a ' + style + '" href="!aura perc ?{Percent?|100}">' + state.auraPerc + '</a><br>' + //--
                 'Show on PC: <a ' + style + 'background-color:' + (state.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show on NPC: <a ' + style + 'background-color:' + (state.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.NPCAura !== true ? "No" : "Yes") + '</a><br>' + //--
+<<<<<<< HEAD
                 'Show Dead: <a ' + style + 'background-color:' + (state.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
                 'DeathFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + state.auraDeadFX + '</a><br>' + //--
+=======
+                'Show Dead: <a ' + style + 'background-color:' + (state.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.auraDead !== true ? "No" : "Yes") + '</a>' + //--
+>>>>>>> 9a8e9c77ee0e9eb7618b7896817311d57f23e53f
                 '<hr>' + //--
                 'GM Sees NPC Names: <a ' + style + 'background-color:' + (state.GM_NPCNames !== true ? off : "") + ';" href="!aura gmnpc">' + (state.GM_NPCNames !== true ? "No" : "Yes") + '</a><br>' + //--
                 'GM Sees PC Names: <a ' + style + 'background-color:' + (state.GM_PCNames !== true ? off : "") + ';" href="!aura gmpc">' + (state.GM_PCNames !== true ? "No" : "Yes") + '</a><br>' + //--
