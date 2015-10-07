@@ -34,9 +34,7 @@ var HealthColors = HealthColors || (function() {
                 //Set dead
                 if(curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
-                    if(state.auraDeadFX !== "None") {
-                    PlayDeath(state.auraDeadFX);                                       
-                }
+                    if(state.auraDeadFX !== "None") PlayDeath(state.auraDeadFX);
                 } else if(dead === true) obj.set("status_dead", false);
                 //Monster or Player
                 var oCharacter = getObj('character', obj.get("_represents"));
@@ -160,12 +158,12 @@ var HealthColors = HealthColors || (function() {
             var track = findObjs({
                 type: 'jukeboxtrack',
                 title: trackname
-            })[0];            
+            })[0];
             if(track) {
-            track.set('playing', false);
-            track.set('softstop', false);
-            track.set('volume', 100);
-            track.set('playing', true);
+                track.set('playing', false);
+                track.set('softstop', false);
+                track.set('volume', 100);
+                track.set('playing', true);
             } else {
                 log("No track found");
             }
