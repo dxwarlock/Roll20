@@ -34,7 +34,9 @@ var HealthColors = HealthColors || (function() {
                 //Set dead
                 if(curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
-                    if(state.auraDeadFX !== "None") PlayDeath(state.auraDeadFX);
+                    if(state.auraDeadFX !== "None") {
+                    PlayDeath(state.auraDeadFX);                                       
+                }
                 } else if(dead === true) obj.set("status_dead", false);
                 //Monster or Player
                 var oCharacter = getObj('character', obj.get("_represents"));
@@ -155,7 +157,6 @@ var HealthColors = HealthColors || (function() {
         MY FUNCTIONS
         */
         PlayDeath = function(trackname) {
-            log(trackname)
             var track = findObjs({
                 type: 'jukeboxtrack',
                 title: trackname
@@ -198,6 +199,7 @@ var HealthColors = HealthColors || (function() {
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="text-align:center; width: 35px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
+            var FX = state.auraDeadFX.substring(0, 4);
             sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + state.HealthColors.version + //--
                 '</u><br>Is On: <a ' + style + 'background-color:' + (state.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?|1}">' + state.auraBar + '</a><br>' + //--
@@ -206,7 +208,7 @@ var HealthColors = HealthColors || (function() {
                 'Show on PC: <a ' + style + 'background-color:' + (state.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show on NPC: <a ' + style + 'background-color:' + (state.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.NPCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show Dead: <a ' + style + 'background-color:' + (state.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
-                'DeathFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + state.auraDeadFX + '</a><br>' + //--
+                'DeathFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + FX + '</a><br>' + //--
                 '<hr>' + //--
                 'GM Sees NPC Names: <a ' + style + 'background-color:' + (state.GM_NPCNames !== true ? off : "") + ';" href="!aura gmnpc">' + (state.GM_NPCNames !== true ? "No" : "Yes") + '</a><br>' + //--
                 'GM Sees PC Names: <a ' + style + 'background-color:' + (state.GM_PCNames !== true ? off : "") + ';" href="!aura gmpc">' + (state.GM_PCNames !== true ? "No" : "Yes") + '</a><br>' + //--
@@ -321,9 +323,6 @@ var HealthColors = HealthColors || (function() {
 }());
 //On Ready
 on('ready', function() {
-    //var d = new Date();
-    //var n = d.getTime() / 1000;
-    //log(n)
     'use strict';
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
