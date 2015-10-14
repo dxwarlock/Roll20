@@ -38,7 +38,7 @@ var HealthColors = HealthColors || (function() {
                 } else if(dead === true) obj.set("status_dead", false);
                 //Monster or Player
                 var oCharacter = getObj('character', obj.get("_represents"));
-                var type = (oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+                var type = (oCharacter.get("controlledby") === "" || oCharacter.get("controlledby") === "all") ? 'Monster' : 'Player';
                 //SET PLAYER AURA------------
                 if(type == 'Player') {
                     if(state.PCAura === false) return;
