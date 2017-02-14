@@ -1,1 +1,0 @@
-{"filter":false,"title":"B-Helper.js","tooltip":"/Screeps/B-Helper.js","ace":{},"undoManager":{"mark":-1,"position":-1,"stack":[]},"timestamp":1440538545000,"hash":"4b0b2627d981c4fb904eb688373a20dee5ee8604"}
