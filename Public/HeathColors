@@ -47,7 +47,7 @@ var HealthColors = HealthColors || (function() {
                     else if (cBy.split(',').length == 1) {
                         var player = getObj('player', cBy);
                         var pColor = '#000000';
-                        if (player !== undefined) var pColor = player.get('color');
+                        if (player !== undefined) pColor = player.get('color');
                         pcSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                     }
                     else {
