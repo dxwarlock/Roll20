@@ -1,3 +1,9 @@
+/*
+My Profile link: https://app.roll20.net/users/262130/dxwarlock
+GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
+Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
+Last Updated 2/14/2017
+*/
 /*global getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
