@@ -1,7 +1,24 @@
+<rolltemplate class="sheet-rolltemplate-RIFTS">
+<table>
+  {{#name}}
+    <tr><th class="rt-header relative {{#color}}{{color}}{{/color}}">{{name}}<br>
+    {{#image}}<img class="{{image}}">{{/image}}
+    <hr></th></tr>
+  {{/name}}
+  {{#subheader}}
+    <tr><td class="sheet-subheader">{{subheader}}</td></tr>
+  {{/subheader}}
+  {{#allprops() color name subheader image}}
+    <tr><td style="vertical-align:middle;"><span class="sheet-tcat">{{key}}&nbsp;</span>{{value}}</td></tr>
+  {{/allprops() color name subheader image}}
+</table>
+</rolltemplate>
+<!--ROLLTEMPLATE---------------------->
 <link href='http://fonts.googleapis.com/css?family=IM+Fell+English+SC' rel='stylesheet' type='text/css'>
 <h2><img src="http://i.imgur.com/pCCUIRC.png" width="100%"/></h2>
 <hr>
-<!------------ 
+<br>
+<!------------
 SET TABS
 ------------->
 <label class="sheet-label">
@@ -16,13 +33,13 @@ SET TABS
 <label class="sheet-label">
 <input name="attr_expand" type="radio" value="1" class="sheet-expand"/>
 <div class="sheet-tab">Powers/Notes</div>
-<!------------   
+<!------------
 START PAGE
 ------------->
-<div class="sheet-character-sheet sheet-show"> 
+<div class="sheet-character-sheet sheet-show">
   <!--TAB 4 START---------------------->
   <h6>Powers</h6>
-    
+
   <div>
       <h4>Spells/Psionics/Abilities - PPE channel per attack: <input class="sheet-dinputbox" type="number" name="attr_Channel" value="@{Level}*5" disabled="true"></h4>
     <table frame="box" width="820px">
@@ -37,8 +54,8 @@ START PAGE
     </table>
     <table frame="box" width="820px">
       <tr>
-        <fieldset class="repeating_CAST">
-        <button type='roll' value='!cast --@{CAST} --@{CASTr} --@{CASTd} --@{CASTdur} --@{CASTdesc} --@{CASTc}' name='roll_CastCheck' /></button>
+        <fieldset class="repeating_cast">
+        <button class="sheet-blank" type='roll' value='!cast --@{CAST} --@{CASTr} --@{CASTd} --@{CASTdur} --@{CASTdesc} --@{CASTc}' name='roll_CastCheck' /></button>
           <input type="text" style="width:205px;" name="attr_CAST" >
           <input type="text" style="width:60px;" name="attr_CASTr">
           <input type="text" style="width:60px;" name="attr_CASTd">
@@ -57,21 +74,21 @@ START PAGE
     <h4>Notes</h4>
     <textarea style="width:810px;"name="attr_Notes"></textarea>
   </div>
-  <!--TAB 4 END----------------------> 
+  <!--TAB 4 END---------------------->
 </div>
 </label>
-<div class="sheet-character-sheet sheet-show"> 
+<div class="sheet-character-sheet sheet-show">
   <!--TAB 3 START---------------------->
   <h6>Weapons/Equipment</h6>
   <hr>
   <h4><span>&#10152;Weapons<span><img src="http://i.imgur.com/GIAiTxg.jpg"/></span></span></h4>
     <h5>
-    Short EClips:
+    <b>[EXTRA CLIPS]</b> Short EClips:
     <input type="text" style="width:30px;" name="attr_S-EClips">
-    /empty:<input type="text" style="width:30px;" name="attr_S-EClips_max">
+    empty:<input type="text" style="width:30px;" name="attr_S-EClips_max">
     || Long EClips:
     <input type="text" style="width:30px;" name="attr_L-EClips">
-    /empty:<input type="text" style="width:30px;" name="attr_L-EClips_max">
+    empty:<input type="text" style="width:30px;" name="attr_L-EClips_max">
     </h5>
   <table frame="box" width="100%">
     <tr>
@@ -80,24 +97,36 @@ START PAGE
   </table>
   <table frame="box" width="100%">
     <tr>
-      <fieldset class="repeating_WEAP">
-        <input type="text" style="width:160px;" name="attr_WEAP">
+      <fieldset class="repeating_weap">
+        <!------- !attack --[[1d20+@{STRK}]] --[[1d4]] --Words --gun 1   --->
+        <button class="sheet-blank" type='roll' value='!attack --[[1d20+@{WEAPb}]] --[[@{WEAPd}]] --@{WEAP} --@{WEAP} @{WEAPshot}' name='roll_AttackMacro' /></button>
+        <input type="text" style="width:135px;" name="attr_WEAP">
         Weight:
-        <input type="text" style="width:30px;" name="attr_WEAPWe">
+        <input type="text" style="width:25px;" name="attr_WEAPWe">
         Bonus:
         <input type="text" style="width:20px;" name="attr_WEAPb">
         Damage:
         <input type="text" style="width:50px;" name="attr_WEAPd">
         Range:
-        <input type="text" style="width:40px;" name="attr_WEAPr">
+        <input type="text" style="width:35px;" name="attr_WEAPr">
         Payload:
-        <input type="text" style="width:30px;" name="attr_WEAPpay">
-        /<input type="text" style="width:30px;" name="attr_WEAPpay_max">
-        || <select style="width:75px; height: 20px;" name="attr_WEAPclip">
+        <input type="text" style="width:25px;" name="attr_WEAPpay">
+        /<input type="text" style="width:25px;" name="attr_WEAPpay_max">
+        ●
+        <select style="width:30px;" name="attr_WEAPshot">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        <b>||</b>
+        <input type="text" style="width:30px;" name="attr_WEAPRounds">
+        <select style="width:75px; height: 20px;" name="attr_WEAPclip">
             <option value="0">Rounds</option>
             <option value="10">Eclips</option>
-          </select>
-        <input type="text" style="width:30px;" name="attr_WEAPRounds">
+        </select>
         <input style="width:20px;" type='checkbox' value='10' name='attr_WEAP-c'>
         <label for="ossm">Equipped</label>
       </fieldset>
@@ -163,10 +192,10 @@ START PAGE
   <div align="center">
     <textarea style="height:300px; width:90%" name="attr_Tequip"></textarea>
   </div>
-  <!--TAB 3 END----------------------> 
+  <!--TAB 3 END---------------------->
 </div>
 </label>
-<div class="sheet-character-sheet sheet-show"> 
+<div class="sheet-character-sheet sheet-show">
   <!--TAB 2 START---------------------->
   <h6>Character Stats</h6>
   <hr>
@@ -181,7 +210,7 @@ START PAGE
   </h5>
   <hr>
   <div style="float:left; width:20%;">
-    <h3><span>&#10152;Ability Scores<span><img src="http://i.imgur.com/Gf8ESEW.png"/></span></span></h3>
+    <h3><span>&#10152;Ability Scores<span><img src="http://i.imgur.com/HH2aUjf.png"/></span></span></h3>
     <table frame="box" width="95%" align="center">
       <thead>
         <tr>
@@ -194,7 +223,9 @@ START PAGE
         <tr>
           <td><label>IQ:</label></td>
           <td><input type="number" name="attr_IQ"></td>
-          <td><input class="sheet-dinputbox" type="number" name="attr_IQ_max" value="@{IQ}-14" disabled="true"></td>
+          <input type="hidden" disabled="true" type="number" name="attr_min_IQ" value="((((@{IQ}-14) + 0) + abs((@{IQ}-14) - 0)) / 2)" />
+          <td><input class="sheet-dinputbox" type="number" name="attr_IQ_max" value="@{min_IQ}" disabled="true"></td>
+
         <tr>
           <td><label>ME:</label></td>
           <td><input type="number" name="attr_ME"></td>
@@ -260,8 +291,8 @@ START PAGE
           <td><label>Roll+:</label></td>
           <td><input type="number" name="attr_ROLL"></td>
         <tr>
-          <td><label>PERC:</label></td>
-          <td><input class="sheet-dinputbox" type="number" name="attr_PERC" value="@{IQ}+20+((@{Level}-1)*5)" disabled="true"></td>
+          <td><button class="sheet-blank" type='roll' value='!PERC @{PERC}' name='roll_PERC'/></button><label>PERC:</label><input type="number" name="attr_PERCM" value="0"></td>
+          <td><input class="sheet-dinputbox" type="number" name="attr_PERC" value="round((@{IQ}+@{ME}/2))+5+((@{Level}-1)*5)+@{PERCM}" disabled="true"></td>
       </tbody>
     </table>
   </div>
@@ -277,24 +308,24 @@ START PAGE
       </thead>
       <tbody>
         <tr>
-          <td><button type='roll' value='!save 1d20 @{STSPELL|max} Spell' name='roll_Spell'/></button><label>Spell:</label></td>
+          <td><button class="sheet-blank" type='roll' value='!save 1d20 @{STSPELL|max} Spell' name='roll_Spell'/></button><label>Spell:</label></td>
           <td><input class="sheet-dinputbox" style="width:25px;" disabled="true" type="text" name="attr_STSPELL" value=12></td>
           <td><input type="number" style="width:30px;" name="attr_STSPELL_max"></td>
 
         <tr>
-          <td><button type='roll' value='!save 1d20 @{STRITUAL|max} Ritual' name='roll_Ritual'/></button><label>Ritual:</label></td>
+          <td><button class="sheet-blank" type='roll' value='!save 1d20 @{STRITUAL|max} Ritual' name='roll_Ritual'/></button><label>Ritual:</label></td>
           <td><input class="sheet-dinputbox" style="width:25px;" disabled="true" type="text" name="attr_STRITUAL" value=16></td>
           <td><input type="number" style="width:30px;" name="attr_STRITUAL_max"></td>
         <tr>
-          <td><button type='roll' value='!save 1d20 @{STPSI|max} Psionics' name='roll_Psi'/></button><label>Psionics:</label></td>
+          <td><button class="sheet-blank" type='roll' value='!save 1d20 @{STPSI|max} Psionics' name='roll_Psi'/></button><label>Psionics:</label></td>
           <td><input class="sheet-dinputbox" style="width:25px;" disabled="true" type="text" name="attr_STPSI" value=15></td>
           <td><input type="number" style="width:30px;" name="attr_STPSI_max"></td>
         <tr>
-          <td><button type='roll' value='!save 1d20 @{STTOXIC|max} Drug-Poison' name='roll_Poison'/></button><label>Poisons:</label></td>
+          <td><button class="sheet-blank" type='roll' value='!save 1d20 @{STTOXIC|max} Drug-Poison' name='roll_Poison'/></button><label>Poisons:</label></td>
           <td><input class="sheet-dinputbox" style="width:25px;" disabled="true" type="text" name="attr_STTOXIC" value=15></td>
           <td><input type="number" style="width:30px;" name="attr_STTOXIC_max"></td>
         <tr>
-          <td><button type='roll' value='!save 1d20 @{STINSAN|max} Insanity' name='roll_Insanity'/></button><label>Insanity:</label></td>
+          <td><button class="sheet-blank" type='roll' value='!save 1d20 @{STINSAN|max} Insanity' name='roll_Insanity'/></button><label>Insanity:</label></td>
           <td><input class="sheet-dinputbox" style="width:25px;" disabled="true" type="text" name="attr_STINSAN" value=12></td>
           <td><input type="number" style="width:30px;" name="attr_STINSAN_max"></td>
         <tr>
@@ -385,6 +416,14 @@ START PAGE
           <td><label>Hunger:</label></td>
           <td><input type="number" name="attr_HUNGER"></td>
           <td ><input class="sheet-dinputbox" type="number" name="attr_HUNGER_max" value=100></td>
+        <tr>
+          <td><label>Hours Up:</label></td>
+          <td><input type="number" name="attr_SLEEP"></td>
+          <td><input class="sheet-dinputbox" type="number" name="attr_SLEEP_max" value=@{attr_SLEEP_max}></td>
+        <tr>
+          <td><label>Sleeping?:</label></td>
+          <td><input type='checkbox' style="width:10px;" name='attr_SLEEPING' value='1'></td>
+          <td></td>
       </tbody>
     </table>
     <table frame="box" width="95%" align="center">
@@ -406,17 +445,10 @@ START PAGE
             <input class="sheet-dinputbox" style="width:28px;" type="number" name="attr_Copper" value="@{Credits}-(@{Gold}*10000)-(@{Silver}*100)" disabled="true"></td>
       </tbody>
     </table>
-    <table frame="box" width="95%" align="center">
-      <tbody>
-        <tr>
-          <td><label>Quirk:</label></td>
-          <td align="right"><input type="text" style="width:100px;" name="attr_Insanity" value=(insanity)></td>
-      </tbody>
-    </table>
   </div>
   <br>
   <hr class="sheet-2">
-  <h6>Power Armor/Mech Stats</h6>
+  <h6>Power Armor/Vehicle Stats</h6>
   <hr>
   <h5 style="background:#CFCFCF;"> MPH:
     <input class="sheet-dinputbox" type="number" name="attr_PSPD01" value="round(@{PSPD}*0.6825938)" disabled="true">
@@ -430,7 +462,7 @@ START PAGE
   <hr>
   <div style="float:left; width:20%;">
     <h3>Name:
-      <input style="width:110px;" type="text" name="attr_PNAME"/>
+      <input style="width:100px;" type="text" name="attr_PNAME"/>
     </h3>
     <table frame="box" width="95%" align="center">
       <thead>
@@ -527,7 +559,7 @@ START PAGE
     </table>
     <table frame="box" width="100%">
       <tr>
-        <fieldset class="repeating_pWEAP">
+        <fieldset class="repeating_pweap">
           <input style="width:20px;" type='checkbox' value='10' name='attr_pWEAP-c'>
           <input type="text" style="width:230px;" name="attr_pWEAP" >
           <input type="text" style="width:35px;" name="attr_pWEAPb">
@@ -539,11 +571,11 @@ START PAGE
     </table>
   </div>
   <hr>
-  <!--TAB 2 END----------------------> 
+  <!--TAB 2 END---------------------->
 </div>
 </label>
-<div class="sheet-character-sheet sheet-show"> 
-  <!--TAB 1 START---------------------->
+<div class="sheet-character-sheet sheet-show">
+  <!--INFO TAB 1 START---------------------->
   <h6>Character Info</h6>
     <table width="100%" border="1" cellspacing="0" cellpadding="2">
     <tr>
@@ -565,7 +597,7 @@ START PAGE
         </table></td>
       <td><table align="center" width="100%" border="1">
           <tr>
-            <td class="sheet-stat3"> 
+            <td class="sheet-stat3">
                 Carry:
               <input class="sheet-iinputbox" style="width:35px;" type="number" name="attr_Carryx101" value="@{Carryx10}" disabled="true">
               Lift:
@@ -592,7 +624,7 @@ START PAGE
         </table></td>
       <td><table align="center" width="100%" border="1">
           <tr>
-            <td class="sheet-stat3"> 
+            <td class="sheet-stat3">
                 HP:
               <input class="sheet-iinputbox" type="number" name="attr_SPD011" value="@{HP}" disabled="true">/
               <input class="sheet-iinputbox" type="number" name="attr_SPD041" value=" @{HP|max}" disabled="true">
@@ -661,20 +693,23 @@ START PAGE
       <h4>OCC Skills</h4>
       <table frame="box" width="100%">
         <tr>
-          <td class="sheet-stat" style="width:155px;">Name</td>
-          <td class="sheet-stat" style="width:30px;" >Base</td>
-          <td class="sheet-stat" style="width:30px;">PerLvl</td>
+          <td class="sheet-stat" style="width:145px;">Name</td>
+          <td class="sheet-stat" style="width:22px;" >Base</td>
+          <td class="sheet-stat" style="width:5px;">Per</td>
           <td class="sheet-stat2" style="width:35px;">Total</td>
         </tr>
       </table>
       <table frame="box" width="100%">
         <tr>
-          <fieldset class="repeating_OCCSK">
-            <button type='roll' value='!rb 1d100 @{OCCT} ?{Modifier|0} ?{Blind|Y} @{OCCSK}' name='roll_SkillCheck' /></button>
-            <input class="sheet-skill" type="text" style="width:130px;" name="attr_OCCSK" >
-            <input type="number" style="width:30px;" name="attr_OCCSKP">
-            <input type="number" style="width:30px;" name="attr_OCCSKPL">
-            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCT" value="@{OCCSKP}+(@{OCCSKPL}*(@{LEVEL}-1))" disabled="true">
+          <fieldset class="repeating_occsk">
+            <button class="sheet-blank" type='roll' value='!rb 1d100 [[@{OCCT}]] ?{Modifier|0} ?{Blind|Y} @{OCCSK}' name='roll_SkillCheck' /></button>
+            <input type="text" style="width:15px; background:#777; color:#fff;" name="attr_OCCSKLV" value=1>
+            <input class="sheet-skill" type="text" name="attr_OCCSK" >
+            <input class="sheet-baseinputbox" type="number" name="attr_OCCSKP">
+            <input class="sheet-perinputbox" type="number" name="attr_OCCSKPL">
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCs" value="@{min_IQ}+@{OCCSKP}+(@{OCCSKPL}*(@{LEVEL}-@{OCCSKLV}))" />
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCt" value="(((@{min_OCCs} + 98) - abs(@{min_OCCs} - 98) ) / 2)" />
+            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCT" value="@{min_OCCt}" disabled="true">
           </fieldset>
         </tr>
       </table>
@@ -683,20 +718,23 @@ START PAGE
       <h4>OCC Related Skills</h4>
       <table frame="box" width="100%">
         <tr>
-          <td class="sheet-stat" style="width:155px;">Name</td>
-          <td class="sheet-stat" style="width:30px;" >Base</td>
-          <td class="sheet-stat" style="width:30px;">PerLvl</td>
+          <td class="sheet-stat" style="width:145px;">Name</td>
+          <td class="sheet-stat" style="width:22px;" >Base</td>
+          <td class="sheet-stat" style="width:5px;">Per</td>
           <td class="sheet-stat2" style="width:35px;">Total</td>
         </tr>
       </table>
       <table frame="box" width="100%">
         <tr>
-          <fieldset class="repeating_OCRCSK">
-            <button type='roll' value='!rb 1d100 @{OCCTr} ?{Modifier|0} ?{Blind|Y} @{OCCRSK}' name='roll_SkillCheck2' /></button>
-            <input class="sheet-skill" type="text" style="width:130px;" name="attr_OCCRSK" >
-            <input type="number" style="width:30px;" name="attr_OCRCSKp">
-            <input type="number" style="width:30px;" name="attr_OCRCSKPL">
-            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCTr" value="@{OCRCSKp}+(@{OCRCSKPL}*(@{LEVEL}-1))" disabled="true">
+          <fieldset class="repeating_ocrcsk">
+            <button class="sheet-blank" type='roll' value='!rb 1d100 [[@{OCCTr}]] ?{Modifier|0} ?{Blind|Y} @{OCCRSK}' name='roll_SkillCheck2' /></button>
+            <input type="text" style="width:15px; background:#777; color:#fff;" name="attr_OCCRSKLV" value=1>
+            <input class="sheet-skill" type="text" name="attr_OCCRSK">
+            <input class="sheet-baseinputbox" type="number" name="attr_OCRCSKp">
+            <input class="sheet-perinputbox" type="number" name="attr_OCRCSKPL">
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCrs" value="@{min_IQ}+@{OCRCSKp}+(@{OCRCSKPL}*(@{LEVEL}-@{OCCRSKLV}))" />
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCrt" value="(((@{min_OCCrs} + 98) - abs(@{min_OCCrs} - 98)) / 2)" />
+            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCTr" value="@{min_OCCrt}" disabled="true">
           </fieldset>
         </tr>
       </table>
@@ -705,24 +743,27 @@ START PAGE
       <h4>Secondary Skills</h4>
       <table frame="box" width="100%">
         <tr>
-          <td class="sheet-stat" style="width:155px;">Name</td>
-          <td class="sheet-stat" style="width:30px;" >Base</td>
-          <td class="sheet-stat" style="width:30px;">PerLvl</td>
+          <td class="sheet-stat" style="width:145px;">Name</td>
+          <td class="sheet-stat" style="width:22px;" >Base</td>
+          <td class="sheet-stat" style="width:5px;">Per</td>
           <td class="sheet-stat2" style="width:35px;">Total</td>
         </tr>
       </table>
       <table frame="box" width="100%">
         <tr>
-          <fieldset class="repeating_SECSK">
-          <button type='roll' value='!rb 1d100 @{OCCTs} ?{Modifier|0} ?{Blind|Y} @{SECSK}' name='roll_SkillCheck3' /></button>
-            <input class="sheet-skill" type="text" style="width:130px;" name="attr_SECSK" >
-            <input type="number" style="width:30px;" name="attr_SECSKp">
-            <input type="number" style="width:30px;" name="attr_SECSKpl">
-            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCTs" value="@{SECSKp}+(@{SECSKpl}*(@{LEVEL}-1))" disabled="true">
+          <fieldset class="repeating_secsk">
+          <button class="sheet-blank" type='roll' value='!rb 1d100 [[@{OCCTs}]] ?{Modifier|0} ?{Blind|Y} @{SECSK}' name='roll_SkillCheck3' /></button>
+            <input type="text" style="width:15px; background:#777; color:#fff;" name="attr_SECSKLV" value=1>
+            <input class="sheet-skill" type="text" name="attr_SECSK">
+            <input class="sheet-baseinputbox" type="number" name="attr_SECSKp">
+            <input class="sheet-perinputbox" type="number" name="attr_SECSKpl">
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCss" value="@{min_IQ}+@{SECSKp}+(@{SECSKpl}*(@{LEVEL}-@{SECSKLV}))" />
+            <input disabled="true" type="hidden" type="number" name="attr_min_OCCst" value="(((@{min_OCCss} + 98) - abs(@{min_OCCss} - 98)) / 2)" />
+            <input class="sheet-sdinputbox" type="text" style="width:40px;" name="attr_OCCTs" value="@{min_OCCst}" disabled="true">
           </fieldset>
         </tr>
       </table>
     </div>
   </div>
-  <!--TAB 1 END----------------------> 
+  <!--INFO TAB 1 END---------------------->
 </div>

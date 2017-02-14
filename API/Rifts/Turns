@@ -9,7 +9,7 @@ API CHAT COMMANDS
 ------------------*/
 on('chat:message', function(msg) {
     /*--NPC INT COMMAND--*/
-	if(msg.type == 'api' && msg.content.indexOf('!int') !== -1) {
+    if(msg.type == 'api' && msg.content.indexOf('!int') !== -1) {
 		var selected = msg.selected;
 		if(Campaign().get("turnorder") == "") order = [];
 		else order = JSON.parse(Campaign().get("turnorder"));
@@ -18,8 +18,8 @@ on('chat:message', function(msg) {
 			sendChat('', "/roll [[1d20+3]]", function(ops) {
 				var token = getObj('graphic', msg.selected[i]._id);
 				var rollresult = ops[0];
-				result = rollresult.inlinerolls[1].results.total;
-				if(result > 21) result = 20;
+				result = rollresult.inlinerolls[0].results.total;
+				if(result > 20) result = 20;
 				found = false;
 				for(var y = 0; y < order.length; ++y) {
 					if(token.id === order[y].id) {
@@ -161,10 +161,7 @@ on("change:campaign:turnorder", function(obj, prev) {
 				return dieName === e.custom;
 			});
 			if(loc !== undefined) {
-				tmmarker = findObjs({
-					name: "Turn",
-					pageid: Campaign().get("playerpageid")
-				})[0];
+				tmmarker = findObjs({name: "Turn",pageid: Campaign().get("playerpageid")})[0];
 				if(tmmarker !== undefined) tmmarker.remove();
 				movemarker(current_token, pColor, iName2);
 			} else SetPurple(turn_order, 1);
@@ -178,16 +175,9 @@ on("change:token", function(obj) {
 	var current_token = getObj("graphic", turn_order[0].id);
 	if(current_token == undefined) return;
 	turnname = current_token.get("name");
-	var tokens = findObjs({
-		_type: "graphic",
-		_pageid: Campaign().get('playerpageid'),
-		name: turnname
-	});
+	var tokens = findObjs({_type: "graphic",_pageid: Campaign().get('playerpageid'),name: turnname});
 	current_token = tokens[0];
-	var marker = findObjs({
-		name: "Turn",
-		pageid: Campaign().get("playerpageid")
-	})[0];
+	var marker = findObjs({name: "Turn",pageid: Campaign().get("playerpageid")})[0];
 	if(current_token.get("layer") !== "gmlayer" && marker !== undefined) {
 		marker.set({
 			"top": current_token.get("top"),
@@ -204,22 +194,8 @@ FUNCTIONS
 function movemarker(current_token, pColor, iName2) {
 	var tokenURL = 'https://s3.amazonaws.com/files.d20.io/images/5509346/yARWYF7LxyddmBMxjCFbUg/thumb.png?1410224858';
 	turnname = current_token.get("name");
-	var tokens = findObjs({
-		_type: "graphic",
-		_pageid: Campaign().get('playerpageid'),
-		name: turnname
-	});
-	current_token = tokens[0];
+	var tokens = findObjs({_type: "graphic",_pageid: Campaign().get('playerpageid'),name: turnname});
 	if(current_token.get("layer") !== "gmlayer") {
-		tmmarker = createObj('graphic', {
-			name: "Turn",
-			pageid: Campaign().get("playerpageid"),
-			layer: 'map',
-			imgsrc: tokenURL,
-			left: current_token.get("left"),
-			top: current_token.get("top")
-		});
-		toFront(tmmarker);
 		var piclink = current_token.get("imgsrc");
 		var picbox = "<div style= 'background-color:#ffffff; display: inline-block; border: 1px solid #000; margin: 0.2em; border-radius: 10px 10px 10px 10px; align:'center''><img src=" + piclink + " style=height:30px; width:30px;'></div>";
 		var table = '<table width="100%" cellspacing="0" cellpadding="0"><tr><td width="20%">' + picbox + '</td><td width="90%"><b>Turn: ' + iName2 + '</b></td></tr></table>';
@@ -286,11 +262,7 @@ function addPlayer(id, Roll, Attack) {
 	if(iName == "UNKNOWN") ChatSay = "";
 	intChat1 = ChatSay;
 	intChat += intChat1;
-	TurnData[id] = {
-		"Roll": Roll,
-		"Attack": Attack,
-		"Table": table
-	};
+	TurnData[id] = {"Roll": Roll,"Attack": Attack,"Table": table};
 };
 //--CREATE ORDER
 function createOrder() {
@@ -298,19 +270,11 @@ function createOrder() {
 	for(i = (BestRoll + 1); i > 0; i--) {
 		_.each(TurnData, function(value, key) {
 			if(value.Table.indexOf(i) != -1) {
-				order.push({
-					"id": key,
-					"pr": i,
-					"custom": ""
-				});
+				order.push({"id": key,"pr": i,"custom": ""});
 			}
 		});
 	}
-	order.unshift({
-		"id": '-1',
-		"pr": 100,
-		"custom": "StartRound"
-	});
+	order.unshift({"id": '-1',"pr": 100,"custom": "StartRound"});
 	return order;
 };
 //--RESET TURNS
