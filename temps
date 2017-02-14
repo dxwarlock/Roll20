@@ -1,0 +1,72 @@
+function FoodSet(Hours) {
+    var tFood = iPart+"background-color:#027527;'>";
+    var characters = findObjs({_type: "character" ,inplayerjournals: "all"});
+    _.each(characters, function(id) {
+        var aName = findObjs({_type: "attribute",name: "Name",_characterid: id.id}, {caseInsensitive: true})[0];
+        var aFood = findObjs({ _type: "attribute",name: "HUNGER",_characterid: id.id}, {caseInsensitive: true})[0];
+        var HungH = findObjs({_type: "attribute",name: "HUNGERH",_characterid: id.id}, {caseInsensitive: true})[0];
+        if(HungH !== undefined) {
+            var Hperc = HungH.get("current");
+            var FoodCount = parseFloat(aFood.get("current")-(Hperc*Hours));
+            if (FoodCount > 100) FoodCount = 100;
+            FoodCount = Math.round(FoodCount.toFixed(1));
+            var name = aName.get("current");
+            aFood.set('current', FoodCount);
+            if (FoodCount < 15) {
+                tFood = tFood.concat(name + " is starving ["+FoodCount+"]!<small><br>(-8 on all rolls -60% skills).</small>");
+            }
+            else if (FoodCount < 30) {
+                tFood = tFood.concat(name + " needs to eat ["+FoodCount+"].<br><h6>(-2 on all rolls -30% skills).</h6>");
+
+            }
+            else if (FoodCount < 50) {
+                tFood = tFood.concat(name + " is getting hungry.<br>");
+            }
+        }
+    });
+    sendChat('', "/direct " + tFood + "</div>");
+};
+function SleepSet(Hours) {
+    var tFood = iPart+"background-color:#027527;'>";
+    var characters = findObjs({_type: "character" ,inplayerjournals: "all"});
+    tSleep = iPart +"background-color:#825930;'>";
+    _.each(characters, function(id) {
+        var aName = findObjs({_type: "attribute",name: "Name",_characterid: id.id}, {caseInsensitive: true})[0];
+        var aSleep = findObjs({ _type: "attribute",name: "SLEEP",_characterid: id.id}, {caseInsensitive: true})[0];
+        var Sleeping = findObjs({ _type: "attribute",name: "SLEEPING",_characterid: id.id}, {caseInsensitive: true})[0];
+        if(aSleep !== undefined) {
+            HoursPassed = Hours
+            var tSleep = '';
+            var MaxUp = aSleep.get("max");
+            var HoursUp = parseFloat(+aSleep.get("current") + +Hours);
+            var name = aName.get("current");
+            //is asleep//
+            var IsSleeping = Sleeping.get("current");
+            var IsSleepingAdjust = Sleeping.get("max");
+            if (IsSleeping == 1 && HoursPassed != 0) {
+                var HoursUp = HoursUp - 1 - (Hours * IsSleepingAdjust);
+                var help = lPart + "background-color:#1E2B78;'>● "+name+" is sleeping  ●<b></div>";
+                sendChat('', "/direct " + help);
+            }
+            else {
+            var HoursUp = parseFloat(+aSleep.get("current") + +Hours);
+            }
+            if (HoursUp < 0) HoursUp = 0;
+            aSleep.set('current', HoursUp);
+            if (HoursUp > MaxUp) {
+                tSleep = tSleep.concat(name + " passes out.</div>");
+            }
+            if (HoursUp >= MaxUp) {
+                tSleep = tSleep.concat(name + " is barely able to stay awake!<br>(up "+ HoursUp +" hours)<br>[-8 on all rolls, -75% on perception rolls, -75% skills, 75% to fall asleep].</div>");
+            }
+            if (HoursUp > (MaxUp * 0.65)) {
+                tSleep = tSleep.concat( name + " seriously needs to sleep.<br>(up "+ HoursUp +" hours)<br>[-2 on all rolls, -30% on perception rolls, -30% skills, 30% to fall asleep].</div>");
+            }
+            else if (HoursUp > (MaxUp * 0.5)) {
+                tSleep = tSleep.concat(name + " is getting sleepy.<br>(up "+ HoursUp +" hours)<br>[-15% on perception roll,-10% skills].</div>");
+
+            }
+        }
+    });
+    sendChat('', "/direct " + tSleep + "</div>");
+};

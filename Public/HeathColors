@@ -1,0 +1,336 @@
+/*global getObj state playerIsGM sendChat _ findObjs log on*/
+var HealthColors = HealthColors || (function() {
+    'use strict';
+    var version = '0.9.43',
+        schemaVersion = '0.9.63',
+        /*TOKEN CHANGE*/
+        handleToken = function(obj) {
+            var bar = state.HealthColors.auraBar;
+            var tint = state.HealthColors.auraTint;
+            var onPerc = state.HealthColors.auraPerc;
+            var ColorOn = state.HealthColors.auraColorOn;
+            var dead = state.HealthColors.auraDead;
+            var markerColor = "";
+            if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
+                if (ColorOn !== true) return; //Check Toggle
+                //Check bars ------------
+                if (obj.get(bar + "_max") === "" && obj.get(bar + "_value") === "") return;
+                var maxValue = parseInt(obj.get(bar + "_max"), 10);
+                var curValue = parseInt(obj.get(bar + "_value"), 10);
+                if (isNaN(maxValue) && isNaN(curValue)) return;
+                //Calc percentage------------
+                var percReal = Math.round((curValue / maxValue) * 100);
+                var perc = Math.round((curValue / maxValue) * 120);
+                //Set dead------------
+                if (curValue <= 0 && dead === true) {
+                    obj.set("status_dead", true);
+                    if (state.HealthColors.auraDeadFX !== "None") {
+                        PlayDeath(state.HealthColors.auraDeadFX);
+                    }
+                }
+                else if (dead === true) obj.set("status_dead", false);
+                //Monster or Player------------
+                var oCharacter = getObj('character', obj.get("_represents"));
+                var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+                //SET PLAYER AURA------------
+                if (type == 'Player') {
+                    if (state.PCAura === false) return;
+                    if (percReal > onPerc) {
+                        SetAuraNone(obj);
+                        return;
+                    }
+                    markerColor = newColor(perc);
+                    var cBy = oCharacter.get('controlledby');
+                    if (tint === true) obj.set({
+                        'tint_color': markerColor,
+                    });
+                    else if (cBy.split(',').length == 1) {
+                        var player = getObj('player', cBy);
+                        var pColor = '#000000';
+                        if (player !== undefined) var pColor = player.get('color');
+                        pcSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    }
+                    else {
+                        pcSet(obj, state.HealthColors.AuraSize, markerColor);
+                    }
+                }
+                //SET NPC AURA------------
+                if (type == 'Monster') {
+                    if (state.NPCAura === false) return;
+                    if (percReal > onPerc) {
+                        SetAuraNone(obj);
+                        return;
+                    }
+                    markerColor = newColor(perc);
+                    if (tint === true) obj.set({
+                        'tint_color': markerColor,
+                    });
+                    else {
+                        npcSet(obj, state.HealthColors.AuraSize, markerColor);
+                    }
+                }
+            }
+        },
+        /*CHAT MESSAGE*/
+        handleInput = function(msg) {
+            var msgFormula = msg.content.split(/\s+/);
+            var command = msgFormula[0].toUpperCase();
+            if (msg.type == "api" && command.indexOf("!AURA") !== -1) {
+                if (!playerIsGM(msg.playerid)) {
+                    sendChat('HealthColors', "/w " + msg.who + " you must be a GM to use this command!");
+                    return;
+                }
+                else {
+                    var option = msgFormula[1];
+                    if (option === undefined) {
+                        aurahelp();
+                        return;
+                    }
+                    switch (msgFormula[1].toUpperCase()) {
+                        case "ON":
+                            state.HealthColors.auraColorOn = !state.HealthColors.auraColorOn;
+                            aurahelp();
+                            break;
+                        case "BAR":
+                            state.HealthColors.auraBar = "bar" + msgFormula[2];
+                            aurahelp();
+                            break;
+                        case "TINT":
+                            state.HealthColors.auraTint = !state.HealthColors.auraTint;
+                            aurahelp();
+                            break;
+                        case "PERC":
+                            state.HealthColors.auraPerc = parseInt(msgFormula[2], 10);
+                            aurahelp();
+                            break;
+                        case "PC":
+                            state.HealthColors.PCAura = !state.HealthColors.PCAura;
+                            aurahelp();
+                            break;
+                        case "NPC":
+                            state.HealthColors.NPCAura = !state.HealthColors.NPCAura;
+                            aurahelp();
+                            break;
+                        case "GMNPC":
+                            state.HealthColors.GM_NPCNames = !state.HealthColors.GM_NPCNames;
+                            aurahelp();
+                            break;
+                        case "GMPC":
+                            state.HealthColors.GM_PCNames = !state.HealthColors.GM_PCNames;
+                            aurahelp();
+                            break;
+                        case "PCNPC":
+                            state.HealthColors.NPCNames = !state.HealthColors.NPCNames;
+                            aurahelp();
+                            break;
+                        case "PCPC":
+                            state.HealthColors.PCNames = !state.HealthColors.PCNames;
+                            aurahelp();
+                            break;
+                        case "DEAD":
+                            state.HealthColors.auraDead = !state.HealthColors.auraDead;
+                            aurahelp();
+                            break;
+                        case "DEADFX":
+                            state.HealthColors.auraDeadFX = msgFormula[2];
+                            aurahelp();
+                            break;
+                        case "SIZE":
+                            state.HealthColors.AuraSize = parseFloat(msgFormula[2]);
+                            aurahelp();
+                            break;
+                        case "ONEOFF":
+                            state.HealthColors.OneOff = !state.HealthColors.OneOff;
+                            aurahelp();
+                            break;
+                        default:
+                            return;
+                    }
+                }
+            }
+        },
+        /*MY FUNCTIONS*/
+        PlayDeath = function(trackname) {
+            var track = findObjs({
+                type: 'jukeboxtrack',
+                title: trackname
+            })[0];
+            if (track) {
+                track.set('playing', false);
+                track.set('softstop', false);
+                track.set('volume', 100);
+                track.set('playing', true);
+            }
+            else {
+                log("No track found");
+            }
+        },
+        pcSet = function(obj, sizeSet, markerColor, pColor) {
+            var Pageon = getObj("page", obj.get("_pageid"));
+            var scale = Pageon.get("scale_number") / 10;
+            obj.set({
+                'aura1_radius': sizeSet * scale * 1.2,
+                'aura2_radius': sizeSet * scale * 0.1,
+                'aura1_color': markerColor,
+                'aura2_color': pColor,
+                'showplayers_aura1': true,
+                'showplayers_aura2': true,
+                'showname': state.HealthColors.GM_PCNames,
+                'showplayers_name': state.HealthColors.PCNames
+            });
+        },
+        npcSet = function(obj, sizeSet, markerColor) {
+            var Pageon = getObj("page", obj.get("_pageid"));
+            var scale = Pageon.get("scale_number") / 10;
+            obj.set({
+                'aura1_radius': sizeSet * scale * 1.2,
+                'aura2_radius': sizeSet * scale * 0.1,
+                'aura1_color': markerColor,
+                'aura2_color': '#ffffff',
+                'showplayers_aura1': true,
+                'showplayers_aura2': true,
+                'showname': state.HealthColors.GM_NPCNames,
+                'showplayers_name': state.HealthColors.NPCNames
+            });
+        },
+        aurahelp = function() {
+            var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
+            var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
+            var style = 'style="text-align:center; width: 35px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
+            var off = "#A84D4D";
+            var FX = state.HealthColors.auraDeadFX.substring(0, 4);
+            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + version + //--
+                '</u><br>Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?|1}">' + state.HealthColors.auraBar + '</a><br>' + //--
+                'Use Tint: <a ' + style + 'background-color:' + (state.HealthColors.auraTint !== true ? off : "") + ';" href="!aura tint">' + (state.HealthColors.auraTint !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Percentage: <a ' + style + '" href="!aura perc ?{Percent?|100}">' + state.HealthColors.auraPerc + '</a><br>' + //--
+                'Show on PC: <a ' + style + 'background-color:' + (state.HealthColors.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.HealthColors.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Show on NPC: <a ' + style + 'background-color:' + (state.HealthColors.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.HealthColors.NPCAura !== true ? "No" : "Yes") + '</a><br>' + //--
+                'Show Dead: <a ' + style + 'background-color:' + (state.HealthColors.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.HealthColors.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
+                'DeathFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + FX + '</a><br>' + //--
+                '<hr>' + //--
+                'GM Sees NPC Names: <a ' + style + 'background-color:' + (state.HealthColors.GM_NPCNames !== true ? off : "") + ';" href="!aura gmnpc">' + (state.HealthColors.GM_NPCNames !== true ? "No" : "Yes") + '</a><br>' + //--
+                'GM Sees PC Names: <a ' + style + 'background-color:' + (state.HealthColors.GM_PCNames !== true ? off : "") + ';" href="!aura gmpc">' + (state.HealthColors.GM_PCNames !== true ? "No" : "Yes") + '</a><br>' + //--
+                '<hr>' + //--
+                'PC Sees NPC Names: <a ' + style + 'background-color:' + (state.HealthColors.NPCNames !== true ? off : "") + ';" href="!aura pcnpc">' + (state.HealthColors.NPCNames !== true ? "No" : "Yes") + '</a><br>' + //--
+                'PC Sees PC Names: <a ' + style + 'background-color:' + (state.HealthColors.PCNames !== true ? off : "") + ';" href="!aura pcpc">' + (state.HealthColors.PCNames !== true ? "No" : "Yes") + '</a><br>' + //--
+                '<hr>' + //--
+                'Aura Size: <a ' + style + '" href="!aura size ?{Size?|0.7}">' + state.HealthColors.AuraSize + '</a><br>' + //--
+                'One Offs: <a ' + style + 'background-color:' + (state.HealthColors.OneOff !== true ? off : "") + ';" href="!aura ONEOFF">' + (state.HealthColors.OneOff !== true ? "No" : "Yes") + '</a><br>' + //--
+                '</div>');
+        },
+        SetAuraNone = function(obj) {
+            var tint = state.auraTint;
+            if (tint === true) {
+                obj.set({
+                    'tint_color': "transparent",
+                });
+            }
+            else {
+                obj.set({
+                    'aura1_color': "",
+                    'aura2_color': "",
+                });
+            }
+        },
+        newColor = function(ratio) {
+            var color = hsl2rgb(ratio, 100, 50);
+            var hex = rgbToHex(color.r, color.g, color.b);
+            return (hex);
+        },
+        rgbToHex = function(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        },
+        hsl2rgb = function(h, s, l) {
+            var r, g, b, m, c, x;
+            if (!isFinite(h)) h = 0;
+            if (!isFinite(s)) s = 0;
+            if (!isFinite(l)) l = 0;
+            h /= 60;
+            if (h < 0) h = 6 - (-h % 6);
+            h %= 6;
+            s = Math.max(0, Math.min(1, s / 100));
+            l = Math.max(0, Math.min(1, l / 100));
+            c = (1 - Math.abs((2 * l) - 1)) * s;
+            x = c * (1 - Math.abs((h % 2) - 1));
+            if (h < 1) {
+                r = c;
+                g = x;
+                b = 0;
+            }
+            else if (h < 2) {
+                r = x;
+                g = c;
+                b = 0;
+            }
+            else if (h < 3) {
+                r = 0;
+                g = c;
+                b = x;
+            }
+            else if (h < 4) {
+                r = 0;
+                g = x;
+                b = c;
+            }
+            else if (h < 5) {
+                r = x;
+                g = 0;
+                b = c;
+            }
+            else {
+                r = c;
+                g = 0;
+                b = x;
+            }
+            m = l - c / 2;
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+            return {
+                r: r,
+                g: g,
+                b: b
+            };
+        },
+        checkInstall = function() {
+            log('<HealthColors v' + version + ' Ready>');
+            if (!_.has(state, 'HealthColors') || state.HealthColors.schemaVersion !== schemaVersion) {
+                log('  > Updating Schema to v' + schemaVersion + ' <');
+                state.HealthColors = {
+                    schemaVersion: schemaVersion
+                };
+                state.HealthColors.version = version;
+            }
+            if (_.isUndefined(state.HealthColors.auraColorOn)) state.HealthColors.auraColorOn = true; //global on or off
+            if (_.isUndefined(state.HealthColors.auraBar)) state.HealthColors.auraBar = "bar1"; //bar to use
+            if (_.isUndefined(state.HealthColors.PCAura)) state.HealthColors.PCAura = true; //show players Health?
+            if (_.isUndefined(state.HealthColors.NPCAura)) state.HealthColors.NPCAura = true; //show NPC Health?
+            if (_.isUndefined(state.HealthColors.auraTint)) state.HealthColors.auraTint = false; //use tint instead?
+            if (_.isUndefined(state.HealthColors.auraPerc)) state.HealthColors.auraPerc = 100; //precent to start showing
+            if (_.isUndefined(state.HealthColors.auraDead)) state.HealthColors.auraDead = true; //show dead X status
+            if (_.isUndefined(state.HealthColors.auraDeadFX)) state.HealthColors.auraDeadFX = 'None'; //Sound FX Name
+            if (_.isUndefined(state.HealthColors.GM_NPCNames)) state.HealthColors.GM_NPCNames = true; //show GM NPC names?
+            if (_.isUndefined(state.HealthColors.NPCNames)) state.HealthColors.NPCNames = true; //show players NPC Names?
+            if (_.isUndefined(state.HealthColors.GM_PCNames)) state.HealthColors.GM_PCNames = true; //show GM PC names?
+            if (_.isUndefined(state.HealthColors.PCNames)) state.HealthColors.PCNames = true; //show players PC Names?
+            if (_.isUndefined(state.HealthColors.AuraSize)) state.HealthColors.AuraSize = 0.7; //set aura size?
+        },
+        registerEventHandlers = function() {
+            on('chat:message', handleInput);
+            on("change:token", handleToken);
+        };
+    /*-------------
+    RETURN OUTSIDE FUNCTIONS
+    -----------*/
+    return {
+        CheckInstall: checkInstall,
+        RegisterEventHandlers: registerEventHandlers
+    };
+}());
+//On Ready
+on('ready', function() {
+    'use strict';
+    HealthColors.CheckInstall();
+    HealthColors.RegisterEventHandlers();
+});
