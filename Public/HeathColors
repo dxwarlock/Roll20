@@ -7,7 +7,7 @@ Last Updated 2/14/2017
 /*global getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '0.9.42',
+    var version = '0.9.43',
         schemaVersion = '0.9.63',
 /*TOKEN CHANGE*/
         handleToken = function(obj) {
