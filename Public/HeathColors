@@ -32,9 +32,11 @@ TOKEN HANDLER
 //SET DEAD------------
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
+                    SetAuraNone(obj);
                     if (state.HealthColors.auraDeadFX !== "None") {
                         PlayDeath(state.HealthColors.auraDeadFX);
                     }
+                    return;
                 }
                 else if (dead === true) obj.set("status_dead", false);
 //MONSTER OR PLAYER------------
