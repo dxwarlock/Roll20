@@ -7,7 +7,7 @@ Last Updated 2/14/2017
 /*global spawnFxWithDefinition getObj Campaign state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.0.0',
+    var version = '1.0.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.0',
 /*--------
