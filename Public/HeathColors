@@ -235,7 +235,7 @@ FUNCTIONS
             var FX = state.HealthColors.auraDeadFX.substring(0, 3);
             sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + version + //--
                 '</u><br>Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
-                'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?(1, 2, or 3)|1}">' + state.HealthColors.auraBar + '</a><br>' + //--
+                'Bar: <a ' + style + '" href="!aura bar ?{Bar|1|2|3}">' + state.HealthColors.auraBar + '</a><br>' + //--
                 'Use Tint: <a ' + style + 'background-color:' + (state.HealthColors.auraTint !== true ? off : "") + ';" href="!aura tint">' + (state.HealthColors.auraTint !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Percentage: <a ' + style + '" href="!aura perc ?{Percent?|100}">' + state.HealthColors.auraPerc + '</a><br>' + //--
                 'Show on PC: <a ' + style + 'background-color:' + (state.HealthColors.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.HealthColors.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
