@@ -21,7 +21,7 @@ TOKEN HANDLER
             var dead = state.HealthColors.auraDead;
             if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
                 if (ColorOn !== true) return; //Check Toggle
-//CHECK FOR BARS ------------
+//CHECK BARS ------------
                 if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
                 var maxValue = parseInt(obj.get(bar + "_max"), 10);
                 var curValue = parseInt(obj.get(bar + "_value"), 10);
@@ -34,12 +34,15 @@ TOKEN HANDLER
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     SetAuraNone(obj);
-                    if (state.HealthColors.auraDeadFX !== "None") {
-                        PlayDeath(state.HealthColors.auraDeadFX);
-                    }
+                    if (state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
                     return;
                 }
                 else if (dead === true) obj.set("status_dead", false);
+//PERCENTAGE OFF------------
+                if (percReal > onPerc) {
+                    SetAuraNone(obj);
+                    return;
+                }
 //MONSTER OR PLAYER------------
                 var oCharacter = getObj('character', obj.get("_represents"));
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
@@ -47,10 +50,6 @@ TOKEN HANDLER
                 var pColor = '#ffffff';
                 var GM = '';
                 var PC = '';
-                if (percReal > onPerc) {
-                    SetAuraNone(obj);
-                    return;
-                }
                 if (type == 'Player') {
                     if (state.HealthColors.PCAura === false) return;
                     var cBy = oCharacter.get('controlledby');
@@ -75,8 +74,7 @@ TOKEN HANDLER
                 }
 //SPURT FX------------
                 if (state.HealthColors.FX == true) {
-                    if (prevValue == "") return;
-                    if(curValue == prevValue) return;
+                    if(curValue == prevValue || prevValue == "") return;
                     var size = obj.get("height");
                     var multi = size / 70;
                     var StartColor = [150, 0, 0, 1.0];
