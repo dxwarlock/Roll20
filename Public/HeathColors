@@ -7,9 +7,9 @@ Last Updated 2/14/2017
 /*global spawnFxWithDefinition getObj Campaign state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.0.1',
+    var version = '1.0.2',
         ScriptName = "HealthColors",
-        schemaVersion = '1.0.0',
+        schemaVersion = '1.0.1',
 /*--------
 TOKEN HANDLER
 --------*/
@@ -44,6 +44,8 @@ TOKEN HANDLER
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
                 var markerColor = newColor(perc);
                 var pColor = '#ffffff';
+                var GM = '';
+                var PC = '';
                 if (percReal > onPerc) {
                     SetAuraNone(obj);
                     return;
@@ -53,18 +55,22 @@ TOKEN HANDLER
                     var cBy = oCharacter.get('controlledby');
                     var player = getObj('player', cBy);
                     pColor = '#000000';
+                    GM = state.HealthColors.GM_PCNames;
+                    PC = state.HealthColors.PCNames
                     if (player !== undefined) pColor = player.get('color');
 
                 }
                 if (type == 'Monster') {
                     if (state.HealthColors.NPCAura === false) return;
+                    GM = state.HealthColors.GM_NPCNames;
+                    PC = state.HealthColors.NPCNames
                 }
 //SET AURA|TINT------------
                 if (tint === true) obj.set({
                     'tint_color': markerColor,
                 });
                 else {
-                    TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, GM, PC);
                 }
             }
         },
@@ -72,10 +78,12 @@ TOKEN HANDLER
 CHANGE FX
 --------*/
         HurtFX = function(obj, prev) {
+            log(state.HealthColors.auraBar);
             if (state.HealthColors.auraColorOn !== true || state.HealthColors.FX !== true) return; //Check Toggle
             if (Campaign().get("playerpageid") != obj.get("_pageid")) return;
             if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
                 var bar1 = parseInt(obj.get(state.HealthColors.auraBar + "_value"), 10);
+                log(bar1)
                 var bar1p = prev.bar1_value;
                 var size = obj.get("height");
                 var multi = size / 70;
@@ -213,7 +221,7 @@ FUNCTIONS
             }
         },
 //SET TOKEN COLORS------------
-        TokenSet = function(obj, sizeSet, markerColor, pColor) {
+        TokenSet = function(obj, sizeSet, markerColor, pColor,GM,PC) {
             var Pageon = getObj("page", obj.get("_pageid"));
             var scale = Pageon.get("scale_number") / 10;
             obj.set({
@@ -223,8 +231,8 @@ FUNCTIONS
                 'aura2_color': pColor,
                 'showplayers_aura1': true,
                 'showplayers_aura2': true,
-                'showname': state.HealthColors.GM_PCNames,
-                'showplayers_name': state.HealthColors.PCNames
+                'showname': GM,
+                'showplayers_name': PC
             });
         },
 //HELP MENU------------
