@@ -204,7 +204,7 @@ FUNCTIONS
             if (track) {
                 track.set('playing', false);
                 track.set('softstop', false);
-                track.set('volume', 100);
+                track.set('volume', 50);
                 track.set('playing', true);
             }
             else {
