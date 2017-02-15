@@ -232,7 +232,7 @@ FUNCTIONS
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="text-align:center; width: 35px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
-            var FX = state.HealthColors.auraDeadFX.substring(0, 4);
+            var FX = state.HealthColors.auraDeadFX.substring(0, 3);
             sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + version + //--
                 '</u><br>Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{BarNumber?(1, 2, or 3)|1}">' + state.HealthColors.auraBar + '</a><br>' + //--
