@@ -7,13 +7,13 @@ Last Updated 2/14/2017
 /*global spawnFxWithDefinition getObj Campaign state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.0.2',
+    var version = '1.0.3',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.1',
 /*--------
 TOKEN HANDLER
 --------*/
-        handleToken = function(obj) {
+        handleToken = function(obj, prev) {
             var ColorOn = state.HealthColors.auraColorOn;
             var bar = state.HealthColors.auraBar;
             var tint = state.HealthColors.auraTint;
@@ -25,6 +25,7 @@ TOKEN HANDLER
                 if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
                 var maxValue = parseInt(obj.get(bar + "_max"), 10);
                 var curValue = parseInt(obj.get(bar + "_value"), 10);
+                var prevValue = prev[bar + "_value"];
                 if (isNaN(maxValue) && isNaN(curValue)) return;
 //CALC PERCENTAGE------------
                 var percReal = Math.round((curValue / maxValue) * 100);
@@ -72,47 +73,39 @@ TOKEN HANDLER
                 else {
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, GM, PC);
                 }
-            }
-        },
-/*--------
-CHANGE FX
---------*/
-        HurtFX = function(obj, prev) {
-            log(state.HealthColors.auraBar);
-            if (state.HealthColors.auraColorOn !== true || state.HealthColors.FX !== true) return; //Check Toggle
-            if (Campaign().get("playerpageid") != obj.get("_pageid")) return;
-            if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
-                var bar1 = parseInt(obj.get(state.HealthColors.auraBar + "_value"), 10);
-                log(bar1)
-                var bar1p = prev.bar1_value;
-                var size = obj.get("height");
-                var multi = size / 70;
-                var StartColor = [150, 0, 0, 1.0];
-                var EndColor = [255, 0, 0, 0];
-                 if (bar1 > bar1p && bar1p !== "") {
-                    StartColor = [0, 255, 0, 1.0];
-                    EndColor = [255, 255, 255, 0];
+//SPURT FX------------
+                if (state.HealthColors.FX == true) {
+                    if (prevValue == "") return;
+                    if(curValue == prevValue) return;
+                    var size = obj.get("height");
+                    var multi = size / 70;
+                    var StartColor = [150, 0, 0, 1.0];
+                    var EndColor = [255, 0, 0, 0];
+                     if (curValue > prevValue && prevValue !== "") {
+                        StartColor = [0, 255, 0, 1.0];
+                        EndColor = [255, 255, 255, 0];
+                    }
+                    var HITS = {
+                        "maxParticles": 50,
+                        "duration": 50,
+                        "size": size / 10,
+                        "sizeRandom": 3,
+                        "lifeSpan": 25,
+                        "lifeSpanRandom": 5,
+                        "speed": multi * 8,
+                        "speedRandom": multi * 2,
+                        "gravity": {
+                            "x": multi * 0.01,
+                            "y": multi * 0.65
+                        },
+                        "angle": 270,
+                        "angleRandom": 15,
+                        "emissionRate": 5,
+                        "startColour": StartColor,
+                        "endColour": EndColor,
+                    };
+                    spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
                 }
-                var HITS = {
-                    "maxParticles": 50,
-                    "duration": 50,
-                    "size": size / 10,
-                    "sizeRandom": 3,
-                    "lifeSpan": 25,
-                    "lifeSpanRandom": 5,
-                    "speed": multi * 8,
-                    "speedRandom": multi * 2,
-                    "gravity": {
-                        "x": multi * 0.01,
-                        "y": multi * 0.65
-                    },
-                    "angle": 270,
-                    "angleRandom": 15,
-                    "emissionRate": 5,
-                    "startColour": StartColor,
-                    "endColour": EndColor,
-                };
-                if (bar1p !== "") spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
             }
         },
 /*--------
@@ -369,7 +362,6 @@ FUNCTIONS
         registerEventHandlers = function() {
             on('chat:message', handleInput);
             on("change:token", handleToken);
-            on('change:graphic:' + state.HealthColors.auraBar + '_value', HurtFX);
         };
 /*-------------
 RETURN OUTSIDE FUNCTIONS
