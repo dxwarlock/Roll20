@@ -10,9 +10,9 @@ var HealthColors = HealthColors || (function() {
     var version = '1.0.4',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        /*--------
-        TOKEN HANDLER
-        --------*/
+/*--------
+TOKEN HANDLER
+--------*/
         handleToken = function(obj, prev) {
             var ColorOn = state.HealthColors.auraColorOn;
             var bar = state.HealthColors.auraBar;
@@ -21,7 +21,7 @@ var HealthColors = HealthColors || (function() {
             var dead = state.HealthColors.auraDead;
             if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
                 if (ColorOn !== true) return; //Check Toggle
-                //CHECK BARS ------------
+//CHECK BARS ------------
                 if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
                 var maxValue = parseInt(obj.get(bar + "_max"), 10);
                 var curValue = parseInt(obj.get(bar + "_value"), 10);
@@ -30,7 +30,7 @@ var HealthColors = HealthColors || (function() {
                 //CALC PERCENTAGE------------
                 var percReal = Math.round((curValue / maxValue) * 100);
                 var perc = Math.round((curValue / maxValue) * 120);
-                //SET DEAD------------
+//SET DEAD------------
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     SetAuraNone(obj);
@@ -38,12 +38,12 @@ var HealthColors = HealthColors || (function() {
                     return;
                 }
                 else if (dead === true) obj.set("status_dead", false);
-                //PERCENTAGE OFF------------
+//PERCENTAGE OFF------------
                 if (percReal > onPerc) {
                     SetAuraNone(obj);
                     return;
                 }
-                //MONSTER OR PLAYER------------
+//CHECK DISABLED TOKEN------------
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if (oCharacter !== undefined) {
                     if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter);
@@ -63,7 +63,9 @@ var HealthColors = HealthColors || (function() {
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                     if (UseAura == "NO") return;
                 }
+//CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+//IF PLAYER------------
                 var markerColor = newColor(perc);
                 var pColor = '#ffffff';
                 var GM = '';
@@ -90,6 +92,7 @@ var HealthColors = HealthColors || (function() {
                     }
 
                 }
+//IF MONSTER------------
                 if (type == 'Monster') {
                     if (state.HealthColors.NPCAura === false) return;
                     GM = state.HealthColors.GM_NPCNames;
@@ -107,14 +110,14 @@ var HealthColors = HealthColors || (function() {
                         });
                     }
                 }
-                //SET AURA|TINT------------
+//SET AURA|TINT------------
                 if (tint === true) obj.set({
                     'tint_color': markerColor,
                 });
                 else {
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
-                //SPURT FX------------
+//SPURT FX------------
                 if (state.HealthColors.FX == true) {
                     if (curValue == prevValue || prevValue == "") return;
                     var size = obj.get("height");
@@ -148,9 +151,9 @@ var HealthColors = HealthColors || (function() {
                 }
             }
         },
-        /*--------
-        CHAT MESSAGE
-        --------*/
+/*--------
+CHAT MESSAGE
+--------*/
         handleInput = function(msg) {
             var msgFormula = msg.content.split(/\s+/);
             var command = msgFormula[0].toUpperCase();
@@ -232,14 +235,14 @@ var HealthColors = HealthColors || (function() {
                 }
             }
         },
-        /*--------
-        FUNCTIONS
-        --------*/
-        //WHISPER GM------------
+/*--------
+FUNCTIONS
+--------*/
+//WHISPER GM------------
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
-        //DEATH SOUND------------
+//DEATH SOUND------------
         PlayDeath = function(trackname) {
             var track = findObjs({
                 type: 'jukeboxtrack',
@@ -255,7 +258,7 @@ var HealthColors = HealthColors || (function() {
                 log("No track found");
             }
         },
-        //CREATE USECOLOR ATTR------------
+//CREATE USECOLOR ATTR------------
         CreateAttrib = function(oCharacter) {
             log("Creating USECOLOR");
             createObj("attribute", {
@@ -264,7 +267,7 @@ var HealthColors = HealthColors || (function() {
                 characterid: oCharacter.id
             });
         },
-        //SET TOKEN COLORS------------
+//SET TOKEN COLORS------------
         TokenSet = function(obj, sizeSet, markerColor, pColor) {
             var Pageon = getObj("page", obj.get("_pageid"));
             var scale = Pageon.get("scale_number") / 10;
@@ -277,7 +280,7 @@ var HealthColors = HealthColors || (function() {
                 'showplayers_aura2': true,
             });
         },
-        //HELP MENU------------
+//HELP MENU------------
         aurahelp = function() {
             var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
@@ -312,7 +315,7 @@ var HealthColors = HealthColors || (function() {
             if (state == "Off") color = disable;
             return color;
         },
-        //REMOVE ALL------------
+//REMOVE ALL------------
         SetAuraNone = function(obj) {
             var tint = state.HealthColors.auraTint;
             if (tint === true) {
@@ -327,17 +330,17 @@ var HealthColors = HealthColors || (function() {
                 });
             }
         },
-        //SET TOKEN COLORS------------
+//SET TOKEN COLORS------------
         newColor = function(ratio) {
             var color = hsl2rgb(ratio, 100, 50);
             var hex = rgbToHex(color.r, color.g, color.b);
             return (hex);
         },
-        //RGB TO HEX COLOR------------
+//RGB TO HEX COLOR------------
         rgbToHex = function(r, g, b) {
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         },
-        //HSL TO RGB COLOR------------
+//HSL TO RGB COLOR------------
         hsl2rgb = function(h, s, l) {
             var r, g, b, m, c, x;
             if (!isFinite(h)) h = 0;
@@ -390,7 +393,7 @@ var HealthColors = HealthColors || (function() {
                 b: b
             };
         },
-        //CHECK INSTALL SET STATE------------
+//CHECK INSTALL SET STATE------------
         checkInstall = function() {
             log('<' + ScriptName + ' v' + version + ' Ready>');
             if (!_.has(state, 'HealthColors') || state.HealthColors.schemaVersion !== schemaVersion) {
@@ -419,9 +422,9 @@ var HealthColors = HealthColors || (function() {
             on('chat:message', handleInput);
             on("change:token", handleToken);
         };
-    /*-------------
-    RETURN OUTSIDE FUNCTIONS
-    -----------*/
+/*-------------
+RETURN OUTSIDE FUNCTIONS
+-----------*/
     return {
         CheckInstall: checkInstall,
         RegisterEventHandlers: registerEventHandlers
