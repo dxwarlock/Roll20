@@ -2,16 +2,16 @@
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 2/14/2017
+Last Updated 2/23/2017
 */
 /*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.0.4',
+    var version = '1.1.0',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
 /*--------
-TOKEN HANDLER
+ON TOKEN UPDATE
 --------*/
         handleToken = function(obj, prev) {
             var ColorOn = state.HealthColors.auraColorOn;
@@ -27,7 +27,7 @@ TOKEN HANDLER
                 var curValue = parseInt(obj.get(bar + "_value"), 10);
                 var prevValue = prev[bar + "_value"];
                 if (isNaN(maxValue) && isNaN(curValue)) return;
-                //CALC PERCENTAGE------------
+//CALC PERCENTAGE------------
                 var percReal = Math.round((curValue / maxValue) * 100);
                 var perc = Math.round((curValue / maxValue) * 120);
 //SET DEAD------------
@@ -54,7 +54,8 @@ TOKEN HANDLER
                     }, {
                         caseInsensitive: true
                     })[0];
-                    var UseAura = UseAuraAtt.get("current").toUpperCase();
+                    var UseAura = UseAuraAtt.get("current");
+                    UseAura = UseAura.toString().toUpperCase();
                     if (UseAura != "YES" && UseAura != "NO") {
                         UseAuraAtt.set('current', "YES");
                         var name = oCharacter.get('name');
@@ -119,13 +120,15 @@ TOKEN HANDLER
                 }
 //SPURT FX------------
                 if (state.HealthColors.FX == true) {
+                    var HealColor = HEXtoRGB(state.HealthColors.HealFX);
+                    var HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
                     if (curValue == prevValue || prevValue == "") return;
                     var size = obj.get("height");
                     var multi = size / 70;
-                    var StartColor = [150, 0, 0, 1.0];
+                    var StartColor = HurtColor;
                     var EndColor = [255, 0, 0, 0];
                     if (curValue > prevValue && prevValue !== "") {
-                        StartColor = [0, 255, 0, 1.0];
+                        StartColor = HealColor;
                         EndColor = [255, 255, 255, 0];
                     }
                     var HITS = {
@@ -153,7 +156,7 @@ TOKEN HANDLER
         },
 /*--------
 CHAT MESSAGE
---------*/
+ --------*/
         handleInput = function(msg) {
             var msgFormula = msg.content.split(/\s+/);
             var command = msgFormula[0].toUpperCase();
@@ -229,6 +232,18 @@ CHAT MESSAGE
                             state.HealthColors.FX = !state.HealthColors.FX;
                             aurahelp();
                             break;
+                        case "HEAL":
+                            var UPPER = msgFormula[2];
+                            UPPER = UPPER.toUpperCase();
+                            state.HealthColors.HealFX = UPPER;
+                            aurahelp();
+                            break;
+                        case "HURT":
+                            var UPPER = msgFormula[2];
+                            UPPER = UPPER.toUpperCase();
+                            state.HealthColors.HurtFX = UPPER;
+                            aurahelp();
+                            break;
                         default:
                             return;
                     }
@@ -284,11 +299,13 @@ FUNCTIONS
         aurahelp = function() {
             var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
-            var style = 'style="text-align:center; font-size: 9pt; width: 35px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
+            var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 45px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
             var disable = "#D6D6D6";
+            var HR = "<hr style='background-color: #000000; margin: 5px; border-width:0;color: #000000;height: 1px;'/>";
             var FX = state.HealthColors.auraDeadFX.substring(0, 4);
-            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>Version: ' + version + '</u><br>' + //--
+            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>HealthColors Version: ' + version + '</u><br>' + //--
+                HR + //--
                 'Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{Bar|1|2|3}">' + state.HealthColors.auraBar + '</a><br>' + //--
                 'Use Tint: <a ' + style + 'background-color:' + (state.HealthColors.auraTint !== true ? off : "") + ';" href="!aura tint">' + (state.HealthColors.auraTint !== true ? "No" : "Yes") + '</a><br>' + //--
@@ -297,18 +314,22 @@ FUNCTIONS
                 'Show on NPC: <a ' + style + 'background-color:' + (state.HealthColors.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.HealthColors.NPCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show Dead: <a ' + style + 'background-color:' + (state.HealthColors.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.HealthColors.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
                 'DeathSFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + FX + '</a><br>' + //--
-                '<hr>' + //--
+                HR + //--
                 'Global GM Sees NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_NPCNames, off, disable) + ';" href="!aura gmnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_NPCNames + '</a><br>' + //---
                 'Global GM Sees PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_PCNames, off, disable) + ';" href="!aura gmpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_PCNames + '</a><br>' + //--
-                '<hr>' + //--
+                HR + //--
                 ' Global PC Sees NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.NPCNames, off, disable) + ';" href="!aura pcnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.NPCNames + '</a><br>' + //--
                 ' Global PC Sees PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.PCNames, off, disable) + ';" href="!aura pcpc ?{Setting|Yes|No|Off}">' + state.HealthColors.PCNames + '</a><br>' + //--
-                '<hr>' + //--
+                HR + //--
                 'Aura Size: <a ' + style + '" href="!aura size ?{Size?|0.7}">' + state.HealthColors.AuraSize + '</a><br>' + //--
                 'One Offs: <a ' + style + 'background-color:' + (state.HealthColors.OneOff !== true ? off : "") + ';" href="!aura ONEOFF">' + (state.HealthColors.OneOff !== true ? "No" : "Yes") + '</a><br>' + //--
                 'FX: <a ' + style + 'background-color:' + (state.HealthColors.FX !== true ? off : "") + ';" href="!aura FX">' + (state.HealthColors.FX !== true ? "No" : "Yes") + '</a><br>' + //--
+                'HealFX Color: <a ' + style + 'background-color:#' + state.HealthColors.HealFX + ';""href="!aura HEAL ?{Sound Name?|00FF00}">' + state.HealthColors.HealFX + '</a><br>' + //--
+                'HurtFX Color: <a ' + style + 'background-color:#' + state.HealthColors.HurtFX + ';""href="!aura HURT ?{Sound Name?|FF0000}">' + state.HealthColors.HurtFX + '</a><br>' + //--
+                HR + //--
                 '</div>');
         },
+//OFF BUTTON COLORS------------
         ButtonColor = function(state, off, disable) {
             var color;
             if (state == "No") color = off;
@@ -335,6 +356,19 @@ FUNCTIONS
             var color = hsl2rgb(ratio, 100, 50);
             var hex = rgbToHex(color.r, color.g, color.b);
             return (hex);
+        },
+//HEX TO RGB------------
+        HEXtoRGB = function(hex) {
+            let parts = hex.match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+            if (parts) {
+                let rgb = _.chain(parts)
+                    .rest()
+                    .map((d) => parseInt(d, 16))
+                    .value();
+                rgb.push(1.0);
+                return rgb;
+            }
+            return [0, 0, 0, 1.0];
         },
 //RGB TO HEX COLOR------------
         rgbToHex = function(r, g, b) {
@@ -416,7 +450,9 @@ FUNCTIONS
             if (_.isUndefined(state.HealthColors.GM_PCNames)) state.HealthColors.GM_PCNames = "Yes"; //show GM PC names?
             if (_.isUndefined(state.HealthColors.PCNames)) state.HealthColors.PCNames = "Yes"; //show players PC Names?
             if (_.isUndefined(state.HealthColors.AuraSize)) state.HealthColors.AuraSize = 0.7; //set aura size?
-            if (_.isUndefined(state.HealthColors.FX)) state.HealthColors.FX = true; //set aura size?
+            if (_.isUndefined(state.HealthColors.FX)) state.HealthColors.FX = true; //set FX ON/OFF?
+            if (_.isUndefined(state.HealthColors.HealFX)) state.HealthColors.HealFX = "00FF00"; //set FX HEAL COLOR
+            if (_.isUndefined(state.HealthColors.HurtFX)) state.HealthColors.HurtFX = "FF0000"; //set FX HURT COLOR?
         },
         registerEventHandlers = function() {
             on('chat:message', handleInput);
