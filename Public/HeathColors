@@ -2,7 +2,7 @@
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 2/23/2017
+Last Updated 2/24/2017
 */
 /*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
@@ -119,7 +119,7 @@ ON TOKEN UPDATE
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
 //SPURT FX------------
-                if (state.HealthColors.FX == true) {
+                if (state.HealthColors.FX == true && obj.get("layer") == "objects") {
                     var HealColor = HEXtoRGB(state.HealthColors.HealFX);
                     var HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
                     if (curValue == prevValue || prevValue == "") return;
