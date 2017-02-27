@@ -2,15 +2,15 @@
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 2/24/2017
+Last Updated 2/27/2017
 */
 /*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.1.1',
+    var version = '1.2.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Feb 24 2017",
+        Updated = "Feb 27 2017",
 /*--------
 ON TOKEN UPDATE
 --------*/
@@ -22,35 +22,20 @@ ON TOKEN UPDATE
             var dead = state.HealthColors.auraDead;
             if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
                 if (ColorOn !== true) return; //Check Toggle
-//CHECK BARS------------
-                if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
-                var maxValue = parseInt(obj.get(bar + "_max"), 10);
-                var curValue = parseInt(obj.get(bar + "_value"), 10);
-                var prevValue = prev[bar + "_value"];
-                if (isNaN(maxValue) && isNaN(curValue)) return;
-//CALC PERCENTAGE------------
-                var perc = Math.round((curValue / maxValue) * 100);
-                var percReal = Math.min(100, perc);
-//SET DEAD------------
-                if (curValue <= 0 && dead === true) {
-                    obj.set("status_dead", true);
-                    SetAuraNone(obj);
-                    if (state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
-                    return;
-                }
-                else if (dead === true) obj.set("status_dead", false);
-//PERCENTAGE OFF------------
-                if (percReal > onPerc) {
-                    SetAuraNone(obj);
-                    return;
-                }
-//CHECK DISABLED TOKEN------------
+//ATTRIBUTE CHECK------------
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if (oCharacter !== undefined) {
-                    if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter);
+    //SET BLOOD ATTRIB------------
+                    if (getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
+                    var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
+                    var UseBlood = Blood.get("current");
+                    UseBlood = UseBlood.toString().toUpperCase();
+    //SET DISABLED AURA/TINT ATTRIB------------
+                    if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
                     var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
                     var UseAura = UseAuraAtt.get("current");
                     UseAura = UseAura.toString().toUpperCase();
+    //DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     if (UseAura != "YES" && UseAura != "NO") {
                         UseAuraAtt.set('current', "YES");
                         var name = oCharacter.get('name');
@@ -59,11 +44,32 @@ ON TOKEN UPDATE
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                     if (UseAura == "NO") return;
                 }
+//CHECK BARS------------
+                if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
+                var maxValue = parseInt(obj.get(bar + "_max"), 10);
+                var curValue = parseInt(obj.get(bar + "_value"), 10);
+                var prevValue = prev[bar + "_value"];
+                if (isNaN(maxValue) && isNaN(curValue)) return;
+    //CALC PERCENTAGE------------
+                var perc = Math.round((curValue / maxValue) * 100);
+                var percReal = Math.min(100, perc);
+    //SET DEAD------------
+                if (curValue <= 0 && dead === true) {
+                    obj.set("status_dead", true);
+                    SetAuraNone(obj);
+                    if (state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
+                    return;
+                }
+                else if (dead === true) obj.set("status_dead", false);
+    //PERCENTAGE OFF------------
+                if (percReal > onPerc) {
+                    SetAuraNone(obj);
+                    return;
+                }
 //CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-//IF PLAYER------------
-                var GM = '';
-                var PC = '';
+    //IF PLAYER------------
+                var GM = '', PC = '';
                 var markerColor = PercentToRGB(Math.min(100, percReal));
                 var pColor = '#ffffff';
                 if (type == 'Player') {
@@ -84,7 +90,7 @@ ON TOKEN UPDATE
                     }
 
                 }
-//IF MONSTER------------
+    //IF MONSTER------------
                 if (type == 'Monster') {
                     if (state.HealthColors.NPCAura === false) return;
                     GM = state.HealthColors.GM_NPCNames;
@@ -104,13 +110,14 @@ ON TOKEN UPDATE
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
 //SPURT FX------------
-                if (state.HealthColors.FX == true && obj.get("layer") == "objects") {
+                if (state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
                     if (curValue == prevValue || prevValue == "") return;
                     var amount = Math.abs(curValue - prevValue);
                     var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
-                    var HitSize = Math.max(HitSizeCalc , 0.2) * (_.random(70, 100) / 100);
+                    var HitSize = Math.max(HitSizeCalc, 0.2) * (_.random(60, 100) / 100);
                     var HealColor = HEXtoRGB(state.HealthColors.HealFX);
                     var HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
+                    if (UseBlood !== "DEFAULT") HurtColor = HEXtoRGB(UseBlood);
                     var size = obj.get("height");
                     var multi = size / 70;
                     var StartColor;
@@ -123,7 +130,7 @@ ON TOKEN UPDATE
                     }
                     else {
                         StartColor = HurtColor;
-                        EndColor = [100, 0, 0, 0];
+                        EndColor = [0, 0, 0, 0];
                         HITS = Hurt(HitSize, multi, StartColor, EndColor, size);
                     }
                     spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
@@ -229,11 +236,11 @@ CHAT MESSAGES
 /*--------
 FUNCTIONS
 --------*/
-//HURT FX----------
+    //HURT FX----------
         Hurt = function(HitSize, multi, StartColor, EndColor, size) {
             var FX = {
                 "maxParticles": 150,
-                "duration": 100 * HitSize,
+                "duration": 70 * HitSize,
                 "size": size / 10 * HitSize,
                 "sizeRandom": 3,
                 "lifeSpan": 25,
@@ -252,17 +259,17 @@ FUNCTIONS
             };
             return FX;
         },
-//HEAL FX----------
+    //HEAL FX----------
         Heal = function(HitSize, multi, StartColor, EndColor, size) {
             var FX = {
                 "maxParticles": 150,
                 "duration": 50 * HitSize,
                 "size": size / 10 * HitSize,
                 "sizeRandom": 15 * HitSize,
-                "lifeSpan": 50,
+                "lifeSpan": multi * 50,
                 "lifeSpanRandom": 30,
-                "speed": multi / 2,
-                "speedRandom": multi / 2 * 1.5,
+                "speed": multi * 0.5,
+                "speedRandom": multi / 2 * 1.1,
                 "angle": 0,
                 "angleRandom": 180,
                 "emissionRate": 1000,
@@ -271,7 +278,7 @@ FUNCTIONS
             };
             return FX;
         },
-//WHISPER GM------------
+    //WHISPER GM------------
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
@@ -288,12 +295,12 @@ FUNCTIONS
                 log("No track found");
             }
         },
-//CREATE USECOLOR ATTR------------
-        CreateAttrib = function(oCharacter) {
-            log("Creating USECOLOR");
-            createObj("attribute", {name: 'USECOLOR',current: 'YES',characterid: oCharacter.id});
+    //CREATE USECOLOR ATTR------------
+        CreateAttrib = function(oCharacter, attrib, value) {
+            log("Creating "+ attrib);
+            createObj("attribute", {name: attrib,current: value,characterid: oCharacter.id});
         },
-//SET TOKEN COLORS------------
+    //SET TOKEN COLORS------------
         TokenSet = function(obj, sizeSet, markerColor, pColor) {
             var Pageon = getObj("page", obj.get("_pageid"));
             var scale = Pageon.get("scale_number") / 10;
@@ -306,16 +313,16 @@ FUNCTIONS
                 'showplayers_aura2': true,
             });
         },
-//HELP MENU------------
+    //HELP MENU------------
         aurahelp = function() {
-            var img = "http://worldcitizenfinancial.com/wp-content/uploads/2014/07/Light-Blue-Gradient-Texture-11-1024x576.jpg";
+            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);"
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 45px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
             var disable = "#D6D6D6";
             var HR = "<hr style='background-color: #000000; margin: 5px; border-width:0;color: #000000;height: 1px;'/>";
             var FX = state.HealthColors.auraDeadFX.substring(0, 4);
-            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; background-image: url(' + img + '); color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>HealthColors Version: ' + version + '</u><br>' + //--
+            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; '+img+' color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>HealthColors Version: ' + version + '</u><br>' + //--
                 HR + //--
                 'Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{Bar|1|2|3}">' + state.HealthColors.auraBar + '</a><br>' + //--
@@ -326,11 +333,11 @@ FUNCTIONS
                 'Show Dead: <a ' + style + 'background-color:' + (state.HealthColors.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.HealthColors.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
                 'DeathSFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + FX + '</a><br>' + //--
                 HR + //--
-                'Global GM Sees NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_NPCNames, off, disable) + ';" href="!aura gmnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_NPCNames + '</a><br>' + //---
-                'Global GM Sees PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_PCNames, off, disable) + ';" href="!aura gmpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_PCNames + '</a><br>' + //--
+                'GM Sees all NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_NPCNames, off, disable) + ';" href="!aura gmnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_NPCNames + '</a><br>' + //---
+                'GM Sees all PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_PCNames, off, disable) + ';" href="!aura gmpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_PCNames + '</a><br>' + //--
                 HR + //--
-                ' Global PC Sees NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.NPCNames, off, disable) + ';" href="!aura pcnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.NPCNames + '</a><br>' + //--
-                ' Global PC Sees PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.PCNames, off, disable) + ';" href="!aura pcpc ?{Setting|Yes|No|Off}">' + state.HealthColors.PCNames + '</a><br>' + //--
+                'PC Sees all NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.NPCNames, off, disable) + ';" href="!aura pcnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.NPCNames + '</a><br>' + //--
+                'PC Sees all PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.PCNames, off, disable) + ';" href="!aura pcpc ?{Setting|Yes|No|Off}">' + state.HealthColors.PCNames + '</a><br>' + //--
                 HR + //--
                 'Aura Size: <a ' + style + '" href="!aura size ?{Size?|0.7}">' + state.HealthColors.AuraSize + '</a><br>' + //--
                 'One Offs: <a ' + style + 'background-color:' + (state.HealthColors.OneOff !== true ? off : "") + ';" href="!aura ONEOFF">' + (state.HealthColors.OneOff !== true ? "No" : "Yes") + '</a><br>' + //--
@@ -340,14 +347,14 @@ FUNCTIONS
                 HR + //--
                 '</div>');
         },
-//OFF BUTTON COLORS------------
+    //OFF BUTTON COLORS------------
         ButtonColor = function(state, off, disable) {
             var color;
             if (state == "No") color = off;
             if (state == "Off") color = disable;
             return color;
         },
-//REMOVE ALL------------
+    //REMOVE ALL------------
         SetAuraNone = function(obj) {
             var tint = state.HealthColors.auraTint;
             if (tint === true) {
@@ -360,7 +367,7 @@ FUNCTIONS
                 });
             }
         },
-//PERC TO RGB------------
+    //PERC TO RGB------------
         PercentToRGB = function(percent) {
             if (percent === 100) percent = 99;
             var r, g, b;
@@ -376,12 +383,12 @@ FUNCTIONS
             var Gradient = rgbToHex(r, g, b);
             return Gradient;
         },
-//RGB TO HEX------------
+    //RGB TO HEX------------
         rgbToHex = function(r, g, b) {
             var Color = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
             return Color;
         },
-//HEX TO RGB------------
+    //HEX TO RGB------------
         HEXtoRGB = function(hex) {
             let parts = hex.match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
             if (parts) {
@@ -394,9 +401,9 @@ FUNCTIONS
             }
             return [0, 0, 0, 1.0];
         },
-//CHECK INSTALL & SET STATE------------
+    //CHECK INSTALL & SET STATE------------
         checkInstall = function() {
-            log('<' + ScriptName + ' v' + version + ' Ready>');
+            log('<' + ScriptName + ' v' + version + ' Ready [Updated: '+ Updated+']>');
             if (!_.has(state, 'HealthColors') || state.HealthColors.schemaVersion !== schemaVersion) {
                 log('<' + ScriptName + ' Updating Schema to v' + schemaVersion + '>');
                 state.HealthColors = {
