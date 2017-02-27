@@ -9,7 +9,6 @@
     "dependencies": [],
     "modifies": {
         "state.HealthColors": "read,write",
-        "state.autoRecovery": "read,write",
         "token.aura1":"read,write",
         "token.aura2":"read,write",
         "token.bar1": "read",
