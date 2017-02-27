@@ -53,6 +53,11 @@ ON TOKEN UPDATE
     //CALC PERCENTAGE------------
                 var perc = Math.round((curValue / maxValue) * 100);
                 var percReal = Math.min(100, perc);
+    //PERCENTAGE OFF------------
+                if (percReal > onPerc) {
+                    SetAuraNone(obj);
+                    return;
+                }
     //SET DEAD------------
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
@@ -61,11 +66,6 @@ ON TOKEN UPDATE
                     return;
                 }
                 else if (dead === true) obj.set("status_dead", false);
-    //PERCENTAGE OFF------------
-                if (percReal > onPerc) {
-                    SetAuraNone(obj);
-                    return;
-                }
 //CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
     //IF PLAYER------------
@@ -282,7 +282,7 @@ FUNCTIONS
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
-//DEATH SOUND------------
+    //DEATH SOUND------------
         PlayDeath = function(trackname) {
             var track = findObjs({type: 'jukeboxtrack',title: trackname})[0];
             if (track) {
@@ -315,7 +315,7 @@ FUNCTIONS
         },
     //HELP MENU------------
         aurahelp = function() {
-            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);"
+            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 45px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
