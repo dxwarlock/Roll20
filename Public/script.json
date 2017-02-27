@@ -3,7 +3,7 @@
     "script": "HealthColors.js",
     "version": "1.2.0",
     "previousversions": ["1.1.1"],
-    "description": "This is an example package.json file in order to show the formatting and syntax required for the script to be deployed in Roll20. It is important for this section to be filled out in detail, as it's the primary way users will get information about the purpose and use of the script. Included in the description section needs to be an example use or purpose, list and explanation of API Commands, and any other information necessary to operating the script.",
+    "description": "Script to set Health Colors on tokens based on a bar value API command !AURA",
     "authors": "DXWarlock",
     "roll20userid": "262130",
     "dependencies": [],
