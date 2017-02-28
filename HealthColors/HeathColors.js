@@ -240,7 +240,7 @@ FUNCTIONS
         Hurt = function(HitSize, multi, StartColor, EndColor, size) {
             var FX = {
                 "maxParticles": 150,
-                "duration": 70 * HitSize,
+                "duration": 50 * HitSize,
                 "size": size / 10 * HitSize,
                 "sizeRandom": 3,
                 "lifeSpan": 25,
