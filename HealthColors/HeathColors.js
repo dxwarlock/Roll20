@@ -60,10 +60,10 @@ ON TOKEN UPDATE
                 }
 //CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-    //IF PLAYER------------
                 var GM = '', PC = '';
                 var markerColor = PercentToRGB(Math.min(100, percReal));
                 var pColor = '#ffffff';
+    //IF PLAYER------------
                 if (type == 'Player') {
                     if (state.HealthColors.PCAura === false) return;
                     var cBy = oCharacter.get('controlledby');
