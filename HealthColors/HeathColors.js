@@ -2,7 +2,7 @@
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 2/27/2017
+Last Updated 3/1/2017
 */
 /*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
@@ -10,7 +10,7 @@ var HealthColors = HealthColors || (function() {
     var version = '1.2.2',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Feb 27 2017",
+        Updated = "Mar 1 2017",
 /*--------
 ON TOKEN UPDATE
 --------*/
@@ -127,7 +127,7 @@ ON TOKEN UPDATE
                     }
                     spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
                 }
-    //SET DEAD------------
+//SET DEAD------------
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     SetAuraNone(obj);
@@ -282,7 +282,7 @@ FUNCTIONS
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
-//DEATH SOUND------------
+    //DEATH SOUND------------
         PlayDeath = function(trackname) {
             var track = findObjs({type: 'jukeboxtrack',title: trackname})[0];
             if (track) {
