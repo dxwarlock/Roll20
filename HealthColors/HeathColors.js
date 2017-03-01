@@ -2,7 +2,7 @@
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 3/1/2017
+Last Updated 2/27/2017
 */
 /*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
@@ -10,7 +10,7 @@ var HealthColors = HealthColors || (function() {
     var version = '1.2.2',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 1 2017",
+        Updated = "Feb 27 2017",
 /*--------
 ON TOKEN UPDATE
 --------*/
@@ -28,12 +28,14 @@ ON TOKEN UPDATE
     //SET BLOOD ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
                     var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
+                    var UseBlood = Blood.get("current");
+                    UseBlood = UseBlood.toString().toUpperCase();
     //SET DISABLED AURA/TINT ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
                     var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-//DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     var UseAura = UseAuraAtt.get("current");
                     UseAura = UseAura.toString().toUpperCase();
+    //DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     if (UseAura != "YES" && UseAura != "NO") {
                         UseAuraAtt.set('current', "YES");
                         var name = oCharacter.get('name');
@@ -58,10 +60,10 @@ ON TOKEN UPDATE
                 }
 //CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+    //IF PLAYER------------
                 var GM = '', PC = '';
                 var markerColor = PercentToRGB(Math.min(100, percReal));
                 var pColor = '#ffffff';
-    //IF PLAYER------------
                 if (type == 'Player') {
                     if (state.HealthColors.PCAura === false) return;
                     var cBy = oCharacter.get('controlledby');
@@ -100,8 +102,6 @@ ON TOKEN UPDATE
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
 //SPURT FX------------
-                var UseBlood = Blood.get("current");
-                UseBlood = UseBlood.toString().toUpperCase();
                 if (state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
                     if (curValue == prevValue || prevValue == "") return;
                     var amount = Math.abs(curValue - prevValue);
@@ -127,7 +127,7 @@ ON TOKEN UPDATE
                     }
                     spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
                 }
-//SET DEAD------------
+    //SET DEAD------------
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     SetAuraNone(obj);
@@ -282,7 +282,7 @@ FUNCTIONS
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
-    //DEATH SOUND------------
+//DEATH SOUND------------
         PlayDeath = function(trackname) {
             var track = findObjs({type: 'jukeboxtrack',title: trackname})[0];
             if (track) {
