@@ -12,16 +12,12 @@ var HealthColors = HealthColors || (function() {
         schemaVersion = '1.0.3',
         Updated = "Feb 27 2017",
 /*--------
-ON TOKEN UPDATE
+ON TOKEN CHANGE/CREATE
 --------*/
         handleToken = function(obj, prev) {
-            var ColorOn = state.HealthColors.auraColorOn;
-            var bar = state.HealthColors.auraBar;
-            var tint = state.HealthColors.auraTint;
-            var onPerc = state.HealthColors.auraPerc;
-            var dead = state.HealthColors.auraDead;
+//CHECK IF TRIGGERED------------
+            if (state.HealthColors.auraColorOn !== true) return;
             if (obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
-                if (ColorOn !== true) return; //Check Toggle
 //ATTRIBUTE CHECK------------
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if (oCharacter !== undefined) {
@@ -37,35 +33,35 @@ ON TOKEN UPDATE
                     UseAura = UseAura.toString().toUpperCase();
     //DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     if (UseAura != "YES" && UseAura != "NO") {
-                        UseAuraAtt.set('current', "YES");
                         var name = oCharacter.get('name');
                         GMW(name + ": USECOLOR NOT SET TO YES or NO, SETTING TO YES");
+                        UseAuraAtt.set('current', "YES");
                     }
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                     if (UseAura == "NO") return;
                 }
 //CHECK BARS------------
-                if (obj.get(bar + "_max") === "" || obj.get(bar + "_value") === "") return;
-                var maxValue = parseInt(obj.get(bar + "_max"), 10);
-                var curValue = parseInt(obj.get(bar + "_value"), 10);
-                var prevValue = prev[bar + "_value"];
+                var barUsed = state.HealthColors.auraBar;
+                if (obj.get(barUsed + "_max") === "" || obj.get(barUsed + "_value") === "") return;
+                var maxValue = parseInt(obj.get(barUsed + "_max"), 10);
+                var curValue = parseInt(obj.get(barUsed + "_value"), 10);
+                var prevValue = prev[barUsed + "_value"];
                 if (isNaN(maxValue) && isNaN(curValue)) return;
     //CALC PERCENTAGE------------
                 var perc = Math.round((curValue / maxValue) * 100);
                 var percReal = Math.min(100, perc);
     //PERCENTAGE OFF------------
-                if (percReal > onPerc) {
+                if (percReal > state.HealthColors.auraPerc) {
                     SetAuraNone(obj);
                     return;
                 }
 //CHECK MONSTER OR PLAYER------------
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-    //IF PLAYER------------
                 var GM = '', PC = '';
                 var markerColor = PercentToRGB(Math.min(100, percReal));
                 var pColor = '#ffffff';
-                if (type == 'Player') {
-                    if (state.HealthColors.PCAura === false) return;
+    //IF PLAYER------------
+                if (type == 'Player' && state.HealthColors.PCAura !== false) {
                     var cBy = oCharacter.get('controlledby');
                     var player = getObj('player', cBy);
                     pColor = '#000000';
@@ -80,11 +76,9 @@ ON TOKEN UPDATE
                         PC = (PC == "Yes") ? true : false;
                         obj.set({'showplayers_name': PC});
                     }
-
                 }
     //IF MONSTER------------
-                if (type == 'Monster') {
-                    if (state.HealthColors.NPCAura === false) return;
+                if (type == 'Monster' && state.HealthColors.PCAura !== false) {
                     GM = state.HealthColors.GM_NPCNames;
                     if (GM != 'Off') {
                         GM = (GM == "Yes") ? true : false;
@@ -97,13 +91,13 @@ ON TOKEN UPDATE
                     }
                 }
 //SET AURA|TINT------------
-                if (tint === true) obj.set({'tint_color': markerColor,});
+                if (state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
                 else {
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
 //SPURT FX------------
                 if (state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
-                    if (curValue == prevValue || prevValue == "") return;
+                    if (curValue == prevValue || prevValue === "") return;
                     var amount = Math.abs(curValue - prevValue);
                     var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
                     var HitSize = Math.max(HitSizeCalc, 0.2) * (_.random(60, 100) / 100);
@@ -115,12 +109,12 @@ ON TOKEN UPDATE
                     var StartColor;
                     var EndColor;
                     var HITS;
-                    if (curValue > prevValue && prevValue !== "") {
+                    if (curValue > prevValue) {
                         StartColor = HealColor;
                         EndColor = [255, 255, 255, 0];
                         HITS = Heal(HitSize, multi, StartColor, EndColor, size);
                     }
-                    else {
+                    else if (curValue < prevValue) {
                         StartColor = HurtColor;
                         EndColor = [0, 0, 0, 0];
                         HITS = Hurt(HitSize, multi, StartColor, EndColor, size);
@@ -128,11 +122,11 @@ ON TOKEN UPDATE
                     spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
                 }
     //SET DEAD------------
+                var dead = state.HealthColors.auraDead;
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
                     SetAuraNone(obj);
                     if (state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
-                    return;
                 }
                 else if (dead === true) obj.set("status_dead", false);
             }
