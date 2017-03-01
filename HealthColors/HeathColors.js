@@ -28,14 +28,12 @@ ON TOKEN UPDATE
     //SET BLOOD ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
                     var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-                    var UseBlood = Blood.get("current");
-                    UseBlood = UseBlood.toString().toUpperCase();
     //SET DISABLED AURA/TINT ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
                     var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
+//DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     var UseAura = UseAuraAtt.get("current");
                     UseAura = UseAura.toString().toUpperCase();
-    //DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     if (UseAura != "YES" && UseAura != "NO") {
                         UseAuraAtt.set('current', "YES");
                         var name = oCharacter.get('name');
@@ -102,6 +100,8 @@ ON TOKEN UPDATE
                     TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
 //SPURT FX------------
+                var UseBlood = Blood.get("current");
+                UseBlood = UseBlood.toString().toUpperCase();
                 if (state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
                     if (curValue == prevValue || prevValue == "") return;
                     var amount = Math.abs(curValue - prevValue);
