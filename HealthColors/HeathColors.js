@@ -1,16 +1,15 @@
+/*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 /*
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
-Last Updated 3/1/2017
 */
-/*global createObj getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 var HealthColors = HealthColors || (function() {
     'use strict';
-    var version = '1.2.2',
+    var version = '1.2.3',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 1 2017",
+        Updated = "Mar 5 2017",
 /*--------
 ON TOKEN CHANGE/CREATE
 --------*/
@@ -21,24 +20,22 @@ ON TOKEN CHANGE/CREATE
 //ATTRIBUTE CHECK------------
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if (oCharacter !== undefined) {
-    //SET BLOOD ATTRIB------------
+    //CHECK BLOOD ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
                     var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
                     var UseBlood = Blood.get("current");
                     UseBlood = UseBlood.toString().toUpperCase();
-    //SET DISABLED AURA/TINT ATTRIB------------
+    //CHECK DISABLED AURA/TINT ATTRIB------------
                     if (getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
                     var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
                     var UseAura = UseAuraAtt.get("current");
                     UseAura = UseAura.toString().toUpperCase();
-    //DISABLE OR ENABLE AURA/TINT ON TOKEN------------
                     if (UseAura != "YES" && UseAura != "NO") {
                         var name = oCharacter.get('name');
                         GMW(name + ": USECOLOR NOT SET TO YES or NO, SETTING TO YES");
                         UseAuraAtt.set('current', "YES");
                     }
                     UseAura = UseAuraAtt.get("current").toUpperCase();
-                    if (UseAura == "NO") return;
                 }
 //CHECK BARS------------
                 var barUsed = state.HealthColors.auraBar;
@@ -91,9 +88,11 @@ ON TOKEN CHANGE/CREATE
                     }
                 }
 //SET AURA|TINT------------
-                if (state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
-                else {
-                    TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                if(UseAura !== "NO") {
+                    if (state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
+                    else {
+                        TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    }
                 }
 //SPURT FX------------
                 if (state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
@@ -121,7 +120,7 @@ ON TOKEN CHANGE/CREATE
                     }
                     spawnFxWithDefinition(obj.get("left"), obj.get("top"), HITS, obj.get("_pageid"));
                 }
-    //SET DEAD------------
+//SET DEAD------------
                 var dead = state.HealthColors.auraDead;
                 if (curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
@@ -276,9 +275,14 @@ FUNCTIONS
         GMW = function(text) {
             sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
-//DEATH SOUND------------
+    //DEATH SOUND------------
         PlayDeath = function(trackname) {
-            var track = findObjs({type: 'jukeboxtrack',title: trackname})[0];
+            if (trackname.indexOf(",") > 0) {
+                  var tracklist = trackname.split(",");
+                  var RandTrackName = tracklist[Math.floor(Math.random() * tracklist.length)];
+            }
+            else RandTrackName = trackname;
+            var track = findObjs({type: 'jukeboxtrack',title: RandTrackName})[0];
             if (track) {
                 track.set('playing', false);
                 track.set('softstop', false);
@@ -286,7 +290,7 @@ FUNCTIONS
                 track.set('playing', true);
             }
             else {
-                log("No track found");
+                log(ScriptName+": No track found named "+RandTrackName);
             }
         },
     //CREATE USECOLOR ATTR------------
@@ -325,7 +329,7 @@ FUNCTIONS
                 'Show on PC: <a ' + style + 'background-color:' + (state.HealthColors.PCAura !== true ? off : "") + ';" href="!aura pc">' + (state.HealthColors.PCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show on NPC: <a ' + style + 'background-color:' + (state.HealthColors.NPCAura !== true ? off : "") + ';" href="!aura npc">' + (state.HealthColors.NPCAura !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Show Dead: <a ' + style + 'background-color:' + (state.HealthColors.auraDead !== true ? off : "") + ';" href="!aura dead">' + (state.HealthColors.auraDead !== true ? "No" : "Yes") + '</a><br>' + //--
-                'DeathSFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|None}">' + FX + '</a><br>' + //--
+                'DeathSFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|'+state.HealthColors.auraDeadFX+'}">' + FX + '</a><br>' + //--
                 HR + //--
                 'GM Sees all NPC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_NPCNames, off, disable) + ';" href="!aura gmnpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_NPCNames + '</a><br>' + //---
                 'GM Sees all PC Names: <a ' + style + 'background-color:' + ButtonColor(state.HealthColors.GM_PCNames, off, disable) + ';" href="!aura gmpc ?{Setting|Yes|No|Off}">' + state.HealthColors.GM_PCNames + '</a><br>' + //--
