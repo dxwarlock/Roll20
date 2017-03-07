@@ -6,7 +6,7 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 */
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.3.0',
+    var version = '1.3.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
         Updated = "Mar 7 2017",
@@ -491,6 +491,16 @@ FUNCTIONS
                 createObj('custfx', {name: "-DefaultHeal",definition: Heal});
             }
         },
+    //OUTSIDE CALL------------
+        UpdateToken = function (obj, prev) {
+            if (obj.get("type") === "graphic") {
+                handleToken(obj, prev);
+            }
+            else {
+                GMW(ScriptName+"A script sent an object to update that is not a token!");
+                return;
+            }
+        },
         registerEventHandlers = function () {
             on('chat:message', handleInput);
             on("change:token", handleToken);
@@ -506,6 +516,7 @@ FUNCTIONS
 RETURN OUTSIDE FUNCTIONS
 ------------------------*/
     return {
+        Update: UpdateToken,
         CheckInstall: checkInstall,
         RegisterEventHandlers: registerEventHandlers
     };
