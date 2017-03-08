@@ -497,7 +497,7 @@ FUNCTIONS
                 handleToken(obj, prev);
             }
             else {
-                GMW(ScriptName+"A script sent an object to update that is not a token!");
+                GMW("A script sent an object to update that is not a token!");
                 return;
             }
         },
