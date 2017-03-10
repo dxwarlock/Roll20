@@ -412,24 +412,29 @@ FUNCTIONS
                 state.HealthColors = {schemaVersion: schemaVersion};
                 state.HealthColors.version = version;
             }
+        //CHECK STATE VALUES
             if(_.isUndefined(state.HealthColors.auraColorOn)) state.HealthColors.auraColorOn = true; //global on or off
             if(_.isUndefined(state.HealthColors.auraBar)) state.HealthColors.auraBar = "bar1"; //bar to use
+            if(_.isUndefined(state.HealthColors.auraTint)) state.HealthColors.auraTint = false; //use tint instead?
+            if(_.isUndefined(state.HealthColors.auraPercPC)) state.HealthColors.auraPercPC = 100; //precent to start showing PC
+            if(_.isUndefined(state.HealthColors.auraPerc)) state.HealthColors.auraPerc = 100; //precent to start showing NPC
+            //-----------------
             if(_.isUndefined(state.HealthColors.PCAura)) state.HealthColors.PCAura = true; //show players Health?
             if(_.isUndefined(state.HealthColors.NPCAura)) state.HealthColors.NPCAura = true; //show NPC Health?
-            if(_.isUndefined(state.HealthColors.auraTint)) state.HealthColors.auraTint = false; //use tint instead?
-            if(_.isUndefined(state.HealthColors.auraPerc)) state.HealthColors.auraPerc = 100; //precent to start showing NPC
-            if(_.isUndefined(state.HealthColors.auraPercPC)) state.HealthColors.auraPercPC = 100; //precent to start showing PC
-            if(_.isUndefined(state.HealthColors.auraDead)) state.HealthColors.auraDead = true; //show dead X status NPC
             if(_.isUndefined(state.HealthColors.auraDeadPC)) state.HealthColors.auraDeadPC = true; //show dead X status PC
-            if(_.isUndefined(state.HealthColors.auraDeadFX)) state.HealthColors.auraDeadFX = 'None'; //Sound FX Name
+            if(_.isUndefined(state.HealthColors.auraDead)) state.HealthColors.auraDead = true; //show dead X status NPC
+            //-----------------
             if(_.isUndefined(state.HealthColors.GM_NPCNames)) state.HealthColors.GM_NPCNames = "Yes"; //show GM NPC names?
             if(_.isUndefined(state.HealthColors.NPCNames)) state.HealthColors.NPCNames = "Yes"; //show players NPC Names?
+            //-----------------
             if(_.isUndefined(state.HealthColors.GM_PCNames)) state.HealthColors.GM_PCNames = "Yes"; //show GM PC names?
             if(_.isUndefined(state.HealthColors.PCNames)) state.HealthColors.PCNames = "Yes"; //show players PC Names?
+            //-----------------
             if(_.isUndefined(state.HealthColors.AuraSize)) state.HealthColors.AuraSize = 0.7; //set aura size?
             if(_.isUndefined(state.HealthColors.FX)) state.HealthColors.FX = true; //set FX ON/OFF?
             if(_.isUndefined(state.HealthColors.HealFX)) state.HealthColors.HealFX = "00FF00"; //set FX HEAL COLOR
             if(_.isUndefined(state.HealthColors.HurtFX)) state.HealthColors.HurtFX = "FF0000"; //set FX HURT COLOR?
+            if(_.isUndefined(state.HealthColors.auraDeadFX)) state.HealthColors.auraDeadFX = 'None'; //Sound FX Name
         //TokenMod CHECK
             if('undefined' !== typeof TokenMod && TokenMod.ObserveTokenChange) {
                 TokenMod.ObserveTokenChange(handleToken);
