@@ -9,7 +9,7 @@ var HealthColors = HealthColors || (function () {
     var version = '1.3.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 7 2017",
+        Updated = "Mar 8 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -17,7 +17,7 @@ ON TOKEN CHANGE/CREATE
 //CHECK IF TRIGGERED------------
             if(state.HealthColors.auraColorOn !== true) return;
             if(obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
-    //ATTRIBUTE CHECK------------
+    //**ATTRIBUTE CHECK------------//
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if(oCharacter !== undefined) {
         //CHECK BLOOD ATTRIB------------
@@ -37,7 +37,7 @@ ON TOKEN CHANGE/CREATE
                     }
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                 }
-    //CHECK BARS------------
+    //**CHECK BARS------------//
                 var barUsed = state.HealthColors.auraBar;
                 if(obj.get(barUsed + "_max") === "" || obj.get(barUsed + "_value") === "") return;
                 var maxValue = parseInt(obj.get(barUsed + "_max"), 10);
@@ -52,7 +52,7 @@ ON TOKEN CHANGE/CREATE
                     SetAuraNone(obj);
                     return;
                 }
-    //CHECK MONSTER OR PLAYER------------
+    //**CHECK MONSTER OR PLAYER------------//
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
                 var GM = '', PC = '';
                 var markerColor = PercentToRGB(Math.min(100, percReal));
@@ -64,38 +64,25 @@ ON TOKEN CHANGE/CREATE
                     pColor = '#000000';
                     if(player !== undefined) pColor = player.get('color');
                     GM = state.HealthColors.GM_PCNames;
-                    if(GM != 'Off') {
-                        GM = (GM == "Yes") ? true : false;
-                        obj.set({'showname': GM});
-                    }
                     PC = state.HealthColors.PCNames;
-                    if(PC != 'Off') {
-                        PC = (PC == "Yes") ? true : false;
-                        obj.set({'showplayers_name': PC});
-                    }
-                    if(UseAura !== "NO") {
-                        if(state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
-                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-                    }
+                    if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
         //IF MONSTER------------
-                if(type == 'Monster' && state.HealthColors.NPCAura !== false) {
+                else if(type == 'Monster' && state.HealthColors.NPCAura !== false) {
                     GM = state.HealthColors.GM_NPCNames;
-                    if(GM != 'Off') {
-                        GM = (GM == "Yes") ? true : false;
-                        obj.set({'showname': GM});
-                    }
                     PC = state.HealthColors.NPCNames;
-                    if(PC != 'Off') {
-                        PC = (PC == "Yes") ? true : false;
-                        obj.set({'showplayers_name': PC});
-                    }
-                    if(UseAura !== "NO") {
-                        if(state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
-                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-                    }
+                    if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
                 }
-    //SPURT FX------------
+        //SET SHOW NAMES------------
+                if(GM != 'Off') {
+                    GM = (GM == "Yes") ? true : false;
+                    obj.set({'showname': GM});
+                }
+                if(PC != 'Off') {
+                    PC = (PC == "Yes") ? true : false;
+                    obj.set({'showplayers_name': PC});
+                }
+    //**SPURT FX------------//
                 if(state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
                     if(curValue == prevValue || prevValue === "") return;
                     var HurtColor, HealColor, HITS, FX, aFX, FXArray = [];
@@ -149,7 +136,7 @@ ON TOKEN CHANGE/CREATE
                         SpawnFX(Scale, HitSize, obj.get("left"), obj.get("top"), FX, obj.get("_pageid"));
                     });
                 }
-    //SET DEAD------------
+    //**SET DEAD------------
                 var dead = state.HealthColors.auraDead;
                 if(curValue <= 0 && dead === true) {
                     obj.set("status_dead", true);
@@ -258,6 +245,10 @@ CHAT MESSAGES
 /*------------------------
 FUNCTIONS
 ------------------------*/
+    //WHISPER GM------------
+        GMW = function (text) {
+            sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
+        },
     //SPAWN FX------------
         SpawnFX = function (Scale,HitSize,left,top,FX,pageid) {
             _.defaults(FX, {
@@ -279,24 +270,20 @@ FUNCTIONS
             var newFX = {
                 "maxParticles": FX.maxParticles * HitSize,
                 "duration": FX.duration * HitSize,
-                "size": FX.size * Scale,
-                "sizeRandom": FX.sizeRandom * Scale,
+                "size": FX.size * Scale / 2,
+                "sizeRandom": FX.sizeRandom * Scale / 2,
                 "lifeSpan": FX.lifeSpan,
                 "lifeSpanRandom": FX.lifeSpanRandom,
                 "speed": FX.speed * Scale,
                 "speedRandom": FX.speedRandom * Scale,
                 "angle": FX.angle,
                 "angleRandom": FX.angleRandom,
-                "emissionRate": FX.emissionRate * HitSize,
+                "emissionRate": FX.emissionRate * HitSize * 2,
                 "startColour": FX.startColour,
                 "endColour": FX.endColour,
                 "gravity": {"x": FX.gravity.x * Scale,"y": FX.gravity.y * Scale},
             };
             spawnFxWithDefinition(left,top,newFX,pageid);
-        },
-    //WHISPER GM------------
-        GMW = function (text) {
-            sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
         },
     //DEATH SOUND------------
         PlayDeath = function (trackname) {
@@ -323,16 +310,19 @@ FUNCTIONS
         },
     //SET TOKEN COLORS------------
         TokenSet = function (obj, sizeSet, markerColor, pColor) {
-            var Pageon = getObj("page", obj.get("_pageid"));
-            var scale = Pageon.get("scale_number") / 10;
-            obj.set({
-                'aura1_radius': sizeSet * scale * 1.8,
-                'aura2_radius': sizeSet * scale * 0.1,
-                'aura1_color': markerColor,
-                'aura2_color': pColor,
-                'showplayers_aura1': true,
-                'showplayers_aura2': true,
-            });
+            if(state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
+            else {
+                var Pageon = getObj("page", obj.get("_pageid"));
+                var scale = Pageon.get("scale_number") / 10;
+                obj.set({
+                    'aura1_radius': sizeSet * scale * 1.8,
+                    'aura2_radius': sizeSet * scale * 0.1,
+                    'aura1_color': markerColor,
+                    'aura2_color': pColor,
+                    'showplayers_aura1': true,
+                    'showplayers_aura2': true,
+                });
+            }
         },
     //HELP MENU------------
         aurahelp = function () {
@@ -382,10 +372,7 @@ FUNCTIONS
                 obj.set({'tint_color': "transparent",});
             }
             else {
-                obj.set({
-                    'aura1_color': "",
-                    'aura2_color': "",
-                });
+                obj.set({'aura1_color': "",'aura2_color': "",});
             }
         },
     //PERC TO RGB------------
@@ -393,12 +380,10 @@ FUNCTIONS
             if(percent === 100) percent = 99;
             var r, g, b;
             if(percent < 50) {
-                g = Math.floor(255 * (percent / 50));
-                r = 255;
+                g = Math.floor(255 * (percent / 50)),r = 255;
             }
             else {
-                g = 255;
-                r = Math.floor(255 * ((50 - percent % 50) / 50));
+                g = 255, r = Math.floor(255 * ((50 - percent % 50) / 50));
             }
             b = 0;
             var Gradient = rgbToHex(r, g, b);
@@ -451,7 +436,8 @@ FUNCTIONS
             }
             var FXHurt = findObjs({_type: "custfx",name: "-DefaultHurt"}, {caseInsensitive: true})[0];
             var FXHeal = findObjs({_type: "custfx",name: "-DefaultHeal"}, {caseInsensitive: true})[0];
-            if(!FXHurt) {
+        //DEFAULT FX CHECK
+        if(!FXHurt) {
                 log(ScriptName + ' <Creating Default Hurt FX>');
                 var Hurt = {
                     "maxParticles": 150,
@@ -496,11 +482,9 @@ FUNCTIONS
             if (obj.get("type") === "graphic") {
                 handleToken(obj, prev);
             }
-            else {
-                GMW("A script sent an object to update that is not a token!");
-                return;
-            }
+            else GMW("Script sent non-Token to be updated!");
         },
+    //REGISTER TRIGGERS------------
         registerEventHandlers = function () {
             on('chat:message', handleInput);
             on("change:token", handleToken);
