@@ -1,0 +1,138 @@
+on("chat:message", function (msg) {
+    var tLOOT = '';
+    var msgTxt = msg.content;
+	if(msg.type == "api" && msgTxt.indexOf("!loot") !== -1) {
+		var msgFormula = msgTxt.split(" ");
+		//---------catch non players
+		var cWho = findObjs({_type: 'character',name: msg.who})[0];
+		if(cWho === undefined) {
+			cWho = RollRight(msg.playerid);
+			msg.who = cWho.get("name");
+		}
+		//---------check credits set
+		var oC = findObjs({name: "Credits",_type: "attribute",characterid: cWho.id}, {caseInsensitive: true})[0];
+		if(oC === undefined || oC.length === 0) {
+			sendChat(msg.who, '/direct No Credits Found, please set!');
+			return;
+		}
+		/*------------------
+        LOOT CALC
+        ------------------*/
+		else {
+			var aLoottext = fPart + "background-color:##0B3B0B;'>● " + msg.who + " Looks for loot..  ●</div>";
+			sendChat('', "/direct " + aLoottext);
+			//set times to run----------------------
+			var x = 0;
+			var times = msgFormula[1];
+			if(times > 20) {times = 20;}
+			while(x < times || x < 1) {
+				//---------set cash or loot
+				var loots = randomInteger(100);
+				//---------set cash or loot
+				log("-KcVBLxjpNV8rVybDpD0")
+/*------------------
+CASH LOOT
+------------------*/
+				if(loots <= 25) {
+					//Set Cash Value---------------------------------
+					var mColor = "#456646";
+					var level = fLevel();
+					var T = randomInteger(200)+randomInteger(50);
+					//---set big payout
+					var BigMoney = randomInteger(100);
+					var BigM = '';
+					if(BigMoney <= 10) {
+						var BigM = ("<a style='color:#00ff00'> BIG ");
+						T = (T * 20) + (150 * level);
+						mColor = "#009605";
+					}
+					var cR = Math.floor(T * (level));
+					//give money-------------------------
+					var credits = parseInt(oC.get("current"));
+					var credits = parseInt(credits);
+					var total = credits + cR;
+					oC.set('current', total);
+					var gold = total.toString().replace(/\B(?=(\d{2})+(?!\d))/g, " ");
+					//tell money-------------------------
+					var lootE = '<b><u>'+BigM+'MONEY:</a><br></b></u>' + cR + ' Credits. Your total: ' + total + ' </b>';
+					var img = "http:\\//i.imgur.com/PREQJkH.jpg";
+					tLOOT = tLOOT + lPart + "background-size:80px 60px; background-image: url("+img+");'>" + lootE +"</div>";
+				}
+/*------------------
+ITEM LOOT
+------------------*/
+				else if(loots <= 85) {
+					//mundane loot-------------------------
+					var items = findObjs({_type: "tableitem",_rollabletableid: "-JCg8SKoOgAP2zgFnXk_"});
+					var rand1 = randomInteger(items.length);
+					var chosen = items[rand1 - 1];
+					var loot = chosen.get("name");
+					var loot1 = loot.split(" ");
+					var a = myrolls(loot1);
+					var lootE = loot.replace(/\[.*?\]\]/g, a);
+					var img = "http:\\//i.imgur.com/hc669Eb.jpg";
+					tLOOT = tLOOT + lPart + "background-size: 100%; background-image: url("+img+");'><b><u> ITEM:</b></u> <a style='color:#888'>#"+rand1+" ("+loots+")</a><br>"+lootE+"</div>";
+				}
+				else if(loots <= 95) {
+					//mundane loot-------------------------
+					var items = findObjs({_type: "tableitem",_rollabletableid: "-KcVBLxjpNV8rVybDpD0"});
+					var rand1 = randomInteger(items.length);
+					var chosen = items[rand1 - 1];
+					var loot = chosen.get("name");
+					var loot1 = loot.split(" ");
+					var a = myrolls(loot1);
+					var lootE = loot.replace(/\[.*?\]\]/g, a);
+					var wQualList = ['Masterwork', 'Ornate', 'Fancy', 'Average', 'Poor', 'Cheap'];
+                    var wQual = wQualList[Math.floor(Math.random() * wQualList.length)];
+					var img = "http:\\//i.imgur.com/hc669Eb.jpg";
+					tLOOT = tLOOT + lPart + "background-size: 100%; background-image: url("+img+");'><b><u> ITEM:</b></u> <a style='color:#888'>#"+rand1+" ("+loots+")</a><br>"+wQual+" Quality "+lootE+"<b> (Appraise for value)</b></div>";
+				}
+/*------------------
+WEAPON LOOT
+------------------*/
+				else {
+					var items = findObjs({_type: "tableitem",_rollabletableid: "-JDlef2TgoMN63HS6hT1"});
+                    var rand1 = randomInteger(items.length);
+					var chosen = items[rand1 - 1];
+					var loot = chosen.get("name");
+					var loot1 = loot.split(" ");
+					var a = myrolls(loot1);
+					var lootE = loot.replace(/\[.*?\]\]/g, a);
+                    var wQualList = ['Excellent', 'Good', 'Average', 'Poor', 'Salvageable', 'Broken'];
+                    var wQual = wQualList[Math.floor(Math.random() * wQualList.length)];
+					var img = "http:\\//i.imgur.com/gGUKNRe.jpg";
+					tLOOT = tLOOT + lPart + "background-size: 100%; background-image: url("+img+");'><b><u>WEAPON:</b></u> <a style='color:#888'>#"+rand1+" ("+loots+")</a><br>"+wQual+" "+lootE+"</div>";
+				}
+				x++;
+			}
+			sendChat(msg.who, '/w gm ' + tLOOT);
+			sendChat(msg.who, "/w " + msg.who + ' ' + tLOOT);
+		};
+	}
+});
+on('chat:message', function (msg) {
+    if(msg.type == 'api' && msg.content.indexOf('!Ches1t') !== -1) {
+		var Names = [];
+		if(msg.selected == undefined) {
+			sendChat('', "/desc No one selected");
+			return;
+		}
+		var selected = msg.selected;
+		i = 0;
+		_.each(selected, function (obj) {
+			var token = getObj('graphic', msg.selected[i]._id);
+			if(token.get("represents") !== '') {
+				if(token.get('subtype') !== 'token') return;
+				var oCharacter = getObj('character', token.get("_represents"));
+				var name = (oCharacter.get('name'));
+				Names.push(oCharacter);
+			}
+			i++;
+		});
+		var rand = Names[Math.floor(Math.random() * Names.length)];
+		var name = (rand.get('name'));
+		pColor = GetPColor(rand);
+		var whoC = OuterDiv + iPart + "background-color:#"+pColor+";'><b>● Who: " + name + "  ●</div>";
+		sendChat('Picked', "/direct " +  whoC);
+	}
+});

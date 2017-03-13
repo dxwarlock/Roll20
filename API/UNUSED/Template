@@ -1,0 +1,48 @@
+/*
+global log state on getObj _ playerIsGM sendChat
+---CLOUD9 ERROR CLEARING---
+*/
+// Github:   https://github.com/shdwjk/Roll20API/blob/master/NAME/NAME.js
+// By:       The Aaron, Arcane Scriptomancer
+// Contact:  https://app.roll20.net/users/104025/the-aaron
+var NAME = NAME || (function() {
+    'use strict';
+    var version = '0.1.0',
+        lastUpdate = 1427601167,
+        schemaVersion = 0.1,
+        checkInstall = function() {
+            log('-=> NAME v' + version + ' <=-  [' + (new Date(lastUpdate * 1000)) + ']');
+            if(!_.has(state, 'NAME') || state.NAME.version !== schemaVersion) {
+                log('  > Updating Schema to v' + schemaVersion + ' <');
+                state.NAME = {
+                    version: schemaVersion
+                };
+            }
+        },
+        handleInput = function(msg) {
+            var args;
+            if(msg.type !== "api") {
+                return;
+            }
+            args = msg.content.split(/\s+/);
+            switch(args[0]) {
+                case '!NAME':
+                    break;
+            }
+        },
+        registerEventHandlers = function() {
+            on('chat:message', handleInput);
+            on('event', functionName);
+            on('event2', functionName2);
+            on('event3', functionName3);
+        };
+    return {
+        CheckInstall: checkInstall,
+        RegisterEventHandlers: registerEventHandlers
+    };
+}());
+on('ready', function() {
+    'use strict';
+    NAME.CheckInstall();
+    NAME.RegisterEventHandlers();
+});
