@@ -9,7 +9,7 @@ var HealthColors = HealthColors || (function () {
     var version = '1.3.3',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 10 2017",
+        Updated = "Mar 13 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
