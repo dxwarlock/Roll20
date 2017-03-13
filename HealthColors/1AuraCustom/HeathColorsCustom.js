@@ -331,8 +331,8 @@ FUNCTIONS
                 var Pageon = getObj("page", obj.get("_pageid"));
                 var scale = Pageon.get("scale_number") / 10;
                 obj.set({
-                    'aura2_radius': sizeSet * scale * 0.1,
-                    'aura2_color': pColor,
+                    'aura2_radius': sizeSet * scale * 1.8,
+                    'aura2_color': markerColor,
                     'showplayers_aura2': true,
                 });
             }
