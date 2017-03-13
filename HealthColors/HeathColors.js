@@ -54,22 +54,28 @@ ON TOKEN CHANGE/CREATE
                 var markerColor = PercentToHEX(Math.min(100, percReal));
                 var pColor = '#ffffff';
         //IF PLAYER------------
-                if(type == 'Player' && state.HealthColors.PCAura !== false) {
+                if(type == 'Player') {
                     var cBy = oCharacter.get('controlledby');
                     var player = getObj('player', cBy);
                     pColor = '#000000';
                     if(player !== undefined) pColor = player.get('color');
                     GM = state.HealthColors.GM_PCNames;
                     PC = state.HealthColors.PCNames;
-                    if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
-                    else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    if(state.HealthColors.PCAura !== false) {
+                        if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
+                        else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    }
+                    else SetAuraNone(obj);
                 }
         //IF MONSTER------------
-                else if(type == 'Monster' && state.HealthColors.NPCAura !== false) {
+                else if(type == 'Monster') {
                     GM = state.HealthColors.GM_NPCNames;
                     PC = state.HealthColors.NPCNames;
-                    if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
-                    else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    if(state.HealthColors.NPCAura !== false) {
+                        if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
+                        else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                    }
+                    else SetAuraNone(obj);
                 }
         //SET SHOW NAMES------------
                 if(GM != 'Off') {
