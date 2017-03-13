@@ -6,7 +6,7 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 */
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.3.2',
+    var version = '1.3.3',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
         Updated = "Mar 10 2017",
@@ -244,6 +244,11 @@ CHAT MESSAGES
                         state.HealthColors.HurtFX = UPPER;
                         aurahelp();
                         break;
+                    case "RESET":
+                        delete state.HealthColors;
+                        GMW("STATE RESET");
+                        checkInstall();
+                        break;
                     default:
                         return;
                     }
@@ -255,7 +260,10 @@ FUNCTIONS
 ------------------------*/
     //WHISPER GM------------
         GMW = function (text) {
-            sendChat('HealthColors', "/w GM <br><b> " + text + "</b>");
+            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
+            var DIV = "<div style='width: 100%; box-shadow: black; text-shadow: 4px; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000;";
+            var MSG = DIV + img +"'><b>"+text+"</b></div";
+            sendChat('HealthColors', "/w GM "+MSG);
         },
     //SPAWN FX------------
         SpawnFX = function (Scale,HitSize,left,top,FX,pageid) {
@@ -424,11 +432,11 @@ FUNCTIONS
             if(_.isUndefined(state.HealthColors.auraDeadPC)) state.HealthColors.auraDeadPC = true; //show dead X status PC
             if(_.isUndefined(state.HealthColors.auraDead)) state.HealthColors.auraDead = true; //show dead X status NPC
             //-----------------
-            if(_.isUndefined(state.HealthColors.GM_NPCNames)) state.HealthColors.GM_NPCNames = "Yes"; //show GM NPC names?
-            if(_.isUndefined(state.HealthColors.NPCNames)) state.HealthColors.NPCNames = "Yes"; //show players NPC Names?
-            //-----------------
             if(_.isUndefined(state.HealthColors.GM_PCNames)) state.HealthColors.GM_PCNames = "Yes"; //show GM PC names?
             if(_.isUndefined(state.HealthColors.PCNames)) state.HealthColors.PCNames = "Yes"; //show players PC Names?
+            //-----------------
+            if(_.isUndefined(state.HealthColors.GM_NPCNames)) state.HealthColors.GM_NPCNames = "Yes"; //show GM NPC names?
+            if(_.isUndefined(state.HealthColors.NPCNames)) state.HealthColors.NPCNames = "Yes"; //show players NPC Names?
             //-----------------
             if(_.isUndefined(state.HealthColors.AuraSize)) state.HealthColors.AuraSize = 0.7; //set aura size?
             if(_.isUndefined(state.HealthColors.FX)) state.HealthColors.FX = true; //set FX ON/OFF?
