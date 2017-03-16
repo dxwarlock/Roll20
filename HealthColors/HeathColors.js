@@ -18,6 +18,21 @@ ON TOKEN CHANGE/CREATE
 //CHECK IF TRIGGERED------------
             if(state.HealthColors.auraColorOn !== true || obj.get("layer") !== "objects") return;
             if(obj.get("represents") !== "" || (obj.get("represents") === "" && state.HealthColors.OneOff === true)) {
+    //**CHECK BARS------------//
+                var barUsed = state.HealthColors.auraBar;
+                var maxValue, curValue, prevValue;
+                if(obj.get(barUsed + "_max") !== "" || obj.get(barUsed + "_value") !== "") {
+                    maxValue = parseInt(obj.get(barUsed + "_max"), 10);
+                    curValue = parseInt(obj.get(barUsed + "_value"), 10);
+                    prevValue = prev[barUsed + "_value"];
+                }
+                if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
+        //CALC PERCENTAGE------------
+                var perc = Math.round((curValue / maxValue) * 100);
+                var percReal = Math.min(100, perc);
+                var markerColor = PercentToHEX(Math.min(100, percReal));
+                var pColor = '#ffffff';
+                var GM = '', PC = '';
     //**ATTRIBUTE CHECK------------//
                 var UseBlood, UseAura;
                 var oCharacter = getObj('character', obj.get("_represents"));
@@ -39,21 +54,6 @@ ON TOKEN CHANGE/CREATE
                     }
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                 }
-    //**CHECK BARS------------//
-                var barUsed = state.HealthColors.auraBar;
-                var maxValue, curValue, prevValue;
-                if(obj.get(barUsed + "_max") !== "" || obj.get(barUsed + "_value") !== "") {
-                    maxValue = parseInt(obj.get(barUsed + "_max"), 10);
-                    curValue = parseInt(obj.get(barUsed + "_value"), 10);
-                    prevValue = prev[barUsed + "_value"];
-                }
-                if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
-        //CALC PERCENTAGE------------
-                var perc = Math.round((curValue / maxValue) * 100);
-                var percReal = Math.min(100, perc);
-                var markerColor = PercentToHEX(Math.min(100, percReal));
-                var pColor = '#ffffff';
-                var GM = '', PC = '';
     //**CHECK MONSTER OR PLAYER------------//
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
         //IF PLAYER------------
@@ -98,55 +98,57 @@ ON TOKEN CHANGE/CREATE
                 }
         //SET SHOW NAMES------------
                 SetShowNames(GM,PC,obj);
-//**SPURT FX------------//
-                if(state.HealthColors.FX === true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
-                    var HurtColor, HealColor, FX, aFX, FXArray = [];
-                    var amount = Math.abs(curValue - prevValue);
-                    var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
-                    var Scale = obj.get("height") / 70;
-                    var HitSize = Math.max(HitSizeCalc, 0.2) * (_.random(60, 100) / 100);
-        //IF HEALED------------
-                    if(curValue > prevValue) {
-                        aFX = findObjs({_type: "custfx",name: '-DefaultHeal'}, {caseInsensitive: true})[0];
-                        FX = aFX.get("definition");
-                        HealColor = HEXtoRGB(state.HealthColors.HealFX);
-                        FX.startColour = HealColor;
-                        FXArray.push(FX);
-                    }
-        //IF HURT------------
-                    else if(curValue < prevValue) {
-                        aFX = findObjs({_type: "custfx",name: '-DefaultHurt'}, {caseInsensitive: true})[0];
-                        if(aFX) FX = aFX.get("definition");
-                //CHECK DEFAULT COLOR--
-                        if(UseBlood === "DEFAULT" || UseBlood === undefined) {
-                            HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
-                            FX.startColour = HurtColor;
+    //**SPURT FX------------//
+                if(curValue !== prevValue) {
+                    if(state.HealthColors.FX === true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
+                        var HurtColor, HealColor, FX, aFX, FXArray = [];
+                        var amount = Math.abs(curValue - prevValue);
+                        var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
+                        var Scale = obj.get("height") / 70;
+                        var HitSize = Math.max(HitSizeCalc, 0.2) * (_.random(60, 100) / 100);
+            //IF HEALED------------
+                        if(curValue > prevValue) {
+                            aFX = findObjs({_type: "custfx",name: '-DefaultHeal'}, {caseInsensitive: true})[0];
+                            FX = aFX.get("definition");
+                            HealColor = HEXtoRGB(state.HealthColors.HealFX);
+                            FX.startColour = HealColor;
                             FXArray.push(FX);
                         }
-                //ELSE CHECK CUSTOM COLOR/FX--
-                        else if(UseBlood !== "DEFAULT" && UseBlood !== undefined) {
-                            HurtColor = HEXtoRGB(UseBlood);
-                    //IF CUSTOM COLOR--
-                            if(_.difference(HurtColor, [0, 0, 0, 0]).length !== 0) {
+            //IF HURT------------
+                        else if(curValue < prevValue) {
+                            aFX = findObjs({_type: "custfx",name: '-DefaultHurt'}, {caseInsensitive: true})[0];
+                            if(aFX) FX = aFX.get("definition");
+                    //CHECK DEFAULT COLOR--
+                            if(UseBlood === "DEFAULT" || UseBlood === undefined) {
+                                HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
                                 FX.startColour = HurtColor;
                                 FXArray.push(FX);
+                            }
+                    //ELSE CHECK CUSTOM COLOR/FX--
+                            else if(UseBlood !== "DEFAULT" && UseBlood !== undefined) {
+                                HurtColor = HEXtoRGB(UseBlood);
+                        //IF CUSTOM COLOR--
+                                if(_.difference(HurtColor, [0, 0, 0, 0]).length !== 0) {
+                                    FX.startColour = HurtColor;
+                                    FXArray.push(FX);
+                                    }
+                        //ELSE ASSUME CUSTOM FX--
+                                else {
+                                    var i = UseBlood.split(/,/);
+                                    _.each(i, function (FXname) {
+                                        aFX = findObjs({_type: "custfx",name: FXname}, {caseInsensitive: true})[0];
+                                        if(aFX) FXArray.push(aFX.get("definition"));
+                                        else GMW("No FX with name " + FXname);
+                                    });
                                 }
-                    //ELSE ASSUME CUSTOM FX--
-                            else {
-                                var i = UseBlood.split(/,/);
-                                _.each(i, function (FXname) {
-                                    aFX = findObjs({_type: "custfx",name: FXname}, {caseInsensitive: true})[0];
-                                    if(aFX) FXArray.push(aFX.get("definition"));
-                                    else GMW("No FX with name " + FXname);
-                                });
                             }
                         }
+                        else return;
+            //SPAWN FX------------
+                        _.each(FXArray, function (FX) {
+                            SpawnFX(Scale, HitSize, obj.get("left"), obj.get("top"), FX, obj.get("_pageid"));
+                        });
                     }
-                    else return;
-        //SPAWN FX------------
-                    _.each(FXArray, function (FX) {
-                        SpawnFX(Scale, HitSize, obj.get("left"), obj.get("top"), FX, obj.get("_pageid"));
-                    });
                 }
             }
         },
@@ -243,16 +245,9 @@ FUNCTIONS
             var i = 0;
             var start = new Date().getTime();
             var barUsed = state.HealthColors.auraBar;
-            var results = filterObjs(function(obj) {
-                if( obj.get("type") == "graphic" &&
-                    obj.get("subtype") == "token" &&
-                    obj.get("layer") == "objects" &&
-                    obj.get(barUsed + "_max") !== "" &&
-                    obj.get(barUsed + "_value") !== "")
-                    return true;
-                else return false;
-            });
-            _.each(results, function(obj) {
+            _.chain(findObjs({type: 'graphic',subtype: 'token',layer: 'objects'}))
+            .filter((o)=>o.get(barUsed + "_max") !== "" && o.get(barUsed + "_value") !== "")
+            .each(function(obj) {
                 var prev = JSON.parse(JSON.stringify(obj));
                 handleToken(obj, prev);
                 i++;
@@ -430,7 +425,7 @@ FUNCTIONS
         },
     //CHECK INSTALL & SET STATE------------
         checkInstall = function () {
-            log('<' + ScriptName + ' v' + version + ' Ready [Updated: ' + Updated + ']>');
+            log('-=>' + ScriptName + ' v' + version + ' [Updated: ' + Updated + ']<=-');
             if(!_.has(state, 'HealthColors') || state.HealthColors.schemaVersion !== schemaVersion) {
                 log('<' + ScriptName + ' Updating Schema to v' + schemaVersion + '>');
                 state.HealthColors = {schemaVersion: schemaVersion};
@@ -525,7 +520,6 @@ FUNCTIONS
     return {
         GMW: GMW,
         Update: UpdateToken,
-        ForceUpdate: ForceUpdate,
         CheckInstall: checkInstall,
         RegisterEventHandlers: registerEventHandlers
     };
