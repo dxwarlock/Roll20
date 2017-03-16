@@ -1,99 +1,111 @@
-/*global createObj TokenMod getAttrByName spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
+/* global createObj TokenMod getAttrByName filterObjs spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 /*
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
 Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-healthcolor
 */
+/*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.3.3',
+    var version = '1.4.0',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 13 2017",
+        Updated = "Mar 16 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
         handleToken = function (obj, prev) {
 //CHECK IF TRIGGERED------------
             if(state.HealthColors.auraColorOn !== true || obj.get("layer") !== "objects") return;
-            if(obj.get("represents") !== "" || (obj.get("represents") == "" && state.HealthColors.OneOff == true)) {
+            if(obj.get("represents") !== "" || (obj.get("represents") === "" && state.HealthColors.OneOff === true)) {
     //**ATTRIBUTE CHECK------------//
+                var UseBlood, UseAura;
                 var oCharacter = getObj('character', obj.get("_represents"));
                 if(oCharacter !== undefined) {
         //CHECK BLOOD ATTRIB------------
                     if(getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
                     var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-                    var UseBlood = Blood.get("current");
+                    UseBlood = Blood.get("current");
                     UseBlood = UseBlood.toString().toUpperCase();
         //CHECK DISABLED AURA/TINT ATTRIB------------
                     if(getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
                     var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-                    var UseAura = UseAuraAtt.get("current");
+                    UseAura = UseAuraAtt.get("current");
                     UseAura = UseAura.toString().toUpperCase();
                     if(UseAura != "YES" && UseAura != "NO") {
                         var name = oCharacter.get('name');
-                        GMW(name + ": USECOLOR NOT SET TO YES or NO, SETTING TO YES");
+                        GMW(name + ":<br> USECOLOR not set to YES or NO, setting to YES");
                         UseAuraAtt.set('current', "YES");
                     }
                     UseAura = UseAuraAtt.get("current").toUpperCase();
                 }
     //**CHECK BARS------------//
                 var barUsed = state.HealthColors.auraBar;
-                if(obj.get(barUsed + "_max") === "" || obj.get(barUsed + "_value") === "") return;
-                var maxValue = parseInt(obj.get(barUsed + "_max"), 10);
-                var curValue = parseInt(obj.get(barUsed + "_value"), 10);
-                var prevValue = prev[barUsed + "_value"];
-                if(isNaN(maxValue) && isNaN(curValue)) return;
-                if(maxValue === "" || curValue === "" || prevValue === "" ) return;
+                var maxValue, curValue, prevValue;
+                if(obj.get(barUsed + "_max") !== "" || obj.get(barUsed + "_value") !== "") {
+                    maxValue = parseInt(obj.get(barUsed + "_max"), 10);
+                    curValue = parseInt(obj.get(barUsed + "_value"), 10);
+                    prevValue = prev[barUsed + "_value"];
+                }
+                if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
         //CALC PERCENTAGE------------
                 var perc = Math.round((curValue / maxValue) * 100);
                 var percReal = Math.min(100, perc);
-    //**CHECK MONSTER OR PLAYER------------//
-                var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-                var GM = '', PC = '';
                 var markerColor = PercentToHEX(Math.min(100, percReal));
                 var pColor = '#ffffff';
+                var GM = '', PC = '';
+    //**CHECK MONSTER OR PLAYER------------//
+                var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
         //IF PLAYER------------
                 if(type == 'Player') {
-                    var cBy = oCharacter.get('controlledby');
-                    var player = getObj('player', cBy);
-                    pColor = '#000000';
-                    if(player !== undefined) pColor = player.get('color');
                     GM = state.HealthColors.GM_PCNames;
                     PC = state.HealthColors.PCNames;
-                    if(state.HealthColors.PCAura !== false) {
+                    if(state.HealthColors.PCAura !== false && UseAura !== "NO") {
+                        var cBy = oCharacter.get('controlledby');
+                        var player = getObj('player', cBy);
+                        pColor = '#000000';
+                        if(player !== undefined) pColor = player.get('color');
+                //SET HEALTH COLOR----------
                         if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
-                        else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                //ELSE SHOW DEAD----------
+                        if(curValue > 0 && state.HealthColors.auraDeadPC === true) obj.set("status_dead", false);
+                        else if(curValue < 1 && state.HealthColors.auraDeadPC === true) {
+                            if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                            obj.set("status_dead", true);
+                            SetAuraNone(obj);
+                        }
                     }
                     else SetAuraNone(obj);
                 }
         //IF MONSTER------------
                 else if(type == 'Monster') {
-                    GM = state.HealthColors.GM_NPCNames;
+                       GM = state.HealthColors.GM_NPCNames;
                     PC = state.HealthColors.NPCNames;
-                    if(state.HealthColors.NPCAura !== false) {
+                    if(state.HealthColors.NPCAura !== false && UseAura !== "NO") {
+                //SET HEALTH COLOR----------
                         if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
-                        else if(UseAura !== "NO") TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
+                //ELSE SHOW DEAD----------
+                        if(curValue > 0 && state.HealthColors.auraDead === true) obj.set("status_dead", false);
+                        else if(curValue < 1 && state.HealthColors.auraDead === true) {
+                            if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                            obj.set("status_dead", true);
+                            SetAuraNone(obj);
+                        }
                     }
                     else SetAuraNone(obj);
                 }
         //SET SHOW NAMES------------
-                if(GM != 'Off') {
-                    GM = (GM == "Yes") ? true : false;
-                    obj.set({'showname': GM});
-                }
-                if(PC != 'Off') {
-                    PC = (PC == "Yes") ? true : false;
-                    obj.set({'showplayers_name': PC});
-                }
-    //**SPURT FX------------//
-                if(state.HealthColors.FX == true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
-                    var HurtColor, HealColor, HITS, FX, aFX, FXArray = [];
+                SetShowNames(GM,PC,obj);
+//**SPURT FX------------//
+                if(state.HealthColors.FX === true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
+                    var HurtColor, HealColor, FX, aFX, FXArray = [];
                     var amount = Math.abs(curValue - prevValue);
                     var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
                     var Scale = obj.get("height") / 70;
                     var HitSize = Math.max(HitSizeCalc, 0.2) * (_.random(60, 100) / 100);
-        //IF HEAL------------
+        //IF HEALED------------
                     if(curValue > prevValue) {
                         aFX = findObjs({_type: "custfx",name: '-DefaultHeal'}, {caseInsensitive: true})[0];
                         FX = aFX.get("definition");
@@ -105,13 +117,13 @@ ON TOKEN CHANGE/CREATE
                     else if(curValue < prevValue) {
                         aFX = findObjs({_type: "custfx",name: '-DefaultHurt'}, {caseInsensitive: true})[0];
                         if(aFX) FX = aFX.get("definition");
-                //IF DEFAULT COLOR--
+                //CHECK DEFAULT COLOR--
                         if(UseBlood === "DEFAULT" || UseBlood === undefined) {
                             HurtColor = HEXtoRGB(state.HealthColors.HurtFX);
                             FX.startColour = HurtColor;
                             FXArray.push(FX);
                         }
-                //ELSE CUSTOM COLOR/FX--
+                //ELSE CHECK CUSTOM COLOR/FX--
                         else if(UseBlood !== "DEFAULT" && UseBlood !== undefined) {
                             HurtColor = HEXtoRGB(UseBlood);
                     //IF CUSTOM COLOR--
@@ -124,10 +136,7 @@ ON TOKEN CHANGE/CREATE
                                 var i = UseBlood.split(/,/);
                                 _.each(i, function (FXname) {
                                     aFX = findObjs({_type: "custfx",name: FXname}, {caseInsensitive: true})[0];
-                                    if(aFX) {
-                                        FX = aFX.get("definition");
-                                        FXArray.push(FX);
-                                    }
+                                    if(aFX) FXArray.push(aFX.get("definition"));
                                     else GMW("No FX with name " + FXname);
                                 });
                             }
@@ -139,20 +148,6 @@ ON TOKEN CHANGE/CREATE
                         SpawnFX(Scale, HitSize, obj.get("left"), obj.get("top"), FX, obj.get("_pageid"));
                     });
                 }
-    //**SET DEAD------------
-                var deadNPC = state.HealthColors.auraDead;
-                var deadPC = state.HealthColors.auraDeadPC;
-                if(curValue <= 0 && deadNPC === true && type == 'Monster') {
-                    obj.set("status_dead", true);
-                    SetAuraNone(obj);
-                    if(state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
-                }
-                else if(curValue <= 0 && deadPC === true && type == 'Player') {
-                    obj.set("status_dead", true);
-                    SetAuraNone(obj);
-                    if(state.HealthColors.auraDeadFX !== "None") PlayDeath(state.HealthColors.auraDeadFX);
-                }
-                else obj.set("status_dead", false);
             }
         },
 /*------------------------
@@ -160,115 +155,115 @@ CHAT MESSAGES
 ------------------------*/
         handleInput = function (msg) {
             var msgFormula = msg.content.split(/\s+/);
-            var command = msgFormula[0].toUpperCase();
+            var command = msgFormula[0].toUpperCase(), UPPER ="";
             if(msg.type == "api" && command.indexOf("!AURA") !== -1) {
-                var option = msgFormula[1];
+                var OPTION = msgFormula[1] || "MENU";
                 if(!playerIsGM(msg.playerid)) {
                     sendChat('HealthColors', "/w " + msg.who + " you must be a GM to use this command!");
                     return;
                 }
                 else {
-                    if(option === undefined) {
-                        aurahelp();
-                        return;
-                    }
-                    switch(msgFormula[1].toUpperCase()) {
+                    switch(OPTION.toUpperCase()) {
+                    case "MENU":
+                        break;
                     case "ON":
                         state.HealthColors.auraColorOn = !state.HealthColors.auraColorOn;
-                        aurahelp();
                         break;
                     case "BAR":
                         state.HealthColors.auraBar = "bar" + msgFormula[2];
-                        aurahelp();
                         break;
                     case "TINT":
                         state.HealthColors.auraTint = !state.HealthColors.auraTint;
-                        aurahelp();
                         break;
                     case "PERC":
                         state.HealthColors.auraPercPC = parseInt(msgFormula[2], 10);
                         state.HealthColors.auraPerc = parseInt(msgFormula[3], 10);
-                        aurahelp();
                         break;
                     case "PC":
                         state.HealthColors.PCAura = !state.HealthColors.PCAura;
-                        aurahelp();
                         break;
                     case "NPC":
                         state.HealthColors.NPCAura = !state.HealthColors.NPCAura;
-                        aurahelp();
                         break;
                     case "GMNPC":
                         state.HealthColors.GM_NPCNames = msgFormula[2];
-                        aurahelp();
                         break;
                     case "GMPC":
                         state.HealthColors.GM_PCNames = msgFormula[2];
-                        aurahelp();
                         break;
                     case "PCNPC":
                         state.HealthColors.NPCNames = msgFormula[2];
-                        aurahelp();
                         break;
                     case "PCPC":
                         state.HealthColors.PCNames = msgFormula[2];
-                        aurahelp();
                         break;
                     case "DEAD":
                         state.HealthColors.auraDead = !state.HealthColors.auraDead;
-                        aurahelp();
                         break;
                     case "DEADPC":
                         state.HealthColors.auraDeadPC = !state.HealthColors.auraDeadPC;
-                        aurahelp();
                         break;
                     case "DEADFX":
                         state.HealthColors.auraDeadFX = msgFormula[2];
-                        aurahelp();
                         break;
                     case "SIZE":
                         state.HealthColors.AuraSize = parseFloat(msgFormula[2]);
-                        aurahelp();
                         break;
                     case "ONEOFF":
                         state.HealthColors.OneOff = !state.HealthColors.OneOff;
-                        aurahelp();
                         break;
                     case "FX":
                         state.HealthColors.FX = !state.HealthColors.FX;
-                        aurahelp();
                         break;
                     case "HEAL":
-                        var UPPER = msgFormula[2];
+                        UPPER = msgFormula[2];
                         UPPER = UPPER.toUpperCase();
                         state.HealthColors.HealFX = UPPER;
-                        aurahelp();
                         break;
                     case "HURT":
-                        var UPPER = msgFormula[2];
+                        UPPER = msgFormula[2];
                         UPPER = UPPER.toUpperCase();
                         state.HealthColors.HurtFX = UPPER;
-                        aurahelp();
                         break;
                     case "RESET":
                         delete state.HealthColors;
                         GMW("STATE RESET");
                         checkInstall();
-                        break;
-                    default:
                         return;
                     }
+                    aurahelp(OPTION);
                 }
             }
         },
 /*------------------------
 FUNCTIONS
 ------------------------*/
+    //FORCE ALL TOKEN UPDATE------------
+        ForceUpdate = function(){
+            var i = 0;
+            var start = new Date().getTime();
+            var barUsed = state.HealthColors.auraBar;
+            var results = filterObjs(function(obj) {
+                if( obj.get("type") == "graphic" &&
+                    obj.get("subtype") == "token" &&
+                    obj.get("layer") == "objects" &&
+                    obj.get(barUsed + "_max") !== "" &&
+                    obj.get(barUsed + "_value") !== "")
+                    return true;
+                else return false;
+            });
+            _.each(results, function(obj) {
+                var prev = JSON.parse(JSON.stringify(obj));
+                handleToken(obj, prev);
+                i++;
+            });
+            var end = new Date().getTime();
+            return "Tokens Processed: " + i + "<br>Run time in ms: " + (end - start);
+        },
     //WHISPER GM------------
         GMW = function (text) {
-            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
-            var DIV = "<div style='width: 100%; box-shadow: black; text-shadow: 4px; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000;";
-            var MSG = DIV + img +"'><b>"+text+"</b></div";
+            var DIV = "<div style='width: 100%; border-radius: 4px;  box-shadow: 1px 1px 1px #707070; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000; background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
+            var MSG = DIV + "'><b>"+text+"</b></div";
             sendChat('HealthColors', "/w GM "+MSG);
         },
     //SPAWN FX------------
@@ -307,11 +302,22 @@ FUNCTIONS
             };
             spawnFxWithDefinition(left,top,newFX,pageid);
         },
+        SetShowNames = function(GM,PC,obj) {
+            if(GM != 'Off') {
+                GM = (GM == "Yes") ? true : false;
+                obj.set({'showname': GM});
+            }
+            if(PC != 'Off') {
+                PC = (PC == "Yes") ? true : false;
+                obj.set({'showplayers_name': PC});
+            }
+        },
     //DEATH SOUND------------
         PlayDeath = function (trackname) {
+          	var RandTrackName;
             if(trackname.indexOf(",") > 0) {
                 var tracklist = trackname.split(",");
-                var RandTrackName = tracklist[Math.floor(Math.random() * tracklist.length)];
+                RandTrackName = tracklist[Math.floor(Math.random() * tracklist.length)];
             }
             else RandTrackName = trackname;
             var track = findObjs({type: 'jukeboxtrack',title: RandTrackName})[0];
@@ -346,16 +352,55 @@ FUNCTIONS
                 });
             }
         },
+    //OFF BUTTON COLORS------------
+        ButtonColor = function (state, off, disable) {
+            var color;
+            if(state == "No") color = off;
+            if(state == "Off") color = disable;
+            return color;
+        },
+    //REMOVE ALL------------
+        SetAuraNone = function (obj) {
+            if(state.HealthColors.auraTint === true) obj.set({'tint_color': "transparent",});
+            else obj.set({'aura1_color': "",'aura2_color': "",});
+        },
+        //PERC TO RGB------------
+        PercentToHEX = function (percent) {
+            if(percent === 100) percent = 99;
+            var r, g, b = 0;
+            if(percent < 50) {
+                g = Math.floor(255 * (percent / 50));
+                r = 255;
+            }
+            else {
+                g = 255;
+                r = Math.floor(255 * ((50 - percent % 50) / 50));
+            }
+            var HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            return HEX;
+        },
+    //HEX TO RGB------------
+        HEXtoRGB = function (hex) {
+            let parts = (hex || '').match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+            if(parts) {
+                let rgb = _.chain(parts).rest().map((d) => parseInt(d, 16)).value();
+                rgb.push(1.0);
+                return rgb;
+            }
+            return [0, 0, 0, 0.0];
+        },
     //HELP MENU------------
-        aurahelp = function () {
-            var img = "background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
+        aurahelp = function (OPTION) {
+            var Update = '';
+            if(OPTION !== "MENU") Update = ForceUpdate();
+            var img = "background-image: -webkit-linear-gradient(left, #76ADD6 0%, #a7c7dc 100%);";
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
-            var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 45px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
+            var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 48px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
             var off = "#A84D4D";
             var disable = "#D6D6D6";
             var HR = "<hr style='background-color: #000000; margin: 5px; border-width:0;color: #000000;height: 1px;'/>";
             var FX = state.HealthColors.auraDeadFX.substring(0, 4);
-            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; ' + img + ' color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u>HealthColors Version: ' + version + '</u><br>' + //--
+            sendChat('HealthColors', "/w GM <b><br>" + '<div style="border-radius: 8px 8px 8px 8px; padding: 5px; font-size: 9pt; text-shadow: ' + tshadow + '; box-shadow: 3px 3px 1px #707070; ' + img + ' color:#FFF; border:2px solid black; text-align:right; vertical-align:middle;">' + '<u><big>HealthColors Version: ' + version + '</u></big><br>' + //--
                 HR + //--
                 'Is On: <a ' + style + 'background-color:' + (state.HealthColors.auraColorOn !== true ? off : "") + ';" href="!aura on">' + (state.HealthColors.auraColorOn !== true ? "No" : "Yes") + '</a><br>' + //--
                 'Bar: <a ' + style + '" href="!aura bar ?{Bar|1|2|3}">' + state.HealthColors.auraBar + '</a><br>' + //--
@@ -380,43 +425,8 @@ FUNCTIONS
                 'HurtFX Color: <a ' + style + 'background-color:#' + state.HealthColors.HurtFX + ';""href="!aura HURT ?{Color?|FF0000}">' + state.HealthColors.HurtFX + '</a><br>' + //--
                 'DeathSFX: <a ' + style + '" href="!aura deadfx ?{Sound Name?|' + state.HealthColors.auraDeadFX + '}">' + FX + '</a><br>' + //--
                 HR + //--
+                Update +//--
                 '</div>');
-        },
-    //OFF BUTTON COLORS------------
-        ButtonColor = function (state, off, disable) {
-            var color;
-            if(state == "No") color = off;
-            if(state == "Off") color = disable;
-            return color;
-        },
-    //REMOVE ALL------------
-        SetAuraNone = function (obj) {
-            var tint = state.HealthColors.auraTint;
-            if(tint === true) {
-                obj.set({'tint_color': "transparent",});
-            }
-            else {
-                obj.set({'aura1_color': "",'aura2_color': "",});
-            }
-        },
-    //PERC TO RGB------------
-        PercentToHEX = function (percent) {
-            if(percent === 100) percent = 99;
-            var r, g, b = 0;
-            if(percent < 50) g = Math.floor(255 * (percent / 50)),r = 255;
-            else g = 255, r = Math.floor(255 * ((50 - percent % 50) / 50));
-            var HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-            return HEX;
-        },
-    //HEX TO RGB------------
-        HEXtoRGB = function (hex) {
-            let parts = (hex || '').match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
-            if(parts) {
-                let rgb = _.chain(parts).rest().map((d) => parseInt(d, 16)).value();
-                rgb.push(1.0);
-                return rgb;
-            }
-            return [0, 0, 0, 0.0];
         },
     //CHECK INSTALL & SET STATE------------
         checkInstall = function () {
@@ -426,7 +436,7 @@ FUNCTIONS
                 state.HealthColors = {schemaVersion: schemaVersion};
                 state.HealthColors.version = version;
             }
-        //CHECK STATE VALUES
+            //CHECK STATE VALUES
             if(_.isUndefined(state.HealthColors.auraColorOn)) state.HealthColors.auraColorOn = true; //global on or off
             if(_.isUndefined(state.HealthColors.auraBar)) state.HealthColors.auraBar = "bar1"; //bar to use
             if(_.isUndefined(state.HealthColors.auraTint)) state.HealthColors.auraTint = false; //use tint instead?
@@ -449,15 +459,13 @@ FUNCTIONS
             if(_.isUndefined(state.HealthColors.HealFX)) state.HealthColors.HealFX = "00FF00"; //set FX HEAL COLOR
             if(_.isUndefined(state.HealthColors.HurtFX)) state.HealthColors.HurtFX = "FF0000"; //set FX HURT COLOR?
             if(_.isUndefined(state.HealthColors.auraDeadFX)) state.HealthColors.auraDeadFX = 'None'; //Sound FX Name
-        //TokenMod CHECK
-            if('undefined' !== typeof TokenMod && TokenMod.ObserveTokenChange) {
-                TokenMod.ObserveTokenChange(handleToken);
-            }
+            //TokenMod CHECK
+            if('undefined' !== typeof TokenMod && TokenMod.ObserveTokenChange) TokenMod.ObserveTokenChange(handleToken);
             var FXHurt = findObjs({_type: "custfx",name: "-DefaultHurt"}, {caseInsensitive: true})[0];
             var FXHeal = findObjs({_type: "custfx",name: "-DefaultHeal"}, {caseInsensitive: true})[0];
         //DEFAULT FX CHECK
-        if(!FXHurt) {
-                log(ScriptName + ' <Creating Default Hurt FX>');
+            if(!FXHurt) {
+                GMW("Creating Default Hurt FX");
                 var Hurt = {
                     "maxParticles": 150,
                     "duration": 50,
@@ -477,7 +485,7 @@ FUNCTIONS
                 createObj('custfx', {name: "-DefaultHurt",definition: Hurt});
             }
             if(!FXHeal) {
-                log(ScriptName + ' <Creating Default Heal FX>');
+                GMW("Creating Default Heal FX");
                 var Heal = {
                     "maxParticles": 150,
                     "duration": 50,
@@ -513,11 +521,11 @@ FUNCTIONS
                 }, 400);
             });
         };
-/*------------------------
-RETURN OUTSIDE FUNCTIONS
-------------------------*/
+    //RETURN OUTSIDE FUNCTIONS------------
     return {
+        GMW: GMW,
         Update: UpdateToken,
+        ForceUpdate: ForceUpdate,
         CheckInstall: checkInstall,
         RegisterEventHandlers: registerEventHandlers
     };
@@ -525,6 +533,7 @@ RETURN OUTSIDE FUNCTIONS
 //On Ready
 on('ready', function () {
     'use strict';
+    //HealthColors.GMW("API READY");
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
 });
