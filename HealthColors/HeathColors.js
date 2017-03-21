@@ -554,7 +554,7 @@ FUNCTIONS
 //On Ready
 on('ready', function () {
     'use strict';
-    HealthColors.GMW("API READY");
+    //HealthColors.GMW("API READY");
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
 });
