@@ -7,15 +7,15 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.4.0',
+    var version = '1.4.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 16 2017",
+        Updated = "Mar 19 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
-        handleToken = function (obj, prev) {
-//CHECK IF TRIGGERED------------
+        handleToken = function (obj, prev, update) {
+            //CHECK IF TRIGGERED------------
             if(state.HealthColors.auraColorOn !== true || obj.get("layer") !== "objects") return;
             if(obj.get("represents") !== "" || (obj.get("represents") === "" && state.HealthColors.OneOff === true)) {
     //**CHECK BARS------------//
@@ -27,34 +27,19 @@ ON TOKEN CHANGE/CREATE
                     prevValue = prev[barUsed + "_value"];
                 }
                 if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
-        //CALC PERCENTAGE------------
+        //CHECK DISABLED AURA/TINT ATTRIB------------
+                var UseAura;
+                var oCharacter = getObj('character', obj.get("_represents"));
+                if(oCharacter !== undefined) {
+                    UseAura = lookupUseColor(oCharacter);
+                }
+                //CALC PERCENTAGE------------
                 var perc = Math.round((curValue / maxValue) * 100);
                 var percReal = Math.min(100, perc);
                 var markerColor = PercentToHEX(Math.min(100, percReal));
                 var pColor = '#ffffff';
-                var GM = '', PC = '';
-    //**ATTRIBUTE CHECK------------//
-                var UseBlood, UseAura;
-                var oCharacter = getObj('character', obj.get("_represents"));
-                if(oCharacter !== undefined) {
-        //CHECK BLOOD ATTRIB------------
-                    if(getAttrByName(oCharacter.id, 'BLOODCOLOR') === undefined) CreateAttrib(oCharacter, 'BLOODCOLOR', 'DEFAULT');
-                    var Blood = findObjs({name: 'BLOODCOLOR',_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-                    UseBlood = Blood.get("current");
-                    UseBlood = UseBlood.toString().toUpperCase();
-        //CHECK DISABLED AURA/TINT ATTRIB------------
-                    if(getAttrByName(oCharacter.id, 'USECOLOR') === undefined) CreateAttrib(oCharacter, 'USECOLOR', 'YES');
-                    var UseAuraAtt = findObjs({name: "USECOLOR",_type: "attribute",characterid: oCharacter.id}, {caseInsensitive: true})[0];
-                    UseAura = UseAuraAtt.get("current");
-                    UseAura = UseAura.toString().toUpperCase();
-                    if(UseAura != "YES" && UseAura != "NO") {
-                        var name = oCharacter.get('name');
-                        GMW(name + ":<br> USECOLOR not set to YES or NO, setting to YES");
-                        UseAuraAtt.set('current', "YES");
-                    }
-                    UseAura = UseAuraAtt.get("current").toUpperCase();
-                }
-    //**CHECK MONSTER OR PLAYER------------//
+                var GM = '',PC = '';
+        //**CHECK MONSTER OR PLAYER------------//
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
         //IF PLAYER------------
                 if(type == 'Player') {
@@ -65,41 +50,50 @@ ON TOKEN CHANGE/CREATE
                         var player = getObj('player', cBy);
                         pColor = '#000000';
                         if(player !== undefined) pColor = player.get('color');
-                //SET HEALTH COLOR----------
+            //SET HEALTH COLOR----------
                         if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
                         else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-                //ELSE SHOW DEAD----------
-                        if(curValue > 0 && state.HealthColors.auraDeadPC === true) obj.set("status_dead", false);
-                        else if(curValue < 1 && state.HealthColors.auraDeadPC === true) {
-                            if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                            obj.set("status_dead", true);
-                            SetAuraNone(obj);
+            //ELSE SHOW DEAD----------
+                        if(state.HealthColors.auraDeadPC === true && update !== "YES") {
+                            if(curValue > 0) obj.set("status_dead", false);
+                            else if(curValue < 1) {
+                                if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                                obj.set("status_dead", true);
+                                SetAuraNone(obj);
+                            }
                         }
                     }
                     else SetAuraNone(obj);
                 }
         //IF MONSTER------------
                 else if(type == 'Monster') {
-                       GM = state.HealthColors.GM_NPCNames;
+                    GM = state.HealthColors.GM_NPCNames;
                     PC = state.HealthColors.NPCNames;
                     if(state.HealthColors.NPCAura !== false && UseAura !== "NO") {
-                //SET HEALTH COLOR----------
+            //SET HEALTH COLOR----------
                         if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
                         else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-                //ELSE SHOW DEAD----------
-                        if(curValue > 0 && state.HealthColors.auraDead === true) obj.set("status_dead", false);
-                        else if(curValue < 1 && state.HealthColors.auraDead === true) {
-                            if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                            obj.set("status_dead", true);
-                            SetAuraNone(obj);
+            //ELSE SHOW DEAD----------
+                        if(state.HealthColors.auraDead == true && update !== "YES") {
+                            if(curValue > 0) obj.set("status_dead", false);
+                            else if(curValue < 1) {
+                                if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                                obj.set("status_dead", true);
+                                SetAuraNone(obj);
+                            }
                         }
                     }
                     else SetAuraNone(obj);
                 }
         //SET SHOW NAMES------------
                 SetShowNames(GM,PC,obj);
-    //**SPURT FX------------//
-                if(curValue !== prevValue) {
+//**SPURT FX------------//
+                if(update !== "YES" && curValue != prevValue && prevValue != "") {
+        //CHECK BLOOD ATTRIB------------
+                    var UseBlood;
+                    if(oCharacter !== undefined) {
+                        UseBlood = lookupUseBlood(oCharacter);
+                    }
                     if(state.HealthColors.FX === true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
                         var HurtColor, HealColor, FX, aFX, FXArray = [];
                         var amount = Math.abs(curValue - prevValue);
@@ -165,6 +159,7 @@ CHAT MESSAGES
                     return;
                 }
                 else {
+                    if(OPTION !== "MENU") GMW("UPDATING TOKENS...");
                     switch(OPTION.toUpperCase()) {
                     case "MENU":
                         break;
@@ -240,6 +235,43 @@ CHAT MESSAGES
 /*------------------------
 FUNCTIONS
 ------------------------*/
+    //ATTRIBUTE CACHE------------
+       makeSmartAttrCache = function (attribute, options) {
+           let cache = {},
+               defaultValue = options.default || 'YES',
+               validator = options.validation || _.constant(true);
+           on('change:attribute', function (attr) {
+               if(attr.get('name') === attribute) {
+                   if(!validator(attr.get('current'))) {
+                       attr.setWithWorker('current', defaultValue);
+                   }
+                   cache[attr.get('characterid')] = attr.get('current');
+               }
+           });
+           on('destory:attribute', function (attr) {
+               if(attr.get('name') === attribute) {
+                   delete cache[attr.get('characterid')];
+               }
+           });
+           return function(character){
+               if(!cache[character.id]){
+                   let attr = findObjs({type: 'attribute',name: attribute,characterid: character.id},{caseInsensitive:true})[0] ||
+                   createObj('attribute',{name: attribute,characterid: character.id, current: defaultValue});
+                   if( !validator(attr.get('current'))){
+                       attr.setWithWorker('current',defaultValue);
+                   }
+                   cache[character.id]=attr.get('current');
+               }
+               return cache[character.id];
+           };
+       },
+        lookupUseBlood = makeSmartAttrCache('USEBLOOD',{
+            default: 'DEFAULT'
+        }),
+        lookupUseColor = makeSmartAttrCache('USECOLOR',{
+            default: 'YES',
+            validation: (o)=>o.match(/YES|NO/)
+        }),
     //FORCE ALL TOKEN UPDATE------------
         ForceUpdate = function(){
             var i = 0;
@@ -249,7 +281,7 @@ FUNCTIONS
             .filter((o)=>o.get(barUsed + "_max") !== "" && o.get(barUsed + "_value") !== "")
             .each(function(obj) {
                 var prev = JSON.parse(JSON.stringify(obj));
-                handleToken(obj, prev);
+                handleToken(obj, prev, 'YES');
                 i++;
             });
             var end = new Date().getTime();
@@ -325,11 +357,6 @@ FUNCTIONS
             else {
                 log(ScriptName + ": No track found named " + RandTrackName);
             }
-        },
-    //CREATE USECOLOR ATTR------------
-        CreateAttrib = function (oCharacter, attrib, value) {
-            log("Creating " + attrib);
-            createObj("attribute", {name: attrib,current: value,characterid: oCharacter.id});
         },
     //SET TOKEN COLORS------------
         TokenSet = function (obj, sizeSet, markerColor, pColor) {
@@ -527,7 +554,7 @@ FUNCTIONS
 //On Ready
 on('ready', function () {
     'use strict';
-    //HealthColors.GMW("API READY");
+    HealthColors.GMW("API READY");
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
 });
