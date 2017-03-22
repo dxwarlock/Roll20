@@ -33,7 +33,7 @@ ON TOKEN CHANGE/CREATE
                 if(oCharacter !== undefined) {
                     UseAura = lookupUseColor(oCharacter);
                 }
-                if(UseAura === "YES") {
+                if(UseAura === "YES" || UseAura === undefined) {
             //CALC PERCENTAGE------------
                     var perc = Math.round((curValue / maxValue) * 100);
                     var percReal = Math.min(100, perc);
