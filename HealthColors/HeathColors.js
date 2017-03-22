@@ -7,10 +7,10 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.4.1',
+    var version = '1.4.2',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 19 2017",
+        Updated = "Mar 22 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -33,62 +33,65 @@ ON TOKEN CHANGE/CREATE
                 if(oCharacter !== undefined) {
                     UseAura = lookupUseColor(oCharacter);
                 }
-                //CALC PERCENTAGE------------
-                var perc = Math.round((curValue / maxValue) * 100);
-                var percReal = Math.min(100, perc);
-                var markerColor = PercentToHEX(Math.min(100, percReal));
-                var pColor = '#ffffff';
-                var GM = '',PC = '';
-        //**CHECK MONSTER OR PLAYER------------//
-                var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-        //IF PLAYER------------
-                if(type == 'Player') {
-                    GM = state.HealthColors.GM_PCNames;
-                    PC = state.HealthColors.PCNames;
-                    if(state.HealthColors.PCAura !== false && UseAura !== "NO") {
-                        var cBy = oCharacter.get('controlledby');
-                        var player = getObj('player', cBy);
-                        pColor = '#000000';
-                        if(player !== undefined) pColor = player.get('color');
-            //SET HEALTH COLOR----------
-                        if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
-                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-            //ELSE SHOW DEAD----------
-                        if(state.HealthColors.auraDeadPC === true && update !== "YES") {
-                            if(curValue > 0) obj.set("status_dead", false);
-                            else if(curValue < 1) {
-                                if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                                obj.set("status_dead", true);
-                                SetAuraNone(obj);
+                if(UseAura === "YES") {
+            //CALC PERCENTAGE------------
+                    var perc = Math.round((curValue / maxValue) * 100);
+                    var percReal = Math.min(100, perc);
+                    var markerColor = PercentToHEX(Math.min(100, percReal));
+                    var pColor = '#ffffff';
+                    var GM = '',PC = '';
+            //**CHECK MONSTER OR PLAYER------------//
+                    var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+                    var colortype = (state.HealthColors.auraTint) ? 'tint' : 'aura1';
+                //IF PLAYER------------
+                    if(type == 'Player') {
+                        GM = state.HealthColors.GM_PCNames;
+                        PC = state.HealthColors.PCNames;
+                        if(state.HealthColors.PCAura !== false) {
+                            var cBy = oCharacter.get('controlledby');
+                            var player = getObj('player', cBy);
+                            pColor = '#000000';
+                            if(player !== undefined) pColor = player.get('color');
+                    //SET HEALTH COLOR----------
+                            if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
+                            else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
+                    //ELSE SHOW DEAD----------
+                            if(state.HealthColors.auraDeadPC === true && update !== "YES") {
+                                if(curValue > 0) obj.set("status_dead", false);
+                                else if(curValue < 1) {
+                                    if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                                    obj.set("status_dead", true);
+                                    SetAuraNone(obj);
+                                }
                             }
                         }
+                        else if(state.HealthColors.PCAura === false && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
                     }
-                    else SetAuraNone(obj);
-                }
-        //IF MONSTER------------
-                else if(type == 'Monster') {
-                    GM = state.HealthColors.GM_NPCNames;
-                    PC = state.HealthColors.NPCNames;
-                    if(state.HealthColors.NPCAura !== false && UseAura !== "NO") {
-            //SET HEALTH COLOR----------
-                        if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
-                        else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor);
-            //ELSE SHOW DEAD----------
-                        if(state.HealthColors.auraDead == true && update !== "YES") {
-                            if(curValue > 0) obj.set("status_dead", false);
-                            else if(curValue < 1) {
-                                if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                                obj.set("status_dead", true);
-                                SetAuraNone(obj);
+                //IF MONSTER------------
+                    else if(type == 'Monster') {
+                        GM = state.HealthColors.GM_NPCNames;
+                        PC = state.HealthColors.NPCNames;
+                        if(state.HealthColors.NPCAura !== false) {
+                    //SET HEALTH COLOR----------
+                            if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
+                            else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
+                    //ELSE SHOW DEAD----------
+                            if(state.HealthColors.auraDead == true && update !== "YES") {
+                                if(curValue > 0) obj.set("status_dead", false);
+                                else if(curValue < 1) {
+                                    if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
+                                    obj.set("status_dead", true);
+                                    SetAuraNone(obj);
+                                }
                             }
                         }
+                        else if(state.HealthColors.NPCAura === false && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
                     }
-                    else SetAuraNone(obj);
                 }
         //SET SHOW NAMES------------
                 SetShowNames(GM,PC,obj);
 //**SPURT FX------------//
-                if(update !== "YES" && curValue != prevValue && prevValue != "") {
+                if(curValue != prevValue && prevValue != "" && update !== "YES") {
         //CHECK BLOOD ATTRIB------------
                     var UseBlood;
                     if(oCharacter !== undefined) {
@@ -235,6 +238,110 @@ CHAT MESSAGES
 /*------------------------
 FUNCTIONS
 ------------------------*/
+    //SET TOKEN COLORS------------
+        TokenSet = function (obj, sizeSet, markerColor, pColor, update) {
+            var Pageon = getObj("page", obj.get("_pageid"));
+            var scale = Pageon.get("scale_number") / 10;
+            if(state.HealthColors.auraTint === true) {
+                if(obj.get('aura1_color') == markerColor && update === "YES") {
+                    obj.set({'aura1_color': "transparent",'aura2_color': "transparent",});
+                }
+                obj.set({'tint_color': markerColor,});
+            }
+            else {
+                if(obj.get('tint_color') == markerColor && update === "YES") {
+                    obj.set({'tint_color': "transparent",});
+                }
+                obj.set({
+                    'aura1_radius': sizeSet * scale * 1.8,
+                    'aura2_radius': sizeSet * scale * 0.1,
+                    'aura1_color': markerColor,
+                    'aura2_color': pColor,
+                    'showplayers_aura1': true,
+                    'showplayers_aura2': true,
+                });
+            }
+        },
+    //REMOVE ALL------------
+        SetAuraNone = function (obj) {
+            if(state.HealthColors.auraTint === true) obj.set({'tint_color': "transparent",});
+            else obj.set({'aura1_color': "transparent",'aura2_color': "transparent",});
+        },
+    //FORCE ALL TOKEN UPDATE------------
+        ForceUpdate = function(){
+            var i = 0;
+            var start = new Date().getTime();
+            var barUsed = state.HealthColors.auraBar;
+            _.chain(findObjs({type: 'graphic',subtype: 'token',layer: 'objects'}))
+            .filter((o)=>o.get(barUsed + "_max") !== "" && o.get(barUsed + "_value") !== "")
+            .each(function(obj) {
+                var prev = JSON.parse(JSON.stringify(obj));
+                handleToken(obj, prev, 'YES');
+                i++;
+            });
+            var end = new Date().getTime();
+            return "Tokens Processed: " + i + "<br>Run time in ms: " + (end - start);
+        },
+        SetShowNames = function(GM,PC,obj) {
+            if(GM != 'Off') {
+                GM = (GM == "Yes") ? true : false;
+                obj.set({'showname': GM});
+            }
+            if(PC != 'Off') {
+                PC = (PC == "Yes") ? true : false;
+                obj.set({'showplayers_name': PC});
+            }
+        },
+    //DEATH SOUND------------
+        PlayDeath = function (trackname) {
+          	var RandTrackName;
+            if(trackname.indexOf(",") > 0) {
+                var tracklist = trackname.split(",");
+                RandTrackName = tracklist[Math.floor(Math.random() * tracklist.length)];
+            }
+            else RandTrackName = trackname;
+            var track = findObjs({type: 'jukeboxtrack',title: RandTrackName})[0];
+            if(track) {
+                track.set('playing', false);
+                track.set('softstop', false);
+                track.set('volume', 50);
+                track.set('playing', true);
+            }
+            else {
+                log(ScriptName + ": No track found named " + RandTrackName);
+            }
+        },
+    //PERC TO RGB------------
+        PercentToHEX = function (percent) {
+            if(percent === 100) percent = 99;
+            var r, g, b = 0;
+            if(percent < 50) {
+                g = Math.floor(255 * (percent / 50));
+                r = 255;
+            }
+            else {
+                g = 255;
+                r = Math.floor(255 * ((50 - percent % 50) / 50));
+            }
+            var HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            return HEX;
+        },
+    //HEX TO RGB------------
+        HEXtoRGB = function (hex) {
+            let parts = (hex || '').match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
+            if(parts) {
+                let rgb = _.chain(parts).rest().map((d) => parseInt(d, 16)).value();
+                rgb.push(1.0);
+                return rgb;
+            }
+            return [0, 0, 0, 0.0];
+        },
+    //WHISPER GM------------
+        GMW = function (text) {
+            var DIV = "<div style='width: 100%; border-radius: 4px;  box-shadow: 1px 1px 1px #707070; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000; background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
+            var MSG = DIV + "'><b>"+text+"</b></div";
+            sendChat('HealthColors', "/w GM "+MSG);
+        },
     //ATTRIBUTE CACHE------------
        makeSmartAttrCache = function (attribute, options) {
            let cache = {},
@@ -272,27 +379,6 @@ FUNCTIONS
             default: 'YES',
             validation: (o)=>o.match(/YES|NO/)
         }),
-    //FORCE ALL TOKEN UPDATE------------
-        ForceUpdate = function(){
-            var i = 0;
-            var start = new Date().getTime();
-            var barUsed = state.HealthColors.auraBar;
-            _.chain(findObjs({type: 'graphic',subtype: 'token',layer: 'objects'}))
-            .filter((o)=>o.get(barUsed + "_max") !== "" && o.get(barUsed + "_value") !== "")
-            .each(function(obj) {
-                var prev = JSON.parse(JSON.stringify(obj));
-                handleToken(obj, prev, 'YES');
-                i++;
-            });
-            var end = new Date().getTime();
-            return "Tokens Processed: " + i + "<br>Run time in ms: " + (end - start);
-        },
-    //WHISPER GM------------
-        GMW = function (text) {
-            var DIV = "<div style='width: 100%; border-radius: 4px;  box-shadow: 1px 1px 1px #707070; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000; background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
-            var MSG = DIV + "'><b>"+text+"</b></div";
-            sendChat('HealthColors', "/w GM "+MSG);
-        },
     //SPAWN FX------------
         SpawnFX = function (Scale,HitSize,left,top,FX,pageid) {
             _.defaults(FX, {
@@ -329,89 +415,14 @@ FUNCTIONS
             };
             spawnFxWithDefinition(left,top,newFX,pageid);
         },
-        SetShowNames = function(GM,PC,obj) {
-            if(GM != 'Off') {
-                GM = (GM == "Yes") ? true : false;
-                obj.set({'showname': GM});
-            }
-            if(PC != 'Off') {
-                PC = (PC == "Yes") ? true : false;
-                obj.set({'showplayers_name': PC});
-            }
-        },
-    //DEATH SOUND------------
-        PlayDeath = function (trackname) {
-          	var RandTrackName;
-            if(trackname.indexOf(",") > 0) {
-                var tracklist = trackname.split(",");
-                RandTrackName = tracklist[Math.floor(Math.random() * tracklist.length)];
-            }
-            else RandTrackName = trackname;
-            var track = findObjs({type: 'jukeboxtrack',title: RandTrackName})[0];
-            if(track) {
-                track.set('playing', false);
-                track.set('softstop', false);
-                track.set('volume', 50);
-                track.set('playing', true);
-            }
-            else {
-                log(ScriptName + ": No track found named " + RandTrackName);
-            }
-        },
-    //SET TOKEN COLORS------------
-        TokenSet = function (obj, sizeSet, markerColor, pColor) {
-            if(state.HealthColors.auraTint === true) obj.set({'tint_color': markerColor,});
-            else {
-                var Pageon = getObj("page", obj.get("_pageid"));
-                var scale = Pageon.get("scale_number") / 10;
-                obj.set({
-                    'aura1_radius': sizeSet * scale * 1.8,
-                    'aura2_radius': sizeSet * scale * 0.1,
-                    'aura1_color': markerColor,
-                    'aura2_color': pColor,
-                    'showplayers_aura1': true,
-                    'showplayers_aura2': true,
-                });
-            }
-        },
-    //OFF BUTTON COLORS------------
+    //HELP MENU------------
+        //OFF BUTTON COLORS------------
         ButtonColor = function (state, off, disable) {
             var color;
             if(state == "No") color = off;
             if(state == "Off") color = disable;
             return color;
         },
-    //REMOVE ALL------------
-        SetAuraNone = function (obj) {
-            if(state.HealthColors.auraTint === true) obj.set({'tint_color': "transparent",});
-            else obj.set({'aura1_color': "",'aura2_color': "",});
-        },
-        //PERC TO RGB------------
-        PercentToHEX = function (percent) {
-            if(percent === 100) percent = 99;
-            var r, g, b = 0;
-            if(percent < 50) {
-                g = Math.floor(255 * (percent / 50));
-                r = 255;
-            }
-            else {
-                g = 255;
-                r = Math.floor(255 * ((50 - percent % 50) / 50));
-            }
-            var HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-            return HEX;
-        },
-    //HEX TO RGB------------
-        HEXtoRGB = function (hex) {
-            let parts = (hex || '').match(/^#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/);
-            if(parts) {
-                let rgb = _.chain(parts).rest().map((d) => parseInt(d, 16)).value();
-                rgb.push(1.0);
-                return rgb;
-            }
-            return [0, 0, 0, 0.0];
-        },
-    //HELP MENU------------
         aurahelp = function (OPTION) {
             var Update = '';
             if(OPTION !== "MENU") Update = ForceUpdate();
