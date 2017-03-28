@@ -7,10 +7,10 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.4.2',
+    var version = '1.4.3',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 22 2017",
+        Updated = "Mar 28 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -27,67 +27,59 @@ ON TOKEN CHANGE/CREATE
                     prevValue = prev[barUsed + "_value"];
                 }
                 if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
-        //CHECK DISABLED AURA/TINT ATTRIB------------
-                var UseAura;
+            //CALC PERCENTAGE------------
+                var perc = Math.round((curValue / maxValue) * 100);
+                var percReal = Math.min(100, perc);
+                var markerColor = PercentToHEX(Math.min(100, percReal));
+            //DEFINE VARIABLES---
+                var pColor = '#ffffff';
+                var GM = '',PC = '';
+                var IsTypeOn, PercentOn, ShowDead, UseAura;
+        //**CHECK MONSTER OR PLAYER------------//
                 var oCharacter = getObj('character', obj.get("_represents"));
+                var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
+                var colortype = (state.HealthColors.auraTint) ? 'tint' : 'aura1';
+            //IF PLAYER------------
+                if(type == 'Player') {
+                    GM = state.HealthColors.GM_PCNames;
+                    PC = state.HealthColors.PCNames;
+                    IsTypeOn =state.HealthColors.PCAura;
+                    PercentOn = state.HealthColors.auraPercPC;
+                    ShowDead = state.HealthColors.auraDeadPC;
+                    var cBy = oCharacter.get('controlledby');
+                    var player = getObj('player', cBy);
+                    pColor = '#000000';
+                    if(player !== undefined) pColor = player.get('color');
+                }
+            //IF MONSTER------------
+                else if(type == 'Monster') {
+                    GM = state.HealthColors.GM_NPCNames;
+                    PC = state.HealthColors.NPCNames;
+                    IsTypeOn =state.HealthColors.NPCAura;
+                    PercentOn = state.HealthColors.auraPerc;
+                    ShowDead = state.HealthColors.auraDead;
+                }
+                else return;
+        //CHECK DISABLED AURA/TINT ATTRIB------------
                 if(oCharacter !== undefined) {
                     UseAura = lookupUseColor(oCharacter);
                 }
-                if(UseAura === "YES" || UseAura === undefined) {
-            //CALC PERCENTAGE------------
-                    var perc = Math.round((curValue / maxValue) * 100);
-                    var percReal = Math.min(100, perc);
-                    var markerColor = PercentToHEX(Math.min(100, percReal));
-                    var pColor = '#ffffff';
-                    var GM = '',PC = '';
-            //**CHECK MONSTER OR PLAYER------------//
-                    var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
-                    var colortype = (state.HealthColors.auraTint) ? 'tint' : 'aura1';
-                //IF PLAYER------------
-                    if(type == 'Player') {
-                        GM = state.HealthColors.GM_PCNames;
-                        PC = state.HealthColors.PCNames;
-                        if(state.HealthColors.PCAura !== false) {
-                            var cBy = oCharacter.get('controlledby');
-                            var player = getObj('player', cBy);
-                            pColor = '#000000';
-                            if(player !== undefined) pColor = player.get('color');
-                    //SET HEALTH COLOR----------
-                            if(percReal > state.HealthColors.auraPercPC || curValue === 0) SetAuraNone(obj);
-                            else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
-                    //ELSE SHOW DEAD----------
-                            if(state.HealthColors.auraDeadPC === true && update !== "YES") {
-                                if(curValue > 0) obj.set("status_dead", false);
-                                else if(curValue < 1) {
-                                    if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                                    obj.set("status_dead", true);
-                                    SetAuraNone(obj);
-                                }
-                            }
+            //SET HEALTH COLOR----------
+                if(IsTypeOn && UseAura !== "NO") {
+                    if(percReal > PercentOn || curValue === 0) SetAuraNone(obj);
+                    else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
+            //SHOW DEAD----------
+                    if(ShowDead === true) {
+                        if(curValue > 0) obj.set("status_dead", false);
+                        else if(curValue < 1) {
+                            var DeadSounds = state.HealthColors.auraDeadFX;
+                            if(DeadSounds !== "None" && curValue != prevValue) PlayDeath(DeadSounds);
+                            obj.set("status_dead", true);
+                            SetAuraNone(obj);
                         }
-                        else if(state.HealthColors.PCAura === false && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
-                    }
-                //IF MONSTER------------
-                    else if(type == 'Monster') {
-                        GM = state.HealthColors.GM_NPCNames;
-                        PC = state.HealthColors.NPCNames;
-                        if(state.HealthColors.NPCAura !== false) {
-                    //SET HEALTH COLOR----------
-                            if(percReal > state.HealthColors.auraPerc || curValue === 0) SetAuraNone(obj);
-                            else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
-                    //ELSE SHOW DEAD----------
-                            if(state.HealthColors.auraDead == true && update !== "YES") {
-                                if(curValue > 0) obj.set("status_dead", false);
-                                else if(curValue < 1) {
-                                    if(state.HealthColors.auraDeadFX !== "None" && curValue != prevValue) PlayDeath(state.HealthColors.auraDeadFX);
-                                    obj.set("status_dead", true);
-                                    SetAuraNone(obj);
-                                }
-                            }
-                        }
-                        else if(state.HealthColors.NPCAura === false && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
                     }
                 }
+                else if(!IsTypeOn && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
         //SET SHOW NAMES------------
                 SetShowNames(GM,PC,obj);
 //**SPURT FX------------//
@@ -283,11 +275,11 @@ FUNCTIONS
             return "Tokens Processed: " + i + "<br>Run time in ms: " + (end - start);
         },
         SetShowNames = function(GM,PC,obj) {
-            if(GM != 'Off') {
+            if(GM != 'Off' && GM != '') {
                 GM = (GM == "Yes") ? true : false;
                 obj.set({'showname': GM});
             }
-            if(PC != 'Off') {
+            if(PC != 'Off' && PC != '') {
                 PC = (PC == "Yes") ? true : false;
                 obj.set({'showplayers_name': PC});
             }
@@ -343,7 +335,7 @@ FUNCTIONS
             sendChat('HealthColors', "/w GM "+MSG);
         },
     //ATTRIBUTE CACHE------------
-       makeSmartAttrCache = function (attribute, options) {
+        makeSmartAttrCache = function (attribute, options) {
            let cache = {},
                defaultValue = options.default || 'YES',
                validator = options.validation || _.constant(true);
@@ -565,7 +557,7 @@ FUNCTIONS
 //On Ready
 on('ready', function () {
     'use strict';
-    //HealthColors.GMW("API READY");
+    HealthColors.GMW("API READY");
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
 });
