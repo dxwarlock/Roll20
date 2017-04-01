@@ -7,10 +7,10 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.4.3',
+    var version = '1.4.4',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "Mar 28 2017",
+        Updated = "April 1 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -342,12 +342,12 @@ FUNCTIONS
            on('change:attribute', function (attr) {
                if(attr.get('name') === attribute) {
                    if(!validator(attr.get('current'))) {
-                       attr.setWithWorker('current', defaultValue);
+                       attr.set('current', defaultValue);
                    }
                    cache[attr.get('characterid')] = attr.get('current');
                }
            });
-           on('destory:attribute', function (attr) {
+           on('destroy:attribute', function (attr) {
                if(attr.get('name') === attribute) {
                    delete cache[attr.get('characterid')];
                }
@@ -357,7 +357,7 @@ FUNCTIONS
                    let attr = findObjs({type: 'attribute',name: attribute,characterid: character.id},{caseInsensitive:true})[0] ||
                    createObj('attribute',{name: attribute,characterid: character.id, current: defaultValue});
                    if( !validator(attr.get('current'))){
-                       attr.setWithWorker('current',defaultValue);
+                       attr.set('current',defaultValue);
                    }
                    cache[character.id]=attr.get('current');
                }
@@ -408,13 +408,6 @@ FUNCTIONS
             spawnFxWithDefinition(left,top,newFX,pageid);
         },
     //HELP MENU------------
-        //OFF BUTTON COLORS------------
-        ButtonColor = function (state, off, disable) {
-            var color;
-            if(state == "No") color = off;
-            if(state == "Off") color = disable;
-            return color;
-        },
         aurahelp = function (OPTION) {
             var Update = '';
             if(OPTION !== "MENU") Update = ForceUpdate();
@@ -452,6 +445,13 @@ FUNCTIONS
                 HR + //--
                 Update +//--
                 '</div>');
+        },
+    //OFF BUTTON COLORS------------
+        ButtonColor = function (state, off, disable) {
+            var color;
+            if(state == "No") color = off;
+            if(state == "Off") color = disable;
+            return color;
         },
     //CHECK INSTALL & SET STATE------------
         checkInstall = function () {
