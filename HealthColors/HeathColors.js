@@ -1,4 +1,4 @@
-/* global createObj TokenMod getAttrByName filterObjs spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
+/* global createObj TokenMod spawnFxWithDefinition getObj state playerIsGM sendChat _ findObjs log on*/
 /*
 My Profile link: https://app.roll20.net/users/262130/dxwarlock
 GIT link: https://github.com/dxwarlock/Roll20/blob/master/Public/HeathColors
@@ -7,10 +7,10 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.4.4',
+    var version = '1.5.0',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "April 1 2017",
+        Updated = "April 4 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -28,9 +28,8 @@ ON TOKEN CHANGE/CREATE
                 }
                 if(isNaN(maxValue) || isNaN(curValue) || isNaN(prevValue)) return;
             //CALC PERCENTAGE------------
-                var perc = Math.round((curValue / maxValue) * 100);
-                var percReal = Math.min(100, perc);
-                var markerColor = PercentToHEX(Math.min(100, percReal));
+                var percReal = Math.round((curValue / maxValue) * 100);
+                var markerColor = PercentToHEX(percReal);
             //DEFINE VARIABLES---
                 var pColor = '#ffffff';
                 var GM = '',PC = '';
@@ -66,6 +65,7 @@ ON TOKEN CHANGE/CREATE
                 }
             //SET HEALTH COLOR----------
                 if(IsTypeOn && UseAura !== "NO") {
+                    percReal = Math.min(percReal, 100);
                     if(percReal > PercentOn || curValue === 0) SetAuraNone(obj);
                     else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
             //SHOW DEAD----------
@@ -79,7 +79,7 @@ ON TOKEN CHANGE/CREATE
                         }
                     }
                 }
-                else if(!IsTypeOn && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
+                else if((!IsTypeOn || UseAura === "NO") && obj.get(colortype + '_color') === markerColor) SetAuraNone(obj);
         //SET SHOW NAMES------------
                 SetShowNames(GM,PC,obj);
 //**SPURT FX------------//
@@ -89,7 +89,7 @@ ON TOKEN CHANGE/CREATE
                     if(oCharacter !== undefined) {
                         UseBlood = lookupUseBlood(oCharacter);
                     }
-                    if(state.HealthColors.FX === true && obj.get("layer") == "objects" && UseBlood !== "OFF") {
+                    if(state.HealthColors.FX === true && obj.get("layer") == "objects" && (UseBlood !== "OFF" || UseBlood !== "NO")) {
                         var HurtColor, HealColor, FX, aFX, FXArray = [];
                         var amount = Math.abs(curValue - prevValue);
                         var HitSizeCalc = Math.min((amount / maxValue) * 4, 1);
@@ -221,6 +221,18 @@ CHAT MESSAGES
                         delete state.HealthColors;
                         GMW("STATE RESET");
                         checkInstall();
+                        break;
+                    case "UPDATE":
+                        var selected = msg.selected;
+                        var allNames = '';
+                        _.each(selected, function(obj) {
+                            var token = getObj('graphic', obj._id);
+                            var tName = token.get("name");
+                            allNames = allNames.concat(tName+'<br>');
+                            var prev = JSON.parse(JSON.stringify(token));
+                            handleToken(token, prev, "YES");
+                        });
+                        GMW(allNames);
                         return;
                     }
                     aurahelp(OPTION);
@@ -228,7 +240,7 @@ CHAT MESSAGES
             }
         },
 /*------------------------
-FUNCTIONS
+"FUNCTIONS"
 ------------------------*/
     //SET TOKEN COLORS------------
         TokenSet = function (obj, sizeSet, markerColor, pColor, update) {
@@ -305,17 +317,21 @@ FUNCTIONS
         },
     //PERC TO RGB------------
         PercentToHEX = function (percent) {
-            if(percent === 100) percent = 99;
-            var r, g, b = 0;
-            if(percent < 50) {
-                g = Math.floor(255 * (percent / 50));
-                r = 255;
-            }
+            var HEX;
+            if(percent > 100) HEX = "#0000FF";
             else {
-                g = 255;
-                r = Math.floor(255 * ((50 - percent % 50) / 50));
+                if(percent === 100) percent = 99;
+                var r, g, b = 0;
+                if(percent < 50) {
+                    g = Math.floor(255 * (percent / 50));
+                    r = 255;
+                }
+                else {
+                    g = 255;
+                    r = Math.floor(255 * ((50 - percent % 50) / 50));
+                }
+                HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
             }
-            var HEX = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
             return HEX;
         },
     //HEX TO RGB------------
@@ -345,6 +361,11 @@ FUNCTIONS
                        attr.set('current', defaultValue);
                    }
                    cache[attr.get('characterid')] = attr.get('current');
+                   var tokens = findObjs({type: 'graphic'}).filter((o) => o.get('represents') === attr.get("characterid"));
+                   _.each(tokens, function (obj) {
+                       var prev = JSON.parse(JSON.stringify(obj));
+                       handleToken(obj, prev, "YES");
+                   });
                }
            });
            on('destroy:attribute', function (attr) {
@@ -363,7 +384,7 @@ FUNCTIONS
                }
                return cache[character.id];
            };
-       },
+        },
         lookupUseBlood = makeSmartAttrCache('USEBLOOD',{
             default: 'DEFAULT'
         }),
@@ -542,7 +563,7 @@ FUNCTIONS
                 _.delay(() => {
                     let token = getObj('graphic', t.id),
                     prev = JSON.parse(JSON.stringify(token));
-                    handleToken(token, prev);
+                    handleToken(token, prev, "YES");
                 }, 400);
             });
         };
