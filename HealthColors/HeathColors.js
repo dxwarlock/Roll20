@@ -7,10 +7,10 @@ Roll20Link: https://app.roll20.net/forum/post/4630083/script-aura-slash-tint-hea
 /*jshint bitwise: false*/
 var HealthColors = HealthColors || (function () {
     'use strict';
-    var version = '1.5.0',
+    var version = '1.5.1',
         ScriptName = "HealthColors",
         schemaVersion = '1.0.3',
-        Updated = "April 4 2017",
+        Updated = "April 6 2017",
 /*------------------------
 ON TOKEN CHANGE/CREATE
 ------------------------*/
@@ -141,9 +141,9 @@ ON TOKEN CHANGE/CREATE
                 }
             }
         },
-/*------------------------
-CHAT MESSAGES
-------------------------*/
+    /*------------------------
+    CHAT MESSAGES
+    ------------------------*/
         handleInput = function (msg) {
             var msgFormula = msg.content.split(/\s+/);
             var command = msgFormula[0].toUpperCase(), UPPER ="";
@@ -223,16 +223,7 @@ CHAT MESSAGES
                         checkInstall();
                         break;
                     case "UPDATE":
-                        var selected = msg.selected;
-                        var allNames = '';
-                        _.each(selected, function(obj) {
-                            var token = getObj('graphic', obj._id);
-                            var tName = token.get("name");
-                            allNames = allNames.concat(tName+'<br>');
-                            var prev = JSON.parse(JSON.stringify(token));
-                            handleToken(token, prev, "YES");
-                        });
-                        GMW(allNames);
+                        manUpdate(msg);
                         return;
                     }
                     aurahelp(OPTION);
@@ -272,7 +263,7 @@ CHAT MESSAGES
             else obj.set({'aura1_color': "transparent",'aura2_color': "transparent",});
         },
     //FORCE ALL TOKEN UPDATE------------
-        ForceUpdate = function(){
+        MenuForceUpdate = function(){
             var i = 0;
             var start = new Date().getTime();
             var barUsed = state.HealthColors.auraBar;
@@ -296,6 +287,61 @@ CHAT MESSAGES
                 obj.set({'showplayers_name': PC});
             }
         },
+    //MANUAL UPDATE------------
+        manUpdate = function(msg){
+            var selected = msg.selected;
+            var allNames = '';
+            _.each(selected, function(obj) {
+                var token = getObj('graphic', obj._id);
+                var tName = token.get("name");
+                allNames = allNames.concat(tName+'<br>');
+                var prev = JSON.parse(JSON.stringify(token));
+                handleToken(token, prev, "YES");
+            });
+            GMW(allNames);
+        },
+    //ATTRIBUTE CACHE------------
+        makeSmartAttrCache = function (attribute, options) {
+            let cache = {},
+               defaultValue = options.default || 'YES',
+               validator = options.validation || _.constant(true);
+            on('change:attribute', function (attr) {
+               if(attr.get('name') === attribute) {
+                   if(!validator(attr.get('current'))) {
+                       attr.set('current', defaultValue);
+                   }
+                   cache[attr.get('characterid')] = attr.get('current');
+                   var tokens = findObjs({type: 'graphic'}).filter((o) => o.get('represents') === attr.get("characterid"));
+                   _.each(tokens, function (obj) {
+                       var prev = JSON.parse(JSON.stringify(obj));
+                       handleToken(obj, prev, "YES");
+                   });
+               }
+            });
+            on('destroy:attribute', function (attr) {
+               if(attr.get('name') === attribute) {
+                   delete cache[attr.get('characterid')];
+               }
+            });
+            return function(character){
+                let attr = findObjs({type: 'attribute',name: attribute,characterid: character.id},{caseInsensitive:true})[0] ||
+                createObj('attribute',{name: attribute,characterid: character.id, current: defaultValue});
+                if(!cache[character.id] || cache[character.id] !== attr.get('current')){
+                   if(!validator(attr.get('current'))){
+                       attr.set('current',defaultValue);
+                   }
+                   cache[character.id]=attr.get('current');
+                }
+                return cache[character.id];
+            };
+        },
+        lookupUseBlood = makeSmartAttrCache('USEBLOOD',{
+            default: 'DEFAULT'
+        }),
+        lookupUseColor = makeSmartAttrCache('USECOLOR',{
+            default: 'YES',
+            validation: (o)=>o.match(/YES|NO/)
+        }),
     //DEATH SOUND------------
         PlayDeath = function (trackname) {
           	var RandTrackName;
@@ -344,54 +390,6 @@ CHAT MESSAGES
             }
             return [0, 0, 0, 0.0];
         },
-    //WHISPER GM------------
-        GMW = function (text) {
-            var DIV = "<div style='width: 100%; border-radius: 4px;  box-shadow: 1px 1px 1px #707070; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000; background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
-            var MSG = DIV + "'><b>"+text+"</b></div";
-            sendChat('HealthColors', "/w GM "+MSG);
-        },
-    //ATTRIBUTE CACHE------------
-        makeSmartAttrCache = function (attribute, options) {
-           let cache = {},
-               defaultValue = options.default || 'YES',
-               validator = options.validation || _.constant(true);
-           on('change:attribute', function (attr) {
-               if(attr.get('name') === attribute) {
-                   if(!validator(attr.get('current'))) {
-                       attr.set('current', defaultValue);
-                   }
-                   cache[attr.get('characterid')] = attr.get('current');
-                   var tokens = findObjs({type: 'graphic'}).filter((o) => o.get('represents') === attr.get("characterid"));
-                   _.each(tokens, function (obj) {
-                       var prev = JSON.parse(JSON.stringify(obj));
-                       handleToken(obj, prev, "YES");
-                   });
-               }
-           });
-           on('destroy:attribute', function (attr) {
-               if(attr.get('name') === attribute) {
-                   delete cache[attr.get('characterid')];
-               }
-           });
-           return function(character){
-               if(!cache[character.id]){
-                   let attr = findObjs({type: 'attribute',name: attribute,characterid: character.id},{caseInsensitive:true})[0] ||
-                   createObj('attribute',{name: attribute,characterid: character.id, current: defaultValue});
-                   if( !validator(attr.get('current'))){
-                       attr.set('current',defaultValue);
-                   }
-                   cache[character.id]=attr.get('current');
-               }
-               return cache[character.id];
-           };
-        },
-        lookupUseBlood = makeSmartAttrCache('USEBLOOD',{
-            default: 'DEFAULT'
-        }),
-        lookupUseColor = makeSmartAttrCache('USECOLOR',{
-            default: 'YES',
-            validation: (o)=>o.match(/YES|NO/)
-        }),
     //SPAWN FX------------
         SpawnFX = function (Scale,HitSize,left,top,FX,pageid) {
             _.defaults(FX, {
@@ -431,7 +429,7 @@ CHAT MESSAGES
     //HELP MENU------------
         aurahelp = function (OPTION) {
             var Update = '';
-            if(OPTION !== "MENU") Update = ForceUpdate();
+            if(OPTION !== "MENU") Update = MenuForceUpdate();
             var img = "background-image: -webkit-linear-gradient(left, #76ADD6 0%, #a7c7dc 100%);";
             var tshadow = "-1px -1px #000, 1px -1px #000, -1px 1px #000, 1px 1px #000 , 2px 2px #222;";
             var style = 'style="padding-top: 1px; text-align:center; font-size: 9pt; width: 48px; height: 14px; border: 1px solid black; margin: 1px; background-color: #6FAEC7;border-radius: 4px;  box-shadow: 1px 1px 1px #707070;';
@@ -550,6 +548,12 @@ CHAT MESSAGES
                 createObj('custfx', {name: "-DefaultHeal",definition: Heal});
             }
         },
+    //WHISPER GM------------
+        GMW = function (text) {
+            var DIV = "<div style='width: 100%; border-radius: 4px;  box-shadow: 1px 1px 1px #707070; text-align: center; vertical-align: middle; padding: 3px 0px; margin: 0px auto; border: 1px solid #000; color: #000; background-image: -webkit-linear-gradient(-45deg, #a7c7dc 0%,#85b2d3 100%);";
+            var MSG = DIV + "'><b>"+text+"</b></div";
+            sendChat('HealthColors', "/w GM "+MSG);
+        },
     //OUTSIDE CALL------------
         UpdateToken = function (obj, prev) {
             if (obj.get("type") === "graphic") handleToken(obj, prev);
@@ -578,7 +582,7 @@ CHAT MESSAGES
 //On Ready
 on('ready', function () {
     'use strict';
-    HealthColors.GMW("API READY");
+    //HealthColors.GMW("API READY");
     HealthColors.CheckInstall();
     HealthColors.RegisterEventHandlers();
 });
