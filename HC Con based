@@ -31,9 +31,9 @@ var HealthColors = HealthColors || (function () {
                 var oCharacter = getObj('character', obj.get("_represents"));
                 var type = (oCharacter === undefined || oCharacter.get("controlledby") === "") ? 'Monster' : 'Player';
                 var colortype = (state.HealthColors.auraTint) ? 'tint' : 'aura1';
-                var CONvalue = 0;
-                var CON_STAT = findObjs({ name: "CON", _type: "attribute", characterid: oCharacter.id }, { caseInsensitive: true })[0];
-                if (CON_STAT != undefined) CONvalue = CON_STAT.get('current');
+                var CONvalue = 0; //new
+                var CON_STAT = findObjs({ name: "CON", _type: "attribute", characterid: oCharacter.id }, { caseInsensitive: true })[0]; //new
+                if (CON_STAT != undefined) CONvalue = CON_STAT.get('current'); //new
                 //IF PLAYER------------
                 if (type == 'Player') {
                     GM = state.HealthColors.GM_PCNames;
@@ -64,12 +64,12 @@ var HealthColors = HealthColors || (function () {
                     else TokenSet(obj, state.HealthColors.AuraSize, markerColor, pColor, update);
                     //SHOW DEAD----------
                     if (ShowDead === true) {
-                        if (curValue == 0) {
-                            obj.set("status_dead", false);
-                            TokenSet(obj, state.HealthColors.AuraSize, "#0000FF", pColor, update);
+                        if (curValue == 0) { //new
+                            obj.set("status_dead", false); 
+                            TokenSet(obj, state.HealthColors.AuraSize, "#0000FF", pColor, update); //new
                         }
-                        if (curValue >= (CONvalue * -1)) obj.set("status_dead", false);
-                        else if (curValue < (CONvalue * -1)) {
+                        if (curValue >= (CONvalue * -1)) obj.set("status_dead", false); //new
+                        else if (curValue < (CONvalue * -1)) { //new
                             var DeadSounds = state.HealthColors.auraDeadFX;
                             if (DeadSounds !== "None" && curValue != prevValue) PlayDeath(DeadSounds);
                             obj.set("status_dead", true);
